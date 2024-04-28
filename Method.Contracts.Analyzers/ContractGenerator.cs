@@ -1,10 +1,13 @@
 ﻿namespace Contracts.Analyzers;
 
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
@@ -242,46 +245,6 @@ public class ContractGenerator : IIncrementalGenerator
         Model = Model with { Attributes = GetModelContract(context, cancellationToken) };
         Model = Model with { GeneratedMethodDeclaration = GetGeneratedMethodDeclaration(Model, context, cancellationToken) };
 
-        string Dbg = string.Empty;
-        SyntaxNode TargetNode = context.TargetNode;
-        MethodDeclarationSyntax MethodDeclaration = (MethodDeclarationSyntax)TargetNode;
-        foreach (var Item in MethodDeclaration!.Body!.Statements!)
-        {
-            if (Item is ExpressionStatementSyntax ExpressionStatement)
-            {
-                if (ExpressionStatement.Expression is InvocationExpressionSyntax InvocationExpression)
-                {
-                    if (InvocationExpression.ArgumentList.Arguments.Count >= 2)
-                    {
-                        Dbg += $"ExpressionStatementSyntax(InvocationExpressionSyntax({InvocationExpression.Expression.GetType()},(1){InvocationExpression.ArgumentList.Arguments[1].Expression.GetType()}))\r\n";
-                    }
-                    else
-                        Dbg += $"ExpressionStatementSyntax(InvocationExpressionSyntax({InvocationExpression.Expression.GetType()},{InvocationExpression.ArgumentList.Arguments.First().Expression.GetType()}))\r\n";
-                }
-                else
-                    Dbg += $"ExpressionStatementSyntax({ExpressionStatement.Expression.GetType()})\r\n";
-            }
-            else if (Item is LocalDeclarationStatementSyntax LocalDeclarationStatement)
-            {
-                TypeSyntax DeclarationType = LocalDeclarationStatement.Declaration.Type;
-                VariableDeclaratorSyntax VariableDeclarator = LocalDeclarationStatement.Declaration.Variables.First();
-                SyntaxToken Identifier = VariableDeclarator.Identifier;
-                EqualsValueClauseSyntax EqualsValueClause = VariableDeclarator.Initializer!;
-                ExpressionSyntax Expression = EqualsValueClause.Value;
-
-                if (DeclarationType is IdentifierNameSyntax TypeIdentifier)
-                    Dbg += $"LocalDeclarationStatementSyntax(Type:{TypeIdentifier.Identifier} {Identifier}={Expression.GetType()})\r\n";
-                else
-                    Dbg += $"LocalDeclarationStatementSyntax({DeclarationType.GetType()} {Identifier}={Expression.GetType()})\r\n";
-            }
-            else
-                Dbg += $"{Item.GetType()}\r\n";
-        }
-
-        Dbg += $"!! {MethodDeclaration.ReturnType.GetType()}\r\n";
-
-        Model = Model with { Dbg = Dbg };
-
         return Model;
     }
 
@@ -303,8 +266,7 @@ public class ContractGenerator : IIncrementalGenerator
             ClassName: ClassName,
             ShortMethodName: ShortMethodName,
             Attributes: new List<AttributeModel>(),
-            GeneratedMethodDeclaration: string.Empty,
-            Dbg: string.Empty);
+            GeneratedMethodDeclaration: string.Empty);
     }
 
     private static List<AttributeModel> GetModelContract(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
@@ -364,13 +326,13 @@ public class ContractGenerator : IIncrementalGenerator
         SyntaxTriviaList LeadingTriviaWithoutLineEnd = GetLeadingTriviaWithoutLineEnd();
         SyntaxTriviaList? TrailingTrivia = GetModifiersTrailingTrivia(MethodDeclaration);
 
-        SyntaxList<AttributeListSyntax> EmptyAttributes = SyntaxFactory.List(new List<AttributeListSyntax>());
-        MethodDeclaration = MethodDeclaration.WithAttributeLists(EmptyAttributes);
+        SyntaxList<AttributeListSyntax> CodeAttributes = GenerateCodeAttributes(LeadingTrivia);
+        MethodDeclaration = MethodDeclaration.WithAttributeLists(CodeAttributes);
 
         SyntaxToken ShortIdentifier = SyntaxFactory.Identifier(model.ShortMethodName);
         MethodDeclaration = MethodDeclaration.WithIdentifier(ShortIdentifier);
 
-        SyntaxTokenList Modifiers = GenerateContractModifiers(model, TrailingTrivia);
+        SyntaxTokenList Modifiers = GenerateContractModifiers(model, LeadingTrivia, TrailingTrivia);
         MethodDeclaration = MethodDeclaration.WithModifiers(Modifiers);
 
         BlockSyntax MethodBody = GenerateBody(model, MethodDeclaration, LeadingTrivia, LeadingTriviaWithoutLineEnd);
@@ -381,7 +343,40 @@ public class ContractGenerator : IIncrementalGenerator
         return MethodDeclaration.ToFullString();
     }
 
-    private static SyntaxTokenList GenerateContractModifiers(ContractModel model, SyntaxTriviaList? trailingTrivia)
+    private static SyntaxList<AttributeListSyntax> GenerateCodeAttributes(SyntaxTriviaList leadingTrivia)
+    {
+        NameSyntax AttributeName = SyntaxFactory.IdentifierName(nameof(GeneratedCodeAttribute));
+
+        string ToolName = GetToolName();
+        SyntaxToken ToolNameToken = SyntaxFactory.Literal(ToolName);
+        LiteralExpressionSyntax ToolNameExpression = SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, ToolNameToken);
+        AttributeArgumentSyntax ToolNameAttributeArgument = SyntaxFactory.AttributeArgument(ToolNameExpression);
+
+        string ToolVersion = GetToolVersion();
+        SyntaxToken ToolVersionToken = SyntaxFactory.Literal(ToolVersion);
+        LiteralExpressionSyntax ToolVersionExpression = SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, ToolVersionToken);
+        AttributeArgumentSyntax ToolVersionAttributeArgument = SyntaxFactory.AttributeArgument(ToolVersionExpression);
+
+        AttributeArgumentListSyntax ArgumentList = SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(new List<AttributeArgumentSyntax>() { ToolNameAttributeArgument, ToolVersionAttributeArgument }));
+        AttributeSyntax Attribute = SyntaxFactory.Attribute(AttributeName, ArgumentList);
+        AttributeListSyntax AttributeList = SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(new List<AttributeSyntax>() { Attribute }));
+        SyntaxList<AttributeListSyntax> Attributes = SyntaxFactory.List(new List<AttributeListSyntax>() { AttributeList });
+
+        return Attributes;
+    }
+
+    private static string GetToolName()
+    {
+        AssemblyName ExecutingAssemblyName = Assembly.GetExecutingAssembly().GetName();
+        return $"{ExecutingAssemblyName.Name}";
+    }
+
+    private static string GetToolVersion()
+    {
+        return Assembly.GetExecutingAssembly().GetName().Version.ToString();
+    }
+
+    private static SyntaxTokenList GenerateContractModifiers(ContractModel model, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia)
     {
         List<SyntaxToken> ModifierTokens = new();
 
@@ -392,7 +387,9 @@ public class ContractGenerator : IIncrementalGenerator
                 string Argument = AccessAttributeModel.Arguments[i];
                 SyntaxToken ModifierToken = SyntaxFactory.Identifier(Argument);
 
-                if (i > 0)
+                if (i == 0)
+                    ModifierToken = ModifierToken.WithLeadingTrivia(leadingTrivia);
+                else
                     ModifierToken = ModifierToken.WithLeadingTrivia(SyntaxFactory.Space);
 
                 if (i + 1 == AccessAttributeModel.Arguments.Count)
@@ -694,14 +691,30 @@ public class ContractGenerator : IIncrementalGenerator
         return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.StringKeyword));
     }
 
-    private static StatementSyntax GenerateRequireStatement(string argumentName, MethodDeclarationSyntax methodDeclaration)
+    private static ExpressionStatementSyntax GenerateRequireStatement(string argumentName, MethodDeclarationSyntax methodDeclaration)
     {
-        return SyntaxFactory.EmptyStatement();
+        return GenerateRequireOrEnsureStatement(argumentName, methodDeclaration, "Require");
     }
 
-    private static StatementSyntax GenerateEnsureStatement(string argumentName, MethodDeclarationSyntax methodDeclaration)
+    private static ExpressionStatementSyntax GenerateEnsureStatement(string argumentName, MethodDeclarationSyntax methodDeclaration)
     {
-        return SyntaxFactory.EmptyStatement();
+        return GenerateRequireOrEnsureStatement(argumentName, methodDeclaration, "Ensure");
+    }
+
+    private static ExpressionStatementSyntax GenerateRequireOrEnsureStatement(string argumentName, MethodDeclarationSyntax methodDeclaration, string contractMethodName)
+    {
+        ExpressionSyntax ContractName = SyntaxFactory.IdentifierName(ContractNamespace);
+        SimpleNameSyntax ContractMethodSimpleName = SyntaxFactory.IdentifierName(contractMethodName);
+        MemberAccessExpressionSyntax MemberAccessExpression = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, ContractName, ContractMethodSimpleName);
+
+        IdentifierNameSyntax InputName = SyntaxFactory.IdentifierName(argumentName);
+        ArgumentSyntax InputArgument = SyntaxFactory.Argument(InputName);
+        List<ArgumentSyntax> Arguments = new() { InputArgument };
+        ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(Arguments));
+        ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(MemberAccessExpression, ArgumentList);
+        ExpressionStatementSyntax ExpressionStatement = SyntaxFactory.ExpressionStatement(CallExpression);
+
+        return ExpressionStatement;
     }
 
     private static string ToAttributeName(AttributeSyntax attribute)
@@ -734,12 +747,11 @@ public class ContractGenerator : IIncrementalGenerator
                 namespace {{model.Namespace}};
 
                 using System;
+                using System.CodeDom.Compiler;
 
                 partial class {{model.ClassName}}
                 {
                 {{model.GeneratedMethodDeclaration}}
-                /*{{model.Dbg}}*/
-                /*public static bool HelloFrom(string text, out string textPlus) { textPlus = null!; return true; }*/
                 }
                 """,
             Encoding.UTF8);
@@ -747,6 +759,6 @@ public class ContractGenerator : IIncrementalGenerator
         context.AddSource($"{model.ClassName}_{model.ShortMethodName}.g.cs", sourceText);
     }
 
-    private record ContractModel(string Namespace, string ClassName, string ShortMethodName, List<AttributeModel> Attributes, string GeneratedMethodDeclaration, string Dbg);
+    private record ContractModel(string Namespace, string ClassName, string ShortMethodName, List<AttributeModel> Attributes, string GeneratedMethodDeclaration);
     private record AttributeModel(string Name, List<string> Arguments);
 }

@@ -8,7 +8,7 @@ internal partial class Program
     public static void Main(string[] args)
     {
         Console.WriteLine("Started...");
-        _ = HelloFrom("Hello, World", out string Text);
+        HelloFrom("Hello, World", out string Text);
         Console.WriteLine(Text);
     }
 
@@ -16,10 +16,8 @@ internal partial class Program
     [RequireNotNull("text")]
     [Require("text.Length > 0")]
     [Ensure("textPlus.Length == text.Length + 1")]
-    static bool HelloFromVerified(string text, out string textPlus)
+    static void HelloFromVerified(string text, out string textPlus)
     {
-        var Text = Contract.AssertNotNull(text);
-        textPlus = Text;
-        return true;
+        textPlus = text + "!";
     }
 }
