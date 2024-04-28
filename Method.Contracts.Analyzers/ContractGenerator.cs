@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -26,6 +27,9 @@ public class ContractGenerator : IIncrementalGenerator
     };
 
     private const string VerifiedSuffix = "Verified";
+    private const string Tab = "    ";
+    private const string ContractNamespace = "Contract";
+    private const string ResultIdentifierName = "Result";
 
     /// <inheritdoc/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -238,6 +242,46 @@ public class ContractGenerator : IIncrementalGenerator
         Model = Model with { Attributes = GetModelContract(context, cancellationToken) };
         Model = Model with { GeneratedMethodDeclaration = GetGeneratedMethodDeclaration(Model, context, cancellationToken) };
 
+        string Dbg = string.Empty;
+        SyntaxNode TargetNode = context.TargetNode;
+        MethodDeclarationSyntax MethodDeclaration = (MethodDeclarationSyntax)TargetNode;
+        foreach (var Item in MethodDeclaration!.Body!.Statements!)
+        {
+            if (Item is ExpressionStatementSyntax ExpressionStatement)
+            {
+                if (ExpressionStatement.Expression is InvocationExpressionSyntax InvocationExpression)
+                {
+                    if (InvocationExpression.ArgumentList.Arguments.Count >= 2)
+                    {
+                        Dbg += $"ExpressionStatementSyntax(InvocationExpressionSyntax({InvocationExpression.Expression.GetType()},(1){InvocationExpression.ArgumentList.Arguments[1].Expression.GetType()}))\r\n";
+                    }
+                    else
+                        Dbg += $"ExpressionStatementSyntax(InvocationExpressionSyntax({InvocationExpression.Expression.GetType()},{InvocationExpression.ArgumentList.Arguments.First().Expression.GetType()}))\r\n";
+                }
+                else
+                    Dbg += $"ExpressionStatementSyntax({ExpressionStatement.Expression.GetType()})\r\n";
+            }
+            else if (Item is LocalDeclarationStatementSyntax LocalDeclarationStatement)
+            {
+                TypeSyntax DeclarationType = LocalDeclarationStatement.Declaration.Type;
+                VariableDeclaratorSyntax VariableDeclarator = LocalDeclarationStatement.Declaration.Variables.First();
+                SyntaxToken Identifier = VariableDeclarator.Identifier;
+                EqualsValueClauseSyntax EqualsValueClause = VariableDeclarator.Initializer!;
+                ExpressionSyntax Expression = EqualsValueClause.Value;
+
+                if (DeclarationType is IdentifierNameSyntax TypeIdentifier)
+                    Dbg += $"LocalDeclarationStatementSyntax(Type:{TypeIdentifier.Identifier} {Identifier}={Expression.GetType()})\r\n";
+                else
+                    Dbg += $"LocalDeclarationStatementSyntax({DeclarationType.GetType()} {Identifier}={Expression.GetType()})\r\n";
+            }
+            else
+                Dbg += $"{Item.GetType()}\r\n";
+        }
+
+        Dbg += $"!! {MethodDeclaration.ReturnType.GetType()}\r\n";
+
+        Model = Model with { Dbg = Dbg };
+
         return Model;
     }
 
@@ -259,7 +303,8 @@ public class ContractGenerator : IIncrementalGenerator
             ClassName: ClassName,
             ShortMethodName: ShortMethodName,
             Attributes: new List<AttributeModel>(),
-            GeneratedMethodDeclaration: string.Empty);
+            GeneratedMethodDeclaration: string.Empty,
+            Dbg: string.Empty);
     }
 
     private static List<AttributeModel> GetModelContract(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
@@ -290,8 +335,10 @@ public class ContractGenerator : IIncrementalGenerator
                                     {
                                         if (AttributeArgument.Expression is LiteralExpressionSyntax LiteralExpression)
                                         {
-                                            string TokenText = LiteralExpression.GetText().ToString();
-                                            Arguments.Add(TokenText);
+                                            string ArgumentText = LiteralExpression.Token.Text;
+                                            ArgumentText = ArgumentText.Trim('"');
+
+                                            Arguments.Add(ArgumentText);
                                         }
                                     }
                             }
@@ -313,7 +360,8 @@ public class ContractGenerator : IIncrementalGenerator
         Debug.Assert(TargetNode is MethodDeclarationSyntax);
         MethodDeclarationSyntax MethodDeclaration = (MethodDeclarationSyntax)TargetNode;
 
-        SyntaxTriviaList? LeadingTrivia = GetModifiersLeadingTrivia(MethodDeclaration);
+        SyntaxTriviaList LeadingTrivia = GetLeadingTriviaWithLineEnd();
+        SyntaxTriviaList LeadingTriviaWithoutLineEnd = GetLeadingTriviaWithoutLineEnd();
         SyntaxTriviaList? TrailingTrivia = GetModifiersTrailingTrivia(MethodDeclaration);
 
         SyntaxList<AttributeListSyntax> EmptyAttributes = SyntaxFactory.List(new List<AttributeListSyntax>());
@@ -322,21 +370,35 @@ public class ContractGenerator : IIncrementalGenerator
         SyntaxToken ShortIdentifier = SyntaxFactory.Identifier(model.ShortMethodName);
         MethodDeclaration = MethodDeclaration.WithIdentifier(ShortIdentifier);
 
+        SyntaxTokenList Modifiers = GenerateContractModifiers(model, TrailingTrivia);
+        MethodDeclaration = MethodDeclaration.WithModifiers(Modifiers);
+
+        BlockSyntax MethodBody = GenerateBody(model, MethodDeclaration, LeadingTrivia, LeadingTriviaWithoutLineEnd);
+        MethodDeclaration = MethodDeclaration.WithBody(MethodBody);
+
+        MethodDeclaration = MethodDeclaration.WithLeadingTrivia(LeadingTriviaWithoutLineEnd);
+
+        return MethodDeclaration.ToFullString();
+    }
+
+    private static SyntaxTokenList GenerateContractModifiers(ContractModel model, SyntaxTriviaList? trailingTrivia)
+    {
         List<SyntaxToken> ModifierTokens = new();
+
         if (model.Attributes.Find(m => m.Name == nameof(AccessAttribute)) is AttributeModel AccessAttributeModel)
         {
             for (int i = 0; i < AccessAttributeModel.Arguments.Count; i++)
             {
                 string Argument = AccessAttributeModel.Arguments[i];
-                SyntaxToken ModifierToken = SyntaxFactory.Identifier(Argument.Trim('"'));
+                SyntaxToken ModifierToken = SyntaxFactory.Identifier(Argument);
 
                 if (i > 0)
                     ModifierToken = ModifierToken.WithLeadingTrivia(SyntaxFactory.Space);
 
                 if (i + 1 == AccessAttributeModel.Arguments.Count)
                 {
-                    if (TrailingTrivia is not null)
-                        ModifierToken = ModifierToken.WithTrailingTrivia(TrailingTrivia);
+                    if (trailingTrivia is not null)
+                        ModifierToken = ModifierToken.WithTrailingTrivia(trailingTrivia);
                 }
 
                 ModifierTokens.Add(ModifierToken);
@@ -345,49 +407,34 @@ public class ContractGenerator : IIncrementalGenerator
         else
         {
             SyntaxToken ModifierToken = SyntaxFactory.Identifier("public");
-            if (TrailingTrivia is not null)
-                ModifierToken = ModifierToken.WithTrailingTrivia(TrailingTrivia);
+            if (trailingTrivia is not null)
+                ModifierToken = ModifierToken.WithTrailingTrivia(trailingTrivia);
 
             ModifierTokens.Add(ModifierToken);
         }
 
-        SyntaxTokenList Modifiers = SyntaxFactory.TokenList(ModifierTokens);
-        MethodDeclaration = MethodDeclaration.WithModifiers(Modifiers);
-
-        if (LeadingTrivia is not null)
-            MethodDeclaration = MethodDeclaration.WithLeadingTrivia(LeadingTrivia);
-
-        return MethodDeclaration.ToFullString();
+        return SyntaxFactory.TokenList(ModifierTokens);
     }
 
-    private static SyntaxTriviaList? GetModifiersLeadingTrivia(MethodDeclarationSyntax methodDeclaration)
+    private static SyntaxTriviaList GetLeadingTriviaWithLineEnd()
     {
-        SyntaxTriviaList? LeadingTrivia = null;
-
-        if (methodDeclaration.HasLeadingTrivia)
-            LeadingTrivia = methodDeclaration.GetLeadingTrivia();
-        else
+        List<SyntaxTrivia> Trivias = new()
         {
-            AttributeSyntax? FirstAttribute = null;
-            foreach (var MethodAttributeList in methodDeclaration.AttributeLists)
-                if (MethodAttributeList is AttributeListSyntax AttributeList)
-                {
-                    foreach (var MethodAttribute in AttributeList.Attributes)
-                        if (MethodAttribute is AttributeSyntax Attribute)
-                        {
-                            FirstAttribute = Attribute;
-                            break;
-                        }
+            SyntaxFactory.EndOfLine("\r\n"),
+            SyntaxFactory.Whitespace(Tab),
+        };
 
-                    if (FirstAttribute is not null)
-                        break;
-                }
+        return SyntaxFactory.TriviaList(Trivias);
+    }
 
-            if (FirstAttribute is not null && FirstAttribute.HasLeadingTrivia)
-                LeadingTrivia = FirstAttribute.GetLeadingTrivia();
-        }
+    private static SyntaxTriviaList GetLeadingTriviaWithoutLineEnd()
+    {
+        List<SyntaxTrivia> Trivias = new()
+        {
+            SyntaxFactory.Whitespace(Tab),
+        };
 
-        return LeadingTrivia;
+        return SyntaxFactory.TriviaList(Trivias);
     }
 
     private static SyntaxTriviaList? GetModifiersTrailingTrivia(MethodDeclarationSyntax methodDeclaration)
@@ -395,9 +442,290 @@ public class ContractGenerator : IIncrementalGenerator
         return methodDeclaration.Modifiers.Count > 0 ? methodDeclaration.Modifiers.Last().TrailingTrivia : null;
     }
 
+    private static BlockSyntax GenerateBody(ContractModel model, MethodDeclarationSyntax methodDeclaration, SyntaxTriviaList tabTrivia, SyntaxTriviaList tabTriviaWithoutLineEnd)
+    {
+        SyntaxToken OpenBraceToken = SyntaxFactory.Token(SyntaxKind.OpenBraceToken);
+        OpenBraceToken = OpenBraceToken.WithLeadingTrivia(tabTriviaWithoutLineEnd);
+
+        List<SyntaxTrivia> TrivialList = new(tabTrivia);
+        TrivialList.Add(SyntaxFactory.Whitespace(Tab));
+        SyntaxTriviaList TabStatementTrivia = SyntaxFactory.TriviaList(TrivialList);
+
+        List<SyntaxTrivia> TrivialListExtraLineEnd = new(tabTrivia);
+        TrivialListExtraLineEnd.Insert(0, SyntaxFactory.EndOfLine("\r\n"));
+        TrivialListExtraLineEnd.Add(SyntaxFactory.Whitespace(Tab));
+        SyntaxTriviaList TabStatementExtraLineEndTrivia = SyntaxFactory.TriviaList(TrivialListExtraLineEnd);
+
+        SyntaxToken CloseBraceToken = SyntaxFactory.Token(SyntaxKind.CloseBraceToken);
+        CloseBraceToken = CloseBraceToken.WithLeadingTrivia(tabTrivia);
+
+        List<StatementSyntax> Statements = GenerateStatements(model, methodDeclaration, TabStatementTrivia, TabStatementExtraLineEndTrivia);
+
+        return SyntaxFactory.Block(OpenBraceToken, SyntaxFactory.List(Statements), CloseBraceToken);
+    }
+
+    private static List<StatementSyntax> GenerateStatements(ContractModel model, MethodDeclarationSyntax methodDeclaration, SyntaxTriviaList tabStatementTrivia, SyntaxTriviaList tabStatementExtraLineEndTrivia)
+    {
+        Dictionary<string, string> ParameterNameReplacementTable = new();
+        bool IsContainingRequire = false;
+
+        foreach (AttributeModel Item in model.Attributes)
+            if (Item.Name == nameof(RequireNotNullAttribute))
+            {
+                foreach (string Argument in Item.Arguments)
+                    ParameterNameReplacementTable.Add(Argument, ToIdentifierLocalName(Argument));
+
+                IsContainingRequire = true;
+            }
+            else if (Item.Name == nameof(RequireAttribute))
+                IsContainingRequire = true;
+
+        List<StatementSyntax> Statements = new();
+
+        StatementSyntax CallStatement;
+        StatementSyntax? ReturnStatement;
+
+        if (methodDeclaration.ReturnType is PredefinedTypeSyntax PredefinedType && PredefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword))
+        {
+            CallStatement = GenerateCommandStatement(model.ShortMethodName, methodDeclaration.ParameterList, ParameterNameReplacementTable);
+            ReturnStatement = null;
+        }
+        else
+        {
+            CallStatement = GenerateQueryStatement(model.ShortMethodName, methodDeclaration.ParameterList, ParameterNameReplacementTable);
+            ReturnStatement = GenerateReturnStatement();
+        }
+
+        if (IsContainingRequire)
+            CallStatement = CallStatement.WithLeadingTrivia(tabStatementExtraLineEndTrivia);
+        else
+            CallStatement = CallStatement.WithLeadingTrivia(tabStatementTrivia);
+
+        int CallStatementIndex = -1;
+        foreach (AttributeModel AttributeModel in model.Attributes)
+            if (AttributeModel.Name != nameof(AccessAttribute))
+            {
+                bool FirstEnsure = false;
+                if (CallStatementIndex < 0 && AttributeModel.Name == nameof(EnsureAttribute))
+                {
+                    CallStatementIndex = Statements.Count;
+                    FirstEnsure = true;
+                }
+
+                List<StatementSyntax> AttributeStatements = GenerateAttributeStatements(AttributeModel, methodDeclaration);
+                foreach (StatementSyntax Statement in AttributeStatements)
+                {
+                    if (FirstEnsure)
+                    {
+                        FirstEnsure = false;
+                        Statements.Add(Statement.WithLeadingTrivia(tabStatementExtraLineEndTrivia));
+                    }
+                    else
+                        Statements.Add(Statement.WithLeadingTrivia(tabStatementTrivia));
+                }
+            }
+
+        if (CallStatementIndex < 0)
+            CallStatementIndex = Statements.Count;
+
+        Statements.Insert(CallStatementIndex, CallStatement);
+
+        if (ReturnStatement is not null)
+            Statements.Add(ReturnStatement.WithLeadingTrivia(tabStatementExtraLineEndTrivia));
+
+        return Statements;
+    }
+
+    private static ExpressionStatementSyntax GenerateCommandStatement(string methodName, ParameterListSyntax parameterList, Dictionary<string, string> parameterNameReplacementTable)
+    {
+        SyntaxTriviaList WhitespaceTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "));
+        ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(methodName + VerifiedSuffix);
+
+        List<ArgumentSyntax> Arguments = new();
+        foreach (var CallParameter in parameterList.Parameters)
+            if (CallParameter is ParameterSyntax Parameter)
+            {
+                bool IsRef = false;
+                bool IsOut = false;
+
+                foreach (var Modifier in Parameter.Modifiers)
+                {
+                    if (Modifier.IsKind(SyntaxKind.RefKeyword))
+                        IsRef = true;
+                    if (Modifier.IsKind(SyntaxKind.OutKeyword))
+                        IsOut = true;
+                }
+
+                string ParameterName = Parameter.Identifier.Text;
+                if (parameterNameReplacementTable.TryGetValue(ParameterName, out string ReplacedParameterName))
+                    ParameterName = ReplacedParameterName;
+
+                IdentifierNameSyntax ParameterIdentifier = SyntaxFactory.IdentifierName(ParameterName);
+
+                ArgumentSyntax Argument;
+                if (IsRef)
+                    Argument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.RefKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia));
+                else if (IsOut)
+                    Argument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia));
+                else
+                    Argument = SyntaxFactory.Argument(ParameterIdentifier);
+
+                if (Arguments.Count > 0)
+                    Argument = Argument.WithLeadingTrivia(WhitespaceTrivia);
+
+                Arguments.Add(Argument);
+            }
+
+        ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(Arguments));
+        ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(Invocation, ArgumentList);
+        ExpressionStatementSyntax ExpressionStatement = SyntaxFactory.ExpressionStatement(CallExpression);
+
+        return ExpressionStatement;
+    }
+
+    private static LocalDeclarationStatementSyntax GenerateQueryStatement(string methodName, ParameterListSyntax parameterList, Dictionary<string, string> parameterNameReplacementTable)
+    {
+        SyntaxTriviaList WhitespaceTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "));
+        ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(methodName + VerifiedSuffix);
+
+        List<ArgumentSyntax> Arguments = new();
+        foreach (var CallParameter in parameterList.Parameters)
+            if (CallParameter is ParameterSyntax Parameter)
+            {
+                bool IsRef = false;
+                bool IsOut = false;
+
+                foreach (var Modifier in Parameter.Modifiers)
+                {
+                    if (Modifier.IsKind(SyntaxKind.RefKeyword))
+                        IsRef = true;
+                    if (Modifier.IsKind(SyntaxKind.OutKeyword))
+                        IsOut = true;
+                }
+
+                string ParameterName = Parameter.Identifier.Text;
+                if (parameterNameReplacementTable.TryGetValue(ParameterName, out string ReplacedParameterName))
+                    ParameterName = ReplacedParameterName;
+
+                IdentifierNameSyntax ParameterIdentifier = SyntaxFactory.IdentifierName(ParameterName);
+
+                ArgumentSyntax Argument;
+                if (IsRef)
+                    Argument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.RefKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia));
+                else if (IsOut)
+                    Argument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia));
+                else
+                    Argument = SyntaxFactory.Argument(ParameterIdentifier);
+
+                if (Arguments.Count > 0)
+                    Argument = Argument.WithLeadingTrivia(WhitespaceTrivia);
+
+                Arguments.Add(Argument);
+            }
+
+        ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(Arguments));
+        ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(Invocation, ArgumentList).WithLeadingTrivia(WhitespaceTrivia);
+
+        IdentifierNameSyntax VarIdentifier = SyntaxFactory.IdentifierName("var");
+        SyntaxToken ResultIdentifier = SyntaxFactory.Identifier(ResultIdentifierName);
+        EqualsValueClauseSyntax Initializer = SyntaxFactory.EqualsValueClause(CallExpression).WithLeadingTrivia(WhitespaceTrivia);
+        VariableDeclaratorSyntax VariableDeclarator = SyntaxFactory.VariableDeclarator(ResultIdentifier, null, Initializer).WithLeadingTrivia(WhitespaceTrivia);
+        VariableDeclarationSyntax Declaration = SyntaxFactory.VariableDeclaration(VarIdentifier, SyntaxFactory.SeparatedList<VariableDeclaratorSyntax>(new List<VariableDeclaratorSyntax>() { VariableDeclarator }));
+        LocalDeclarationStatementSyntax LocalDeclarationStatement = SyntaxFactory.LocalDeclarationStatement(Declaration);
+
+        return LocalDeclarationStatement;
+    }
+
+    private static ReturnStatementSyntax GenerateReturnStatement()
+    {
+        SyntaxTriviaList WhitespaceTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "));
+        IdentifierNameSyntax ResultIdentifier = SyntaxFactory.IdentifierName(ResultIdentifierName).WithLeadingTrivia(WhitespaceTrivia);
+        ReturnStatementSyntax ReturnStatement = SyntaxFactory.ReturnStatement(ResultIdentifier);
+
+        return ReturnStatement;
+    }
+
+    private static List<StatementSyntax> GenerateAttributeStatements(AttributeModel attributeModel, MethodDeclarationSyntax methodDeclaration)
+    {
+        Dictionary<string, Func<string, MethodDeclarationSyntax, StatementSyntax>> GeneratorTable = new()
+        {
+            { nameof(RequireNotNullAttribute), GenerateRequireNotNullStatement },
+            { nameof(RequireAttribute), GenerateRequireStatement },
+            { nameof(EnsureAttribute), GenerateEnsureStatement },
+        };
+
+        Debug.Assert(GeneratorTable.ContainsKey(attributeModel.Name));
+
+        List<StatementSyntax> Statements = new();
+        foreach (string ArgumentName in attributeModel.Arguments)
+            Statements.Add(GeneratorTable[attributeModel.Name](ArgumentName, methodDeclaration));
+
+        return Statements;
+    }
+
+    private static StatementSyntax GenerateRequireNotNullStatement(string argumentName, MethodDeclarationSyntax methodDeclaration)
+    {
+        ExpressionSyntax ContractName = SyntaxFactory.IdentifierName(ContractNamespace);
+        SimpleNameSyntax RequireNotNullName = SyntaxFactory.IdentifierName(ToNameWithoutAttribute<RequireNotNullAttribute>());
+        MemberAccessExpressionSyntax MemberAccessExpression = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, ContractName, RequireNotNullName);
+
+        SyntaxTriviaList WhitespaceTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "));
+        IdentifierNameSyntax InputName = SyntaxFactory.IdentifierName(argumentName);
+        ArgumentSyntax InputArgument = SyntaxFactory.Argument(InputName);
+
+        TypeSyntax ParameterType = GetParameterType(argumentName, methodDeclaration);
+        SyntaxToken VariableName = SyntaxFactory.Identifier(ToIdentifierLocalName(argumentName));
+        VariableDesignationSyntax VariableDesignation = SyntaxFactory.SingleVariableDesignation(VariableName);
+        DeclarationExpressionSyntax DeclarationExpression = SyntaxFactory.DeclarationExpression(ParameterType, VariableDesignation.WithLeadingTrivia(WhitespaceTrivia));
+        ArgumentSyntax OutputArgument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), DeclarationExpression.WithLeadingTrivia(WhitespaceTrivia));
+        OutputArgument = OutputArgument.WithLeadingTrivia(WhitespaceTrivia);
+
+        List<ArgumentSyntax> Arguments = new() { InputArgument, OutputArgument };
+        ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(Arguments));
+
+        ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(MemberAccessExpression, ArgumentList);
+        ExpressionStatementSyntax ExpressionStatement = SyntaxFactory.ExpressionStatement(CallExpression);
+
+        return ExpressionStatement;
+    }
+
+    private static PredefinedTypeSyntax GetParameterType(string argumentName, MethodDeclarationSyntax methodDeclaration)
+    {
+        return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.StringKeyword));
+    }
+
+    private static StatementSyntax GenerateRequireStatement(string argumentName, MethodDeclarationSyntax methodDeclaration)
+    {
+        return SyntaxFactory.EmptyStatement();
+    }
+
+    private static StatementSyntax GenerateEnsureStatement(string argumentName, MethodDeclarationSyntax methodDeclaration)
+    {
+        return SyntaxFactory.EmptyStatement();
+    }
+
     private static string ToAttributeName(AttributeSyntax attribute)
     {
         return $"{attribute.Name.GetText()}{nameof(Attribute)}";
+    }
+
+    private static string ToNameWithoutAttribute<T>()
+    {
+        string LongName = typeof(T).Name;
+        return LongName.Substring(0, LongName.Length - nameof(Attribute).Length);
+    }
+
+    private static string ToIdentifierLocalName(string text)
+    {
+        Debug.Assert(text.Length > 0);
+
+        char FirstLetter = text[0];
+        string OtherLetters = text.Substring(1);
+
+        if (char.IsLower(FirstLetter))
+            return $"{char.ToUpper(FirstLetter, CultureInfo.InvariantCulture)}{OtherLetters}";
+        else
+            return $"_{text}";
     }
 
     private static void OutputContractMethod(SourceProductionContext context, ContractModel model)
@@ -408,13 +736,17 @@ public class ContractGenerator : IIncrementalGenerator
                 using System;
 
                 partial class {{model.ClassName}}
-                {{{model.GeneratedMethodDeclaration}}}
+                {
+                {{model.GeneratedMethodDeclaration}}
+                /*{{model.Dbg}}*/
+                /*public static bool HelloFrom(string text, out string textPlus) { textPlus = null!; return true; }*/
+                }
                 """,
             Encoding.UTF8);
 
         context.AddSource($"{model.ClassName}_{model.ShortMethodName}.g.cs", sourceText);
     }
 
-    private record ContractModel(string Namespace, string ClassName, string ShortMethodName, List<AttributeModel> Attributes, string GeneratedMethodDeclaration);
+    private record ContractModel(string Namespace, string ClassName, string ShortMethodName, List<AttributeModel> Attributes, string GeneratedMethodDeclaration, string Dbg);
     private record AttributeModel(string Name, List<string> Arguments);
 }

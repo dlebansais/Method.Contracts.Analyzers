@@ -14,7 +14,7 @@ Add the assembly from the latest release as a dependency of your project. The `C
 using Contracts;
 ````
 
-### Summary
+## Summary
 
 This code generators can be used to decorate methods with contracts. The general principle is to declare private method `FooVerified` with arguments, and attributes specifying the contract around these arguments. The genertor will then add a public method `Foo` with the same arguments, and code to check these contracts, then call `FooVerified`.
 
@@ -136,4 +136,3 @@ protected internal void Foo()
 ````
 
 Note that `public` is the default access when the `Access` attribute is not present. If you need `private` you must specify it explicitely.
-
