@@ -1,6 +1,7 @@
 ﻿namespace Contracts.Analyzers.Demo;
 
 using System;
+using System.Text.RegularExpressions;
 using Contracts;
 
 internal partial class Program
@@ -10,6 +11,9 @@ internal partial class Program
         Console.WriteLine("Started...");
         HelloFrom("Hello, World", out string Text);
         Console.WriteLine(Text);
+
+        Regex x = AbcOrDefGeneratedRegex();
+        Console.WriteLine($"{x}");
     }
 
     [RequireNotNull("text")]
@@ -19,4 +23,7 @@ internal partial class Program
     {
         textPlus = text + "!";
     }
+
+    [GeneratedRegex("abc|def", RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex AbcOrDefGeneratedRegex();
 }

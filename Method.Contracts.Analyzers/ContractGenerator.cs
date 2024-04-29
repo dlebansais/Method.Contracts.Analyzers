@@ -5,7 +5,6 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -38,36 +37,39 @@ public class ContractGenerator : IIncrementalGenerator
     // Namespace of the Method.Contracts assemblies.
     private const string ContractNamespace = "Contract";
 
+    // Namespace of the generated code.
+    private const string ContractAnalyzerNamespace = "Contracts";
+
     // Name of the intermediate variable for methods that return a result.
     private const string ResultIdentifierName = "Result";
 
     /// <inheritdoc/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        const string Namespace = "Contracts";
-
-        RegisterAccessAttribute(context, Namespace);
-        RegisterRequireNotNullAttribute(context, Namespace);
-        RegisterRequireAttribute(context, Namespace);
-        RegisterEnsureAttribute(context, Namespace);
+        /*
+        RegisterAccessAttribute(context);
+        RegisterRequireNotNullAttribute(context);
+        RegisterRequireAttribute(context);
+        RegisterEnsureAttribute(context);
+        */
 
         var pipelineAccess = context.SyntaxProvider.ForAttributeWithMetadataName(
-            fullyQualifiedMetadataName: $"{Namespace}.{nameof(AccessAttribute)}",
+            fullyQualifiedMetadataName: GetFullyQualifiedMetadataName<AccessAttribute>(),
             predicate: KeepNodeForPipeline<AccessAttribute>,
             transform: TransformContractAttributes);
 
         var pipelineRequireNotNull = context.SyntaxProvider.ForAttributeWithMetadataName(
-            fullyQualifiedMetadataName: $"{Namespace}.{nameof(RequireNotNullAttribute)}",
+            fullyQualifiedMetadataName: GetFullyQualifiedMetadataName<RequireNotNullAttribute>(),
             predicate: KeepNodeForPipeline<RequireNotNullAttribute>,
             transform: TransformContractAttributes);
 
         var pipelineRequire = context.SyntaxProvider.ForAttributeWithMetadataName(
-            fullyQualifiedMetadataName: $"{Namespace}.{nameof(RequireAttribute)}",
+            fullyQualifiedMetadataName: GetFullyQualifiedMetadataName<RequireAttribute>(),
             predicate: KeepNodeForPipeline<RequireAttribute>,
             transform: TransformContractAttributes);
 
         var pipelineEnsure = context.SyntaxProvider.ForAttributeWithMetadataName(
-            fullyQualifiedMetadataName: $"{Namespace}.{nameof(EnsureAttribute)}",
+            fullyQualifiedMetadataName: GetFullyQualifiedMetadataName<EnsureAttribute>(),
             predicate: KeepNodeForPipeline<EnsureAttribute>,
             transform: TransformContractAttributes);
 
@@ -77,10 +79,15 @@ public class ContractGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(pipelineEnsure, OutputContractMethod);
     }
 
-    private static void RegisterAccessAttribute(IncrementalGeneratorInitializationContext context, string @namespace)
+    private static string GetFullyQualifiedMetadataName<T>()
     {
-        string FileName = $"Method.{@namespace}.{nameof(AccessAttribute)}.cs";
-        string NamespaceSpecifier = $"namespace {@namespace};";
+        return $"{ContractAnalyzerNamespace}.{typeof(T).Name}";
+    }
+
+    private static void RegisterAccessAttribute(IncrementalGeneratorInitializationContext context)
+    {
+        const string FileName = $"Method.{ContractAnalyzerNamespace}.{nameof(AccessAttribute)}.cs";
+        const string NamespaceSpecifier = $"namespace {ContractAnalyzerNamespace};";
 
         context.RegisterPostInitializationOutput(postInitializationContext =>
             postInitializationContext.AddSource(FileName, SourceText.From(NamespaceSpecifier + """
@@ -111,10 +118,10 @@ public class ContractGenerator : IIncrementalGenerator
                 Encoding.UTF8)));
     }
 
-    private static void RegisterRequireNotNullAttribute(IncrementalGeneratorInitializationContext context, string @namespace)
+    private static void RegisterRequireNotNullAttribute(IncrementalGeneratorInitializationContext context)
     {
-        string FileName = $"Method.{@namespace}.{nameof(RequireNotNullAttribute)}.cs";
-        string NamespaceSpecifier = $"namespace {@namespace};";
+        const string FileName = $"Method.{ContractAnalyzerNamespace}.{nameof(RequireNotNullAttribute)}.cs";
+        const string NamespaceSpecifier = $"namespace {ContractAnalyzerNamespace};";
 
         context.RegisterPostInitializationOutput(postInitializationContext =>
             postInitializationContext.AddSource(FileName, SourceText.From(NamespaceSpecifier + """
@@ -145,10 +152,10 @@ public class ContractGenerator : IIncrementalGenerator
                 Encoding.UTF8)));
     }
 
-    private static void RegisterRequireAttribute(IncrementalGeneratorInitializationContext context, string @namespace)
+    private static void RegisterRequireAttribute(IncrementalGeneratorInitializationContext context)
     {
-        string FileName = $"Method.{@namespace}.{nameof(RequireAttribute)}.cs";
-        string NamespaceSpecifier = $"namespace {@namespace};";
+        const string FileName = $"Method.{ContractAnalyzerNamespace}.{nameof(RequireAttribute)}.cs";
+        const string NamespaceSpecifier = $"namespace {ContractAnalyzerNamespace};";
 
         context.RegisterPostInitializationOutput(postInitializationContext =>
             postInitializationContext.AddSource(FileName, SourceText.From(NamespaceSpecifier + """
@@ -179,10 +186,10 @@ public class ContractGenerator : IIncrementalGenerator
                 Encoding.UTF8)));
     }
 
-    private static void RegisterEnsureAttribute(IncrementalGeneratorInitializationContext context, string @namespace)
+    private static void RegisterEnsureAttribute(IncrementalGeneratorInitializationContext context)
     {
-        string FileName = $"Method.{@namespace}.{nameof(EnsureAttribute)}.cs";
-        string NamespaceSpecifier = $"namespace {@namespace};";
+        const string FileName = $"Method.{ContractAnalyzerNamespace}.{nameof(EnsureAttribute)}.cs";
+        const string NamespaceSpecifier = $"namespace {ContractAnalyzerNamespace};";
 
         context.RegisterPostInitializationOutput(postInitializationContext =>
             postInitializationContext.AddSource(FileName, SourceText.From(NamespaceSpecifier + """
@@ -248,14 +255,14 @@ public class ContractGenerator : IIncrementalGenerator
 
     private static ContractModel TransformContractAttributes(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
     {
-        ContractModel Model = GetModelWithoutContract(context, cancellationToken);
-        Model = Model with { Attributes = GetModelContract(context, cancellationToken) };
-        Model = Model with { GeneratedMethodDeclaration = GetGeneratedMethodDeclaration(Model, context, cancellationToken) };
+        ContractModel Model = GetModelWithoutContract(context);
+        Model = Model with { Attributes = GetModelContract(context) };
+        Model = Model with { GeneratedMethodDeclaration = GetGeneratedMethodDeclaration(Model, context) };
 
         return Model;
     }
 
-    private static ContractModel GetModelWithoutContract(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
+    private static ContractModel GetModelWithoutContract(GeneratorAttributeSyntaxContext context)
     {
         var containingClass = context.TargetSymbol.ContainingType;
 
@@ -276,7 +283,7 @@ public class ContractGenerator : IIncrementalGenerator
             GeneratedMethodDeclaration: string.Empty);
     }
 
-    private static List<AttributeModel> GetModelContract(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
+    private static List<AttributeModel> GetModelContract(GeneratorAttributeSyntaxContext context)
     {
         SyntaxNode TargetNode = context.TargetNode;
 
@@ -322,7 +329,7 @@ public class ContractGenerator : IIncrementalGenerator
         return Result;
     }
 
-    private static string GetGeneratedMethodDeclaration(ContractModel model, GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
+    private static string GetGeneratedMethodDeclaration(ContractModel model, GeneratorAttributeSyntaxContext context)
     {
         SyntaxNode TargetNode = context.TargetNode;
 
