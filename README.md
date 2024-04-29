@@ -86,7 +86,7 @@ There can be multiple occurences of the `Require` attribute for the same method.
 
 If there is an error in the expression (for example, a syntax error), this can only be caught in the generated code.
 
-### Require attribute
+### Ensure attribute
 
 Specifies that one or more conditions are guaranteed to be true on method exit. Conditions can freely mix arguments (`in`, `out` or `ref`) and other variables. They must provided to the attribute has a string arguments.
 
@@ -97,14 +97,10 @@ using Contracts;
 
 public string Bar { get; set; }
 
-[Ensure("result.Length > Bar.Length")]
+[Ensure("Result.Length > Bar.Length")]
 private string FooVerified()
 {
-  string result;
-
-  // ...
-
-  return result;
+  return Bar + "!";
 }
 ````
 
@@ -112,9 +108,11 @@ There can be multiple occurences of the `Ensure` attribute for the same method. 
 
 If there is an error in the expression (for example, a syntax error), this can only be caught in the generated code.
 
+You can use the special name `Result` in expression that test the returned value.
+
 ### Access attribute
 
-Indicates that the generated method access has one or more specifiers. These can be `public`, `internal` and so on. If multiple specifiers are needed, such as `protected internal`, provide eahc of them as separate argument.
+Indicates that the generated method access has one or more specifiers. These can be `public`, `internal` and so on. If multiple specifiers are needed, such as `protected internal`, provide each of them as separate argument.
 
 ````csharp
 using Contracts;
@@ -136,3 +134,5 @@ protected internal void Foo()
 ````
 
 Note that `public` is the default access when the `Access` attribute is not present. If you need `private` you must specify it explicitely.
+
+If there is no `Access` attribute and the method is `static`, the generated code is also `static`. Otherwise, you have to specify it explicitely.

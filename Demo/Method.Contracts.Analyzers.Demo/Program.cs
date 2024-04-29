@@ -12,11 +12,10 @@ internal partial class Program
         Console.WriteLine(Text);
     }
 
-    [Access("public", "static")]
     [RequireNotNull("text")]
     [Require("text.Length > 0")]
     [Ensure("textPlus.Length == text.Length + 1")]
-    static void HelloFromVerified(string text, out string textPlus)
+    private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + "!";
     }

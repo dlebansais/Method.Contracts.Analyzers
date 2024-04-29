@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
@@ -21,6 +20,7 @@ using Microsoft.CodeAnalysis.Text;
 [Generator]
 public class ContractGenerator : IIncrementalGenerator
 {
+    // List of supported attributes by their name.
     private static readonly List<string> SupportedAttributeNames = new()
     {
         nameof(AccessAttribute),
@@ -29,9 +29,16 @@ public class ContractGenerator : IIncrementalGenerator
         nameof(EnsureAttribute),
     };
 
+    // The suffix that a method must have for code to be generated.
     private const string VerifiedSuffix = "Verified";
+
+    // One tab.
     private const string Tab = "    ";
+
+    // Namespace of the Method.Contracts assemblies.
     private const string ContractNamespace = "Contract";
+
+    // Name of the intermediate variable for methods that return a result.
     private const string ResultIdentifierName = "Result";
 
     /// <inheritdoc/>
@@ -332,7 +339,7 @@ public class ContractGenerator : IIncrementalGenerator
         SyntaxToken ShortIdentifier = SyntaxFactory.Identifier(model.ShortMethodName);
         MethodDeclaration = MethodDeclaration.WithIdentifier(ShortIdentifier);
 
-        SyntaxTokenList Modifiers = GenerateContractModifiers(model, LeadingTrivia, TrailingTrivia);
+        SyntaxTokenList Modifiers = GenerateContractModifiers(model, MethodDeclaration, LeadingTrivia, TrailingTrivia);
         MethodDeclaration = MethodDeclaration.WithModifiers(Modifiers);
 
         BlockSyntax MethodBody = GenerateBody(model, MethodDeclaration, LeadingTrivia, LeadingTriviaWithoutLineEnd);
@@ -376,41 +383,69 @@ public class ContractGenerator : IIncrementalGenerator
         return Assembly.GetExecutingAssembly().GetName().Version.ToString();
     }
 
-    private static SyntaxTokenList GenerateContractModifiers(ContractModel model, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia)
+    private static SyntaxTokenList GenerateContractModifiers(ContractModel model, MethodDeclarationSyntax methodDeclaration, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia)
     {
         List<SyntaxToken> ModifierTokens = new();
 
         if (model.Attributes.Find(m => m.Name == nameof(AccessAttribute)) is AttributeModel AccessAttributeModel)
-        {
-            for (int i = 0; i < AccessAttributeModel.Arguments.Count; i++)
-            {
-                string Argument = AccessAttributeModel.Arguments[i];
-                SyntaxToken ModifierToken = SyntaxFactory.Identifier(Argument);
-
-                if (i == 0)
-                    ModifierToken = ModifierToken.WithLeadingTrivia(leadingTrivia);
-                else
-                    ModifierToken = ModifierToken.WithLeadingTrivia(SyntaxFactory.Space);
-
-                if (i + 1 == AccessAttributeModel.Arguments.Count)
-                {
-                    if (trailingTrivia is not null)
-                        ModifierToken = ModifierToken.WithTrailingTrivia(trailingTrivia);
-                }
-
-                ModifierTokens.Add(ModifierToken);
-            }
-        }
+            ModifierTokens = GenerateContractExplicitModifiers(AccessAttributeModel, leadingTrivia, trailingTrivia);
         else
+            ModifierTokens = GenerateContractDefaultModifiers(methodDeclaration, leadingTrivia, trailingTrivia);
+
+        return SyntaxFactory.TokenList(ModifierTokens);
+    }
+
+    private static List<SyntaxToken> GenerateContractExplicitModifiers(AttributeModel accessAttributeModel, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia)
+    {
+        List<SyntaxToken> ModifierTokens = new();
+
+        for (int i = 0; i < accessAttributeModel.Arguments.Count; i++)
         {
-            SyntaxToken ModifierToken = SyntaxFactory.Identifier("public");
-            if (trailingTrivia is not null)
-                ModifierToken = ModifierToken.WithTrailingTrivia(trailingTrivia);
+            string Argument = accessAttributeModel.Arguments[i];
+            SyntaxToken ModifierToken = SyntaxFactory.Identifier(Argument);
+
+            if (i == 0)
+                ModifierToken = ModifierToken.WithLeadingTrivia(leadingTrivia);
+            else
+                ModifierToken = ModifierToken.WithLeadingTrivia(SyntaxFactory.Space);
+
+            if (i + 1 == accessAttributeModel.Arguments.Count)
+            {
+                if (trailingTrivia is not null)
+                    ModifierToken = ModifierToken.WithTrailingTrivia(trailingTrivia);
+            }
 
             ModifierTokens.Add(ModifierToken);
         }
 
-        return SyntaxFactory.TokenList(ModifierTokens);
+        return ModifierTokens;
+    }
+
+    private static List<SyntaxToken> GenerateContractDefaultModifiers(MethodDeclarationSyntax methodDeclaration, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia)
+    {
+        List<SyntaxToken> ModifierTokens = new();
+
+        SyntaxToken PublicModifierToken = SyntaxFactory.Identifier("public");
+        PublicModifierToken = PublicModifierToken.WithLeadingTrivia(leadingTrivia);
+        ModifierTokens.Add(PublicModifierToken);
+
+        // If the method is static, add the same static modifier to the generated code.
+        foreach (var Modifier in methodDeclaration.Modifiers)
+            if (Modifier.Text == "static")
+            {
+                SyntaxToken StaticModifierToken = SyntaxFactory.Identifier("static");
+                StaticModifierToken = StaticModifierToken.WithLeadingTrivia(SyntaxFactory.Space);
+                ModifierTokens.Add(StaticModifierToken);
+                break;
+            }
+
+        if (trailingTrivia is not null)
+        {
+            int LastItemIndex = methodDeclaration.Modifiers.Count - 1;
+            ModifierTokens[LastItemIndex] = ModifierTokens[LastItemIndex].WithTrailingTrivia(trailingTrivia);
+        }
+
+        return ModifierTokens;
     }
 
     private static SyntaxTriviaList GetLeadingTriviaWithLineEnd()
@@ -573,7 +608,7 @@ public class ContractGenerator : IIncrementalGenerator
                 Arguments.Add(Argument);
             }
 
-        ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(Arguments));
+        ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(Arguments));
         ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(Invocation, ArgumentList);
         ExpressionStatementSyntax ExpressionStatement = SyntaxFactory.ExpressionStatement(CallExpression);
 
@@ -620,14 +655,14 @@ public class ContractGenerator : IIncrementalGenerator
                 Arguments.Add(Argument);
             }
 
-        ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(Arguments));
+        ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(Arguments));
         ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(Invocation, ArgumentList).WithLeadingTrivia(WhitespaceTrivia);
 
         IdentifierNameSyntax VarIdentifier = SyntaxFactory.IdentifierName("var");
         SyntaxToken ResultIdentifier = SyntaxFactory.Identifier(ResultIdentifierName);
         EqualsValueClauseSyntax Initializer = SyntaxFactory.EqualsValueClause(CallExpression).WithLeadingTrivia(WhitespaceTrivia);
         VariableDeclaratorSyntax VariableDeclarator = SyntaxFactory.VariableDeclarator(ResultIdentifier, null, Initializer).WithLeadingTrivia(WhitespaceTrivia);
-        VariableDeclarationSyntax Declaration = SyntaxFactory.VariableDeclaration(VarIdentifier, SyntaxFactory.SeparatedList<VariableDeclaratorSyntax>(new List<VariableDeclaratorSyntax>() { VariableDeclarator }));
+        VariableDeclarationSyntax Declaration = SyntaxFactory.VariableDeclaration(VarIdentifier, SyntaxFactory.SeparatedList(new List<VariableDeclaratorSyntax>() { VariableDeclarator }));
         LocalDeclarationStatementSyntax LocalDeclarationStatement = SyntaxFactory.LocalDeclarationStatement(Declaration);
 
         return LocalDeclarationStatement;
@@ -678,7 +713,7 @@ public class ContractGenerator : IIncrementalGenerator
         OutputArgument = OutputArgument.WithLeadingTrivia(WhitespaceTrivia);
 
         List<ArgumentSyntax> Arguments = new() { InputArgument, OutputArgument };
-        ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(Arguments));
+        ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(Arguments));
 
         ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(MemberAccessExpression, ArgumentList);
         ExpressionStatementSyntax ExpressionStatement = SyntaxFactory.ExpressionStatement(CallExpression);
@@ -710,7 +745,7 @@ public class ContractGenerator : IIncrementalGenerator
         IdentifierNameSyntax InputName = SyntaxFactory.IdentifierName(argumentName);
         ArgumentSyntax InputArgument = SyntaxFactory.Argument(InputName);
         List<ArgumentSyntax> Arguments = new() { InputArgument };
-        ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>(Arguments));
+        ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(Arguments));
         ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(MemberAccessExpression, ArgumentList);
         ExpressionStatementSyntax ExpressionStatement = SyntaxFactory.ExpressionStatement(CallExpression);
 
