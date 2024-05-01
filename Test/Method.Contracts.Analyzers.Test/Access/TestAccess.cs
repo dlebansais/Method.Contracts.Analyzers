@@ -37,6 +37,6 @@ internal partial class Program
         var Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifiyAccess.Verify(Driver).ConfigureAwait(false);
 
-        Assert.That(Result, Is.Not.Null);
+        Assert.That(Result.Files, Has.Exactly(1).Items);
     }
 }
