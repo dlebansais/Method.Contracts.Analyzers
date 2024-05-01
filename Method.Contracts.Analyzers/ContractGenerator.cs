@@ -5,6 +5,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -90,17 +91,37 @@ public class ContractGenerator : IIncrementalGenerator
 
         // Get a list of all supported attributes for this method.
         List<string> AttributeNames = new();
-        foreach (var MethodAttributeList in MethodDeclaration.AttributeLists)
-            if (MethodAttributeList is AttributeListSyntax AttributeList)
+        for (int IndexList = 0; IndexList < MethodDeclaration.AttributeLists.Count; IndexList++)
+        {
+            AttributeListSyntax AttributeList = MethodDeclaration.AttributeLists[IndexList];
+
+            for (int Index = 0; Index < AttributeList.Attributes.Count; Index++)
             {
-                foreach (var MethodAttribute in AttributeList.Attributes)
-                    if (MethodAttribute is AttributeSyntax Attribute)
+                AttributeSyntax Attribute = AttributeList.Attributes[Index];
+
+                string AttributeName = ToAttributeName(Attribute);
+                if (SupportedAttributeNames.Contains(AttributeName) && Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
+                {
+                    bool AreAllArgumentsValid = AttributeArgumentList.Arguments.All(attributeArgument => attributeArgument.Expression is LiteralExpressionSyntax LiteralExpression && LiteralExpression.Kind() == SyntaxKind.StringLiteralExpression);
+                    /*
+                    for (int IndexArgument = 0; IndexArgument < AttributeArgumentList.Arguments.Count; IndexArgument++)
                     {
-                        string AttributeName = ToAttributeName(Attribute);
-                        if (SupportedAttributeNames.Contains(AttributeName))
-                            AttributeNames.Add(AttributeName);
-                    }
+                        AttributeArgumentSyntax AttributeArgument = AttributeArgumentList.Arguments[IndexArgument];
+
+                        if (AttributeArgument.Expression is LiteralExpressionSyntax LiteralExpression && LiteralExpression.Kind() == SyntaxKind.StringLiteralExpression)
+                        {
+                            string ArgumentText = LiteralExpression.Token.Text;
+                            ArgumentText = ArgumentText.Trim('"');
+
+                            Arguments.Add(ArgumentText);
+                        }
+                    }*/
+
+                    if (AreAllArgumentsValid)
+                        AttributeNames.Add(AttributeName);
+                }
             }
+        }
 
         // One of these attributes has to be the first, and we only return true for this one.
         // This way, multiple calls with different T return true exactly once.
@@ -150,38 +171,42 @@ public class ContractGenerator : IIncrementalGenerator
 
         List<AttributeModel> Result = new();
 
-        foreach (var MethodAttributeList in MethodDeclaration.AttributeLists)
-            if (MethodAttributeList is AttributeListSyntax AttributeList)
+        for (int IndexList = 0; IndexList < MethodDeclaration.AttributeLists.Count; IndexList++)
+        {
+            AttributeListSyntax AttributeList = MethodDeclaration.AttributeLists[IndexList];
+
+            for (int Index = 0; Index < AttributeList.Attributes.Count; Index++)
             {
-                foreach (var MethodAttribute in AttributeList.Attributes)
-                    if (MethodAttribute is AttributeSyntax Attribute)
+                AttributeSyntax Attribute = AttributeList.Attributes[Index];
+
+                string AttributeName = ToAttributeName(Attribute);
+                if (SupportedAttributeNames.Contains(AttributeName))
+                {
+                    Debug.Assert(Attribute.ArgumentList is AttributeArgumentListSyntax, "Nodes for attributes without arguments are filtered away.");
+                    AttributeArgumentListSyntax AttributeArgumentList = Attribute.ArgumentList!;
+
+                    List<string> Arguments = new();
+
+                    for (int IndexArgument = 0; IndexArgument < AttributeArgumentList.Arguments.Count; IndexArgument++)
                     {
-                        string AttributeName = ToAttributeName(Attribute);
-                        if (SupportedAttributeNames.Contains(AttributeName))
-                        {
-                            List<string> Arguments = new();
+                        AttributeArgumentSyntax AttributeArgument = AttributeArgumentList.Arguments[IndexArgument];
 
-                            if (Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
-                            {
-                                foreach (var Argument in AttributeArgumentList.Arguments)
-                                    if (Argument is AttributeArgumentSyntax AttributeArgument)
-                                    {
-                                        if (AttributeArgument.Expression is LiteralExpressionSyntax LiteralExpression)
-                                        {
-                                            string ArgumentText = LiteralExpression.Token.Text;
-                                            ArgumentText = ArgumentText.Trim('"');
+                        Debug.Assert(AttributeArgument.Expression is LiteralExpressionSyntax);
+                        LiteralExpressionSyntax LiteralExpression = (LiteralExpressionSyntax)AttributeArgument.Expression;
 
-                                            Arguments.Add(ArgumentText);
-                                        }
-                                    }
-                            }
+                        Debug.Assert(LiteralExpression.Kind() == SyntaxKind.StringLiteralExpression);
+                        string ArgumentText = LiteralExpression.Token.Text;
+                        ArgumentText = ArgumentText.Trim('"');
 
-                            AttributeModel Model = new(AttributeName, Arguments);
-
-                            Result.Add(Model);
-                        }
+                        Arguments.Add(ArgumentText);
                     }
+
+                    AttributeModel Model = new(AttributeName, Arguments);
+
+                    Result.Add(Model);
+                }
             }
+        }
 
         return Result;
     }
