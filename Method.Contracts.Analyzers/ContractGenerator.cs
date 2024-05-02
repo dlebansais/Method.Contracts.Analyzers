@@ -47,30 +47,21 @@ public class ContractGenerator : IIncrementalGenerator
     /// <inheritdoc cref="IIncrementalGenerator.Initialize"/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var pipelineRequireNotNull = context.SyntaxProvider.ForAttributeWithMetadataName(
-            fullyQualifiedMetadataName: GetFullyQualifiedMetadataName<RequireNotNullAttribute>(),
-            predicate: KeepNodeForPipeline<RequireNotNullAttribute>,
+        InitializePipeline<AccessAttribute>(context);
+        InitializePipeline<RequireNotNullAttribute>(context);
+        InitializePipeline<RequireAttribute>(context);
+        InitializePipeline<EnsureAttribute>(context);
+    }
+
+    private static void InitializePipeline<T>(IncrementalGeneratorInitializationContext context)
+        where T : Attribute
+    {
+        var pipeline = context.SyntaxProvider.ForAttributeWithMetadataName(
+            fullyQualifiedMetadataName: GetFullyQualifiedMetadataName<T>(),
+            predicate: KeepNodeForPipeline<T>,
             transform: TransformContractAttributes);
 
-        var pipelineRequire = context.SyntaxProvider.ForAttributeWithMetadataName(
-            fullyQualifiedMetadataName: GetFullyQualifiedMetadataName<RequireAttribute>(),
-            predicate: KeepNodeForPipeline<RequireAttribute>,
-            transform: TransformContractAttributes);
-
-        var pipelineEnsure = context.SyntaxProvider.ForAttributeWithMetadataName(
-            fullyQualifiedMetadataName: GetFullyQualifiedMetadataName<EnsureAttribute>(),
-            predicate: KeepNodeForPipeline<EnsureAttribute>,
-            transform: TransformContractAttributes);
-
-        var pipelineAccess = context.SyntaxProvider.ForAttributeWithMetadataName(
-            fullyQualifiedMetadataName: GetFullyQualifiedMetadataName<AccessAttribute>(),
-            predicate: KeepNodeForPipeline<AccessAttribute>,
-            transform: TransformContractAttributes);
-
-        context.RegisterSourceOutput(pipelineAccess, OutputContractMethod);
-        context.RegisterSourceOutput(pipelineRequireNotNull, OutputContractMethod);
-        context.RegisterSourceOutput(pipelineRequire, OutputContractMethod);
-        context.RegisterSourceOutput(pipelineEnsure, OutputContractMethod);
+        context.RegisterSourceOutput(pipeline, OutputContractMethod);
     }
 
     private static string GetFullyQualifiedMetadataName<T>()
