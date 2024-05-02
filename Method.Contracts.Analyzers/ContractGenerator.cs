@@ -47,11 +47,6 @@ public class ContractGenerator : IIncrementalGenerator
     /// <inheritdoc cref="IIncrementalGenerator.Initialize"/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var pipelineAccess = context.SyntaxProvider.ForAttributeWithMetadataName(
-            fullyQualifiedMetadataName: GetFullyQualifiedMetadataName<AccessAttribute>(),
-            predicate: KeepNodeForPipeline<AccessAttribute>,
-            transform: TransformContractAttributes);
-
         var pipelineRequireNotNull = context.SyntaxProvider.ForAttributeWithMetadataName(
             fullyQualifiedMetadataName: GetFullyQualifiedMetadataName<RequireNotNullAttribute>(),
             predicate: KeepNodeForPipeline<RequireNotNullAttribute>,
@@ -65,6 +60,11 @@ public class ContractGenerator : IIncrementalGenerator
         var pipelineEnsure = context.SyntaxProvider.ForAttributeWithMetadataName(
             fullyQualifiedMetadataName: GetFullyQualifiedMetadataName<EnsureAttribute>(),
             predicate: KeepNodeForPipeline<EnsureAttribute>,
+            transform: TransformContractAttributes);
+
+        var pipelineAccess = context.SyntaxProvider.ForAttributeWithMetadataName(
+            fullyQualifiedMetadataName: GetFullyQualifiedMetadataName<AccessAttribute>(),
+            predicate: KeepNodeForPipeline<AccessAttribute>,
             transform: TransformContractAttributes);
 
         context.RegisterSourceOutput(pipelineAccess, OutputContractMethod);

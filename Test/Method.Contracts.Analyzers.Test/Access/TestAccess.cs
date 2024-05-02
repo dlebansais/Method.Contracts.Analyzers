@@ -108,6 +108,77 @@ internal partial class Program
     }
 
     [Test]
+    public async Task TestQueryRef()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        string Copy = string.Empty;
+        string Text = HelloFrom(""Hello, World"", ref Copy);
+        Console.WriteLine(Text);
+        Console.WriteLine(Copy);
+    }
+
+    [Access(""public"", ""static"")]
+    private static string HelloFromVerified(string text, ref string copy)
+    {
+        copy = text;
+        return text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyAccess.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(1).Items);
+    }
+
+    [Test]
+    public async Task TestQueryOut()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        string Text = HelloFrom(""Hello, World"", out string Copy);
+        Console.WriteLine(Text);
+        Console.WriteLine(Copy);
+    }
+
+    [Access(""public"", ""static"")]
+    private static string HelloFromVerified(string text, out string copy)
+    {
+        copy = text;
+        return text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyAccess.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(1).Items);
+    }
+
+    [Test]
     public async Task TestExtraAttribute()
     {
         // The source code to test
