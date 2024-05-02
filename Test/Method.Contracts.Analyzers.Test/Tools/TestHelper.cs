@@ -23,7 +23,6 @@ public static class TestHelper
             references: new[] { referenceBinder, referenceContracts },
             new CSharpCompilationOptions(OutputKind.ConsoleApplication, reportSuppressedDiagnostics: true, platform: Platform.X64, generalDiagnosticOption: ReportDiagnostic.Error, warningLevel: 4));
 
-
         // Create an instance of our EnumGenerator incremental source generator.
         var generator = new ContractGenerator();
 

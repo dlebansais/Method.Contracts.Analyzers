@@ -44,7 +44,7 @@ public class ContractGenerator : IIncrementalGenerator
     // Name of the intermediate variable for methods that return a result.
     private const string ResultIdentifierName = "Result";
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="IIncrementalGenerator.Initialize"/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var pipelineAccess = context.SyntaxProvider.ForAttributeWithMetadataName(
@@ -103,19 +103,6 @@ public class ContractGenerator : IIncrementalGenerator
                 if (SupportedAttributeNames.Contains(AttributeName) && Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
                 {
                     bool AreAllArgumentsValid = AttributeArgumentList.Arguments.All(attributeArgument => attributeArgument.Expression is LiteralExpressionSyntax LiteralExpression && LiteralExpression.Kind() == SyntaxKind.StringLiteralExpression);
-                    /*
-                    for (int IndexArgument = 0; IndexArgument < AttributeArgumentList.Arguments.Count; IndexArgument++)
-                    {
-                        AttributeArgumentSyntax AttributeArgument = AttributeArgumentList.Arguments[IndexArgument];
-
-                        if (AttributeArgument.Expression is LiteralExpressionSyntax LiteralExpression && LiteralExpression.Kind() == SyntaxKind.StringLiteralExpression)
-                        {
-                            string ArgumentText = LiteralExpression.Token.Text;
-                            ArgumentText = ArgumentText.Trim('"');
-
-                            Arguments.Add(ArgumentText);
-                        }
-                    }*/
 
                     if (AreAllArgumentsValid)
                         AttributeNames.Add(AttributeName);
@@ -387,64 +374,22 @@ public class ContractGenerator : IIncrementalGenerator
 
     private static List<StatementSyntax> GenerateStatements(ContractModel model, MethodDeclarationSyntax methodDeclaration, SyntaxTriviaList tabStatementTrivia, SyntaxTriviaList tabStatementExtraLineEndTrivia)
     {
-        Dictionary<string, string> ParameterNameReplacementTable = new();
-        bool IsContainingRequire = false;
-
-        foreach (AttributeModel Item in model.Attributes)
-            if (Item.Name == nameof(RequireNotNullAttribute))
-            {
-                foreach (string Argument in Item.Arguments)
-                    ParameterNameReplacementTable.Add(Argument, ToIdentifierLocalName(Argument));
-
-                IsContainingRequire = true;
-            }
-            else if (Item.Name == nameof(RequireAttribute))
-                IsContainingRequire = true;
-
         List<StatementSyntax> Statements = new();
 
-        StatementSyntax CallStatement;
-        StatementSyntax? ReturnStatement;
-
-        if (methodDeclaration.ReturnType is PredefinedTypeSyntax PredefinedType && PredefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword))
-        {
-            CallStatement = GenerateCommandStatement(model.ShortMethodName, methodDeclaration.ParameterList, ParameterNameReplacementTable);
-            ReturnStatement = null;
-        }
-        else
-        {
-            CallStatement = GenerateQueryStatement(model.ShortMethodName, methodDeclaration.ParameterList, ParameterNameReplacementTable);
-            ReturnStatement = GenerateReturnStatement();
-        }
-
-        if (IsContainingRequire)
-            CallStatement = CallStatement.WithLeadingTrivia(tabStatementExtraLineEndTrivia);
-        else
-            CallStatement = CallStatement.WithLeadingTrivia(tabStatementTrivia);
+        GetParameterReplacementTable(model, out Dictionary<string, string> ParameterNameReplacementTable, out bool IsContainingRequire);
+        GetCallAndReturnStatements(model,
+                                   methodDeclaration,
+                                   tabStatementTrivia,
+                                   tabStatementExtraLineEndTrivia,
+                                   ParameterNameReplacementTable,
+                                   IsContainingRequire,
+                                   out StatementSyntax CallStatement,
+                                   out StatementSyntax? ReturnStatement);
 
         int CallStatementIndex = -1;
         foreach (AttributeModel AttributeModel in model.Attributes)
             if (AttributeModel.Name != nameof(AccessAttribute))
-            {
-                bool FirstEnsure = false;
-                if (CallStatementIndex < 0 && AttributeModel.Name == nameof(EnsureAttribute))
-                {
-                    CallStatementIndex = Statements.Count;
-                    FirstEnsure = true;
-                }
-
-                List<StatementSyntax> AttributeStatements = GenerateAttributeStatements(AttributeModel, methodDeclaration);
-                foreach (StatementSyntax Statement in AttributeStatements)
-                {
-                    if (FirstEnsure)
-                    {
-                        FirstEnsure = false;
-                        Statements.Add(Statement.WithLeadingTrivia(tabStatementExtraLineEndTrivia));
-                    }
-                    else
-                        Statements.Add(Statement.WithLeadingTrivia(tabStatementTrivia));
-                }
-            }
+                AddStatement(methodDeclaration, tabStatementTrivia, tabStatementExtraLineEndTrivia, Statements, AttributeModel, ref CallStatementIndex);
 
         if (CallStatementIndex < 0)
             CallStatementIndex = Statements.Count;
@@ -455,6 +400,76 @@ public class ContractGenerator : IIncrementalGenerator
             Statements.Add(ReturnStatement.WithLeadingTrivia(tabStatementExtraLineEndTrivia));
 
         return Statements;
+    }
+
+    private static void GetParameterReplacementTable(ContractModel model, out Dictionary<string, string> parameterNameReplacementTable, out bool isContainingRequire)
+    {
+        parameterNameReplacementTable = new();
+        isContainingRequire = false;
+
+        foreach (AttributeModel Item in model.Attributes)
+            if (Item.Name == nameof(RequireNotNullAttribute))
+            {
+                foreach (string Argument in Item.Arguments)
+                    parameterNameReplacementTable.Add(Argument, ToIdentifierLocalName(Argument));
+
+                isContainingRequire = true;
+            }
+            else if (Item.Name == nameof(RequireAttribute))
+                isContainingRequire = true;
+    }
+
+    private static void GetCallAndReturnStatements(ContractModel model,
+                                                   MethodDeclarationSyntax methodDeclaration,
+                                                   SyntaxTriviaList tabStatementTrivia,
+                                                   SyntaxTriviaList tabStatementExtraLineEndTrivia,
+                                                   Dictionary<string, string> parameterNameReplacementTable,
+                                                   bool isContainingRequire,
+                                                   out StatementSyntax callStatement,
+                                                   out StatementSyntax? returnStatement)
+    {
+        if (methodDeclaration.ReturnType is PredefinedTypeSyntax PredefinedType && PredefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword))
+        {
+            callStatement = GenerateCommandStatement(model.ShortMethodName, methodDeclaration.ParameterList, parameterNameReplacementTable);
+            returnStatement = null;
+        }
+        else
+        {
+            callStatement = GenerateQueryStatement(model.ShortMethodName, methodDeclaration.ParameterList, parameterNameReplacementTable);
+            returnStatement = GenerateReturnStatement();
+        }
+
+        if (isContainingRequire)
+            callStatement = callStatement.WithLeadingTrivia(tabStatementExtraLineEndTrivia);
+        else
+            callStatement = callStatement.WithLeadingTrivia(tabStatementTrivia);
+    }
+
+    private static void AddStatement(MethodDeclarationSyntax methodDeclaration,
+                                     SyntaxTriviaList tabStatementTrivia,
+                                     SyntaxTriviaList tabStatementExtraLineEndTrivia,
+                                     List<StatementSyntax> statements,
+                                     AttributeModel attributeModel,
+                                     ref int callStatementIndex)
+    {
+        bool FirstEnsure = false;
+        if (callStatementIndex < 0 && attributeModel.Name == nameof(EnsureAttribute))
+        {
+            callStatementIndex = statements.Count;
+            FirstEnsure = true;
+        }
+
+        List<StatementSyntax> AttributeStatements = GenerateAttributeStatements(attributeModel, methodDeclaration);
+        foreach (StatementSyntax Statement in AttributeStatements)
+        {
+            if (FirstEnsure)
+            {
+                FirstEnsure = false;
+                statements.Add(Statement.WithLeadingTrivia(tabStatementExtraLineEndTrivia));
+            }
+            else
+                statements.Add(Statement.WithLeadingTrivia(tabStatementTrivia));
+        }
     }
 
     private static ExpressionStatementSyntax GenerateCommandStatement(string methodName, ParameterListSyntax parameterList, Dictionary<string, string> parameterNameReplacementTable)
