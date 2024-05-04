@@ -3,6 +3,7 @@
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -12,6 +13,7 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 /// <summary>
@@ -29,31 +31,72 @@ public class ContractGenerator : IIncrementalGenerator
         nameof(EnsureAttribute),
     };
 
-    // The suffix that a method must have for code to be generated.
-    private const string VerifiedSuffix = "Verified";
+    // The .editorconfig setting for the namespace of the Method.Contracts assemblies.
+    private const string ContractsNamespace = "Contracts";
+    private const string ContractClassName = "Contract";
 
-    // One tab.
-    private const string Tab = "    ";
+    // The .editorconfig setting for the suffix that a method must have for code to be generated.
+    private const string DefaultVerifiedSuffix = "Verified";
+    private static readonly GeneratorSettingsEntry VerifiedSuffixSetting = new(EditorConfigKey: "contract_generator.called_method.suffix", DefaultValue: DefaultVerifiedSuffix);
 
-    // Namespace of the Method.Contracts assemblies.
-    private const string ContractNamespace = "Contract";
+    // The .editorconfig setting for the tab length in generated code.
+    private const int DefaultTabLength = 4;
+    private static readonly GeneratorSettingsEntry TabLengthSetting = new(EditorConfigKey: "contract_generator.tab_length", DefaultValue: $"{DefaultTabLength}");
 
-    // Namespace of the generated code.
-    private const string ContractAnalyzerNamespace = "Contracts";
+    // The .editorconfig setting for the name of the result identifier in generated queries.
+    private const string DefaultResultIdentifier = "Result";
+    private static readonly GeneratorSettingsEntry ResultIdentifierSetting = new(EditorConfigKey: "contract_generator.called_method.result_identifier", DefaultValue: DefaultResultIdentifier);
 
-    // Name of the intermediate variable for methods that return a result.
-    private const string ResultIdentifierName = "Result";
+    // The settings values.
+    private static GeneratorSettings Settings = new(VerifiedSuffix: DefaultVerifiedSuffix, TabLength: DefaultTabLength, ResultIdentifier: DefaultResultIdentifier);
 
     /// <inheritdoc cref="IIncrementalGenerator.Initialize"/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        InitializePipeline<AccessAttribute>(context);
-        InitializePipeline<RequireNotNullAttribute>(context);
-        InitializePipeline<RequireAttribute>(context);
-        InitializePipeline<EnsureAttribute>(context);
+        var Settings = context.AnalyzerConfigOptionsProvider.SelectMany(ReadSettings);
+
+        InitializePipeline<AccessAttribute>(context, Settings);
+        InitializePipeline<RequireNotNullAttribute>(context, Settings);
+        InitializePipeline<RequireAttribute>(context, Settings);
+        InitializePipeline<EnsureAttribute>(context, Settings);
     }
 
-    private static void InitializePipeline<T>(IncrementalGeneratorInitializationContext context)
+    private static IEnumerable<GeneratorSettings> ReadSettings(AnalyzerConfigOptionsProvider options, CancellationToken cancellationToken)
+    {
+        string VerifiedSuffix = ReadStringSetting(options, VerifiedSuffixSetting);
+        int TabLength = ReadIntSetting(options, TabLengthSetting);
+        string ResultIdentifier = ReadStringSetting(options, ResultIdentifierSetting);
+
+        Settings = Settings with
+        {
+            VerifiedSuffix = VerifiedSuffix,
+            TabLength = TabLength,
+            ResultIdentifier = ResultIdentifier,
+        };
+
+        return new List<GeneratorSettings>() { Settings };
+    }
+
+    private static string ReadStringSetting(AnalyzerConfigOptionsProvider options, GeneratorSettingsEntry entry)
+    {
+        _ = options.GlobalOptions.TryGetValue(entry.EditorConfigKey, out string? Value);
+        if (Value is not null)
+            return Value;
+
+        return entry.DefaultValue;
+    }
+
+    private static int ReadIntSetting(AnalyzerConfigOptionsProvider options, GeneratorSettingsEntry entry)
+    {
+        _ = options.GlobalOptions.TryGetValue(entry.EditorConfigKey, out string? Value);
+        if (Value is not null)
+            if (int.TryParse(Value, out int IntValue))
+                return IntValue;
+
+        return int.Parse(entry.DefaultValue, CultureInfo.InvariantCulture);
+    }
+
+    private static void InitializePipeline<T>(IncrementalGeneratorInitializationContext context, IncrementalValuesProvider<GeneratorSettings> settings)
         where T : Attribute
     {
         var pipeline = context.SyntaxProvider.ForAttributeWithMetadataName(
@@ -61,12 +104,12 @@ public class ContractGenerator : IIncrementalGenerator
             predicate: KeepNodeForPipeline<T>,
             transform: TransformContractAttributes);
 
-        context.RegisterSourceOutput(pipeline, OutputContractMethod);
+        context.RegisterSourceOutput(settings.Combine(pipeline.Collect()), OutputContractMethod);
     }
 
     private static string GetFullyQualifiedMetadataName<T>()
     {
-        return $"{ContractAnalyzerNamespace}.{typeof(T).Name}";
+        return $"{ContractsNamespace}.{typeof(T).Name}";
     }
 
     private static bool KeepNodeForPipeline<T>(SyntaxNode syntaxNode, CancellationToken cancellationToken)
@@ -77,6 +120,12 @@ public class ContractGenerator : IIncrementalGenerator
             return false;
 
         string MethodName = MethodDeclaration.Identifier.ToString();
+        string VerifiedSuffix = VerifiedSuffixSetting.DefaultValue;
+
+        // Reject configurations with an empty suffix: the corresponding value in .editorconfig file is not valid.
+        if (VerifiedSuffix.Length == 0)
+            return false;
+
         if (!MethodName.EndsWith(VerifiedSuffix, StringComparison.Ordinal) || MethodName.Length == VerifiedSuffix.Length)
             return false;
 
@@ -127,6 +176,7 @@ public class ContractGenerator : IIncrementalGenerator
         string ClassName = containingClass.Name;
         string SymbolName = context.TargetSymbol.Name;
 
+        string VerifiedSuffix = VerifiedSuffixSetting.DefaultValue;
         Debug.Assert(SymbolName.EndsWith(VerifiedSuffix, StringComparison.Ordinal));
         Debug.Assert(SymbolName.Length > VerifiedSuffix.Length);
         string ShortMethodName = SymbolName.Substring(0, SymbolName.Length - VerifiedSuffix.Length);
@@ -196,8 +246,9 @@ public class ContractGenerator : IIncrementalGenerator
         Debug.Assert(TargetNode is MethodDeclarationSyntax);
         MethodDeclarationSyntax MethodDeclaration = (MethodDeclarationSyntax)TargetNode;
 
-        SyntaxTriviaList LeadingTrivia = GetLeadingTriviaWithLineEnd();
-        SyntaxTriviaList LeadingTriviaWithoutLineEnd = GetLeadingTriviaWithoutLineEnd();
+        string Tab = new(' ', Settings.TabLength);
+        SyntaxTriviaList LeadingTrivia = GetLeadingTriviaWithLineEnd(Tab);
+        SyntaxTriviaList LeadingTriviaWithoutLineEnd = GetLeadingTriviaWithoutLineEnd(Tab);
         SyntaxTriviaList? TrailingTrivia = GetModifiersTrailingTrivia(MethodDeclaration);
 
         SyntaxList<AttributeListSyntax> CodeAttributes = GenerateCodeAttributes(LeadingTrivia);
@@ -209,7 +260,7 @@ public class ContractGenerator : IIncrementalGenerator
         SyntaxTokenList Modifiers = GenerateContractModifiers(model, MethodDeclaration, LeadingTrivia, TrailingTrivia);
         MethodDeclaration = MethodDeclaration.WithModifiers(Modifiers);
 
-        BlockSyntax MethodBody = GenerateBody(model, MethodDeclaration, LeadingTrivia, LeadingTriviaWithoutLineEnd);
+        BlockSyntax MethodBody = GenerateBody(model, MethodDeclaration, LeadingTrivia, LeadingTriviaWithoutLineEnd, Tab);
         MethodDeclaration = MethodDeclaration.WithBody(MethodBody);
 
         MethodDeclaration = MethodDeclaration.WithLeadingTrivia(LeadingTriviaWithoutLineEnd);
@@ -315,22 +366,22 @@ public class ContractGenerator : IIncrementalGenerator
         return ModifierTokens;
     }
 
-    private static SyntaxTriviaList GetLeadingTriviaWithLineEnd()
+    private static SyntaxTriviaList GetLeadingTriviaWithLineEnd(string tab)
     {
         List<SyntaxTrivia> Trivias = new()
         {
             SyntaxFactory.EndOfLine("\r\n"),
-            SyntaxFactory.Whitespace(Tab),
+            SyntaxFactory.Whitespace(tab),
         };
 
         return SyntaxFactory.TriviaList(Trivias);
     }
 
-    private static SyntaxTriviaList GetLeadingTriviaWithoutLineEnd()
+    private static SyntaxTriviaList GetLeadingTriviaWithoutLineEnd(string tab)
     {
         List<SyntaxTrivia> Trivias = new()
         {
-            SyntaxFactory.Whitespace(Tab),
+            SyntaxFactory.Whitespace(tab),
         };
 
         return SyntaxFactory.TriviaList(Trivias);
@@ -341,18 +392,18 @@ public class ContractGenerator : IIncrementalGenerator
         return methodDeclaration.Modifiers.Count > 0 ? methodDeclaration.Modifiers.Last().TrailingTrivia : null;
     }
 
-    private static BlockSyntax GenerateBody(ContractModel model, MethodDeclarationSyntax methodDeclaration, SyntaxTriviaList tabTrivia, SyntaxTriviaList tabTriviaWithoutLineEnd)
+    private static BlockSyntax GenerateBody(ContractModel model, MethodDeclarationSyntax methodDeclaration, SyntaxTriviaList tabTrivia, SyntaxTriviaList tabTriviaWithoutLineEnd, string tab)
     {
         SyntaxToken OpenBraceToken = SyntaxFactory.Token(SyntaxKind.OpenBraceToken);
         OpenBraceToken = OpenBraceToken.WithLeadingTrivia(tabTriviaWithoutLineEnd);
 
         List<SyntaxTrivia> TrivialList = new(tabTrivia);
-        TrivialList.Add(SyntaxFactory.Whitespace(Tab));
+        TrivialList.Add(SyntaxFactory.Whitespace(tab));
         SyntaxTriviaList TabStatementTrivia = SyntaxFactory.TriviaList(TrivialList);
 
         List<SyntaxTrivia> TrivialListExtraLineEnd = new(tabTrivia);
         TrivialListExtraLineEnd.Insert(0, SyntaxFactory.EndOfLine("\r\n"));
-        TrivialListExtraLineEnd.Add(SyntaxFactory.Whitespace(Tab));
+        TrivialListExtraLineEnd.Add(SyntaxFactory.Whitespace(tab));
         SyntaxTriviaList TabStatementExtraLineEndTrivia = SyntaxFactory.TriviaList(TrivialListExtraLineEnd);
 
         SyntaxToken CloseBraceToken = SyntaxFactory.Token(SyntaxKind.CloseBraceToken);
@@ -466,6 +517,7 @@ public class ContractGenerator : IIncrementalGenerator
     private static ExpressionStatementSyntax GenerateCommandStatement(string methodName, ParameterListSyntax parameterList, Dictionary<string, string> parameterNameReplacementTable)
     {
         SyntaxTriviaList WhitespaceTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "));
+        string VerifiedSuffix = VerifiedSuffixSetting.DefaultValue;
         ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(methodName + VerifiedSuffix);
 
         List<ArgumentSyntax> Arguments = new();
@@ -513,6 +565,7 @@ public class ContractGenerator : IIncrementalGenerator
     private static LocalDeclarationStatementSyntax GenerateQueryStatement(string methodName, ParameterListSyntax parameterList, Dictionary<string, string> parameterNameReplacementTable)
     {
         SyntaxTriviaList WhitespaceTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "));
+        string VerifiedSuffix = VerifiedSuffixSetting.DefaultValue;
         ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(methodName + VerifiedSuffix);
 
         List<ArgumentSyntax> Arguments = new();
@@ -554,7 +607,7 @@ public class ContractGenerator : IIncrementalGenerator
         ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(Invocation, ArgumentList).WithLeadingTrivia(WhitespaceTrivia);
 
         IdentifierNameSyntax VarIdentifier = SyntaxFactory.IdentifierName("var");
-        SyntaxToken ResultIdentifier = SyntaxFactory.Identifier(ResultIdentifierName);
+        SyntaxToken ResultIdentifier = SyntaxFactory.Identifier(Settings.ResultIdentifier);
         EqualsValueClauseSyntax Initializer = SyntaxFactory.EqualsValueClause(CallExpression).WithLeadingTrivia(WhitespaceTrivia);
         VariableDeclaratorSyntax VariableDeclarator = SyntaxFactory.VariableDeclarator(ResultIdentifier, null, Initializer).WithLeadingTrivia(WhitespaceTrivia);
         VariableDeclarationSyntax Declaration = SyntaxFactory.VariableDeclaration(VarIdentifier, SyntaxFactory.SeparatedList(new List<VariableDeclaratorSyntax>() { VariableDeclarator }));
@@ -566,7 +619,7 @@ public class ContractGenerator : IIncrementalGenerator
     private static ReturnStatementSyntax GenerateReturnStatement()
     {
         SyntaxTriviaList WhitespaceTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "));
-        IdentifierNameSyntax ResultIdentifier = SyntaxFactory.IdentifierName(ResultIdentifierName).WithLeadingTrivia(WhitespaceTrivia);
+        IdentifierNameSyntax ResultIdentifier = SyntaxFactory.IdentifierName(Settings.ResultIdentifier).WithLeadingTrivia(WhitespaceTrivia);
         ReturnStatementSyntax ReturnStatement = SyntaxFactory.ReturnStatement(ResultIdentifier);
 
         return ReturnStatement;
@@ -592,7 +645,7 @@ public class ContractGenerator : IIncrementalGenerator
 
     private static StatementSyntax GenerateRequireNotNullStatement(string argumentName, MethodDeclarationSyntax methodDeclaration)
     {
-        ExpressionSyntax ContractName = SyntaxFactory.IdentifierName(ContractNamespace);
+        ExpressionSyntax ContractName = SyntaxFactory.IdentifierName(ContractClassName);
         SimpleNameSyntax RequireNotNullName = SyntaxFactory.IdentifierName(ToNameWithoutAttribute<RequireNotNullAttribute>());
         MemberAccessExpressionSyntax MemberAccessExpression = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, ContractName, RequireNotNullName);
 
@@ -633,7 +686,7 @@ public class ContractGenerator : IIncrementalGenerator
 
     private static ExpressionStatementSyntax GenerateRequireOrEnsureStatement(string argumentName, MethodDeclarationSyntax methodDeclaration, string contractMethodName)
     {
-        ExpressionSyntax ContractName = SyntaxFactory.IdentifierName(ContractNamespace);
+        ExpressionSyntax ContractName = SyntaxFactory.IdentifierName(ContractClassName);
         SimpleNameSyntax ContractMethodSimpleName = SyntaxFactory.IdentifierName(contractMethodName);
         MemberAccessExpressionSyntax MemberAccessExpression = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, ContractName, ContractMethodSimpleName);
 
@@ -671,24 +724,24 @@ public class ContractGenerator : IIncrementalGenerator
             return $"_{text}";
     }
 
-    private static void OutputContractMethod(SourceProductionContext context, ContractModel model)
+    private static void OutputContractMethod(SourceProductionContext context, (GeneratorSettings Settings, ImmutableArray<ContractModel> Models) modelAndSettings)
     {
-        var sourceText = SourceText.From($$"""
-                namespace {{model.Namespace}};
+        foreach (ContractModel Model in modelAndSettings.Models)
+        {
+            var sourceText = SourceText.From($$"""
+                namespace {{Model.Namespace}};
 
                 using System;
                 using System.CodeDom.Compiler;
 
-                partial class {{model.ClassName}}
+                partial class {{Model.ClassName}}
                 {
-                {{model.GeneratedMethodDeclaration}}
+                {{Model.GeneratedMethodDeclaration}}
                 }
                 """,
-            Encoding.UTF8);
+                Encoding.UTF8);
 
-        context.AddSource($"{model.ClassName}_{model.ShortMethodName}.g.cs", sourceText);
+            context.AddSource($"{Model.ClassName}_{Model.ShortMethodName}.g.cs", sourceText);
+        }
     }
-
-    private record ContractModel(string Namespace, string ClassName, string ShortMethodName, List<AttributeModel> Attributes, string GeneratedMethodDeclaration);
-    private record AttributeModel(string Name, List<string> Arguments);
 }

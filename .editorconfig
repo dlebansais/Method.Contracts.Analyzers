@@ -1,5 +1,10 @@
 ﻿[*.cs]
 
+#### Special
+contract_generator.called_method.suffix = DemoVerified
+contract_generator.tab_length = 2
+contract_generator.called_method.result_identifier = DemoResult
+
 #### CA
 
 # CA1031: Do not catch general exception types

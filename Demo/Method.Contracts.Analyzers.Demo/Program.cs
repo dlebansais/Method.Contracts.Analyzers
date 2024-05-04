@@ -8,15 +8,15 @@ internal partial class Program
     public static void Main(string[] args)
     {
         Console.WriteLine("Started...");
-        HelloFrom("Hello, World", out string Text);
+        string Text = HelloFrom("Hello, World");
         Console.WriteLine(Text);
     }
 
     [RequireNotNull("text")]
     [Require("text.Length > 0")]
-    [Ensure("textPlus.Length == text.Length + 1")]
-    private static void HelloFromVerified(string text, out string textPlus)
+    [Ensure("Result.Length == text.Length + 1")]
+    private static string  HelloFromVerified(string text)
     {
-        textPlus = text + "!";
+        return text + "!";
     }
 }
