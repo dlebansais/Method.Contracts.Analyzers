@@ -1,7 +1,9 @@
 ﻿namespace Contracts.Analyzers.Test;
 
+extern alias Analyzers;
+
 using System.Reflection;
-using Contracts.Analyzers;
+using Analyzers::Contracts.Analyzers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 

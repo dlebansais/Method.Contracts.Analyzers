@@ -1,4 +1,4 @@
-﻿namespace Contracts.Analyzers;
+﻿namespace Contracts.Analyzers.Helper;
 
 /// <summary>
 /// Represents the model of a method contract.

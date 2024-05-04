@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Method.Contracts.Analyzers"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Method.Contracts.Analyzers.Test", "Test\Method.Contracts.Analyzers.Test\Method.Contracts.Analyzers.Test.csproj", "{B57CEBD1-2D09-4D0A-A8C4-F296368FC586}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helper", "Helper\Helper.csproj", "{8F24E67C-7206-41A3-A91C-46A8266ED330}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -27,6 +29,10 @@ Global
 		{B57CEBD1-2D09-4D0A-A8C4-F296368FC586}.Debug|x64.Build.0 = Debug|x64
 		{B57CEBD1-2D09-4D0A-A8C4-F296368FC586}.Release|x64.ActiveCfg = Release|x64
 		{B57CEBD1-2D09-4D0A-A8C4-F296368FC586}.Release|x64.Build.0 = Release|x64
+		{8F24E67C-7206-41A3-A91C-46A8266ED330}.Debug|x64.ActiveCfg = Debug|x64
+		{8F24E67C-7206-41A3-A91C-46A8266ED330}.Debug|x64.Build.0 = Debug|x64
+		{8F24E67C-7206-41A3-A91C-46A8266ED330}.Release|x64.ActiveCfg = Release|x64
+		{8F24E67C-7206-41A3-A91C-46A8266ED330}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
