@@ -32,23 +32,50 @@ public class ContractGenerator : IIncrementalGenerator
         nameof(EnsureAttribute),
     };
 
-    // The .editorconfig setting for the namespace of the Method.Contracts assemblies.
-    private const string ContractsNamespace = "Contracts";
-    private const string ContractClassName = "Contract";
+    /// <summary>
+    /// The namespace of the Method.Contracts assemblies.
+    /// </summary>
+    public const string ContractsNamespace = "Contracts";
 
-    // The .editorconfig setting for the suffix that a method must have for code to be generated.
-    private const string DefaultVerifiedSuffix = "Verified";
-    private static readonly GeneratorSettingsEntry VerifiedSuffixSetting = new(EditorConfigKey: "contract_generator.called_method.suffix", DefaultValue: DefaultVerifiedSuffix);
+    /// <summary>
+    /// The class name of Method.Contracts methods.
+    /// </summary>
+    public const string ContractClassName = "Contract";
 
-    // The .editorconfig setting for the tab length in generated code.
-    private const int DefaultTabLength = 4;
-    private static readonly GeneratorSettingsEntry TabLengthSetting = new(EditorConfigKey: "contract_generator.tab_length", DefaultValue: $"{DefaultTabLength}");
+    /// <summary>
+    /// The key in .editorconfig for the suffix that a method must have for code to be generated.
+    /// </summary>
+    public const string VerifiedSuffixKey = "contract_generator.called_method.suffix";
 
-    // The .editorconfig setting for the name of the result identifier in generated queries.
-    private const string DefaultResultIdentifier = "Result";
-    private static readonly GeneratorSettingsEntry ResultIdentifierSetting = new(EditorConfigKey: "contract_generator.called_method.result_identifier", DefaultValue: DefaultResultIdentifier);
+    /// <summary>
+    /// The default value for the suffix that a method must have for code to be generated.
+    /// </summary>
+    public const string DefaultVerifiedSuffix = "Verified";
+
+    /// <summary>
+    /// The key in .editorconfig for the tab length in generated code.
+    /// </summary>
+    public const string TabLengthKey = "contract_generator.tab_length";
+
+    /// <summary>
+    /// The default value for the tab length in generated code.
+    /// </summary>
+    public const int DefaultTabLength = 4;
+
+    /// <summary>
+    /// The key in .editorconfig for the name of the result identifier in generated queries.
+    /// </summary>
+    public const string ResultIdentifierKey = "contract_generator.called_method.result_identifier";
+
+    /// <summary>
+    /// The default value for the name of the result identifier in generated queries.
+    /// </summary>
+    public const string DefaultResultIdentifier = "Result";
 
     // The settings values.
+    private static readonly GeneratorSettingsEntry VerifiedSuffixSetting = new(EditorConfigKey: VerifiedSuffixKey, DefaultValue: DefaultVerifiedSuffix);
+    private static readonly GeneratorSettingsEntry TabLengthSetting = new(EditorConfigKey: TabLengthKey, DefaultValue: $"{DefaultTabLength}");
+    private static readonly GeneratorSettingsEntry ResultIdentifierSetting = new(EditorConfigKey: ResultIdentifierKey, DefaultValue: DefaultResultIdentifier);
     private static GeneratorSettings Settings = new(VerifiedSuffix: DefaultVerifiedSuffix, TabLength: DefaultTabLength, ResultIdentifier: DefaultResultIdentifier);
 
     /// <inheritdoc cref="IIncrementalGenerator.Initialize"/>
@@ -64,9 +91,9 @@ public class ContractGenerator : IIncrementalGenerator
 
     private static IEnumerable<GeneratorSettings> ReadSettings(AnalyzerConfigOptionsProvider options, CancellationToken cancellationToken)
     {
-        string VerifiedSuffix = ReadStringSetting(options, VerifiedSuffixSetting);
-        int TabLength = ReadIntSetting(options, TabLengthSetting);
-        string ResultIdentifier = ReadStringSetting(options, ResultIdentifierSetting);
+        string VerifiedSuffix = VerifiedSuffixSetting.ReadAsString(options, out _);
+        int TabLength = TabLengthSetting.ReadAsInt(options, out _);
+        string ResultIdentifier = ResultIdentifierSetting.ReadAsString(options, out _);
 
         Settings = Settings with
         {
@@ -76,25 +103,6 @@ public class ContractGenerator : IIncrementalGenerator
         };
 
         return new List<GeneratorSettings>() { Settings };
-    }
-
-    private static string ReadStringSetting(AnalyzerConfigOptionsProvider options, GeneratorSettingsEntry entry)
-    {
-        _ = options.GlobalOptions.TryGetValue(entry.EditorConfigKey, out string? Value);
-        if (Value is not null)
-            return Value;
-
-        return entry.DefaultValue;
-    }
-
-    private static int ReadIntSetting(AnalyzerConfigOptionsProvider options, GeneratorSettingsEntry entry)
-    {
-        _ = options.GlobalOptions.TryGetValue(entry.EditorConfigKey, out string? Value);
-        if (Value is not null)
-            if (int.TryParse(Value, out int IntValue))
-                return IntValue;
-
-        return int.Parse(entry.DefaultValue, CultureInfo.InvariantCulture);
     }
 
     private static void InitializePipeline<T>(IncrementalGeneratorInitializationContext context, IncrementalValuesProvider<GeneratorSettings> settings)

@@ -47,12 +47,4 @@
         <ProjectReference Include="..\..\Method.Contracts.Analyzers\Method.Contracts.Analyzers.csproj" Aliases="Analyzers" />
     </ItemGroup>
     
-    <Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
-        <ItemGroup>
-            <ReferencePath Condition="'%(FileName)' == 'System.Runtime.CompilerServices'">
-                <Aliases>signed</Aliases>
-            </ReferencePath>
-        </ItemGroup>
-    </Target>
-    
 </Project>
