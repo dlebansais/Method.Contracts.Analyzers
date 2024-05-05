@@ -129,11 +129,10 @@ public class ContractGenerator : IIncrementalGenerator
             return false;
 
         string MethodName = MethodDeclaration.Identifier.ToString();
-        string VerifiedSuffix = VerifiedSuffixSetting.DefaultValue;
+        string VerifiedSuffix = Settings.VerifiedSuffix;
 
-        // Reject configurations with an empty suffix: the corresponding value in .editorconfig file is not valid.
-        if (VerifiedSuffix.Length == 0)
-            return false;
+        // The suffix can't be empty: if invalid in user settings, it's the default suffix.
+        Debug.Assert(VerifiedSuffix != string.Empty);
 
         if (!MethodName.EndsWith(VerifiedSuffix, StringComparison.Ordinal) || MethodName.Length == VerifiedSuffix.Length)
             return false;
