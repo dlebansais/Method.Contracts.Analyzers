@@ -17,7 +17,7 @@ public class TestSettings
         string Value;
         bool IsDefault;
 
-        GeneratorSettingsEntry Entry = new(EditorConfigKey: ContractGenerator.ResultIdentifierKey, DefaultValue: ContractGenerator.DefaultResultIdentifier);
+        GeneratorSettingsEntry Entry = new(BuildKey: ContractGenerator.ResultIdentifierKey, DefaultValue: ContractGenerator.DefaultResultIdentifier);
 
         Value = Entry.StringValueOrDefault(null, out IsDefault);
         Assert.That(Value, Is.EqualTo(ContractGenerator.DefaultResultIdentifier));
@@ -40,7 +40,7 @@ public class TestSettings
         int Value;
         bool IsDefault;
 
-        GeneratorSettingsEntry Entry = new(EditorConfigKey: ContractGenerator.TabLengthKey, DefaultValue: $"{ContractGenerator.DefaultTabLength}");
+        GeneratorSettingsEntry Entry = new(BuildKey: ContractGenerator.TabLengthKey, DefaultValue: $"{ContractGenerator.DefaultTabLength}");
 
         Value = Entry.IntValueOrDefault(null, out IsDefault);
         Assert.That(Value, Is.EqualTo(ContractGenerator.DefaultTabLength));

@@ -45,7 +45,7 @@ public class ContractGenerator : IIncrementalGenerator
     /// <summary>
     /// The key in .editorconfig for the suffix that a method must have for code to be generated.
     /// </summary>
-    public const string VerifiedSuffixKey = "contract_generator.called_method.suffix";
+    public const string VerifiedSuffixKey = "VerifiedSuffix";
 
     /// <summary>
     /// The default value for the suffix that a method must have for code to be generated.
@@ -55,7 +55,7 @@ public class ContractGenerator : IIncrementalGenerator
     /// <summary>
     /// The key in .editorconfig for the tab length in generated code.
     /// </summary>
-    public const string TabLengthKey = "contract_generator.tab_length";
+    public const string TabLengthKey = "TabLength";
 
     /// <summary>
     /// The default value for the tab length in generated code.
@@ -65,7 +65,7 @@ public class ContractGenerator : IIncrementalGenerator
     /// <summary>
     /// The key in .editorconfig for the name of the result identifier in generated queries.
     /// </summary>
-    public const string ResultIdentifierKey = "contract_generator.called_method.result_identifier";
+    public const string ResultIdentifierKey = "ResultIdentifier";
 
     /// <summary>
     /// The default value for the name of the result identifier in generated queries.
@@ -73,9 +73,9 @@ public class ContractGenerator : IIncrementalGenerator
     public const string DefaultResultIdentifier = "Result";
 
     // The settings values.
-    private static readonly GeneratorSettingsEntry VerifiedSuffixSetting = new(EditorConfigKey: VerifiedSuffixKey, DefaultValue: DefaultVerifiedSuffix);
-    private static readonly GeneratorSettingsEntry TabLengthSetting = new(EditorConfigKey: TabLengthKey, DefaultValue: $"{DefaultTabLength}");
-    private static readonly GeneratorSettingsEntry ResultIdentifierSetting = new(EditorConfigKey: ResultIdentifierKey, DefaultValue: DefaultResultIdentifier);
+    private static readonly GeneratorSettingsEntry VerifiedSuffixSetting = new(BuildKey: VerifiedSuffixKey, DefaultValue: DefaultVerifiedSuffix);
+    private static readonly GeneratorSettingsEntry TabLengthSetting = new(BuildKey: TabLengthKey, DefaultValue: $"{DefaultTabLength}");
+    private static readonly GeneratorSettingsEntry ResultIdentifierSetting = new(BuildKey: ResultIdentifierKey, DefaultValue: DefaultResultIdentifier);
     private static GeneratorSettings Settings = new(VerifiedSuffix: DefaultVerifiedSuffix, TabLength: DefaultTabLength, ResultIdentifier: DefaultResultIdentifier);
 
     /// <inheritdoc cref="IIncrementalGenerator.Initialize"/>
@@ -184,7 +184,7 @@ public class ContractGenerator : IIncrementalGenerator
         string ClassName = containingClass.Name;
         string SymbolName = context.TargetSymbol.Name;
 
-        string VerifiedSuffix = VerifiedSuffixSetting.DefaultValue;
+        string VerifiedSuffix = Settings.VerifiedSuffix;
         Debug.Assert(SymbolName.EndsWith(VerifiedSuffix, StringComparison.Ordinal));
         Debug.Assert(SymbolName.Length > VerifiedSuffix.Length);
         string ShortMethodName = SymbolName.Substring(0, SymbolName.Length - VerifiedSuffix.Length);
@@ -525,7 +525,7 @@ public class ContractGenerator : IIncrementalGenerator
     private static ExpressionStatementSyntax GenerateCommandStatement(string methodName, ParameterListSyntax parameterList, Dictionary<string, string> parameterNameReplacementTable)
     {
         SyntaxTriviaList WhitespaceTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "));
-        string VerifiedSuffix = VerifiedSuffixSetting.DefaultValue;
+        string VerifiedSuffix = Settings.VerifiedSuffix;
         ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(methodName + VerifiedSuffix);
 
         List<ArgumentSyntax> Arguments = new();
@@ -573,7 +573,7 @@ public class ContractGenerator : IIncrementalGenerator
     private static LocalDeclarationStatementSyntax GenerateQueryStatement(string methodName, ParameterListSyntax parameterList, Dictionary<string, string> parameterNameReplacementTable)
     {
         SyntaxTriviaList WhitespaceTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "));
-        string VerifiedSuffix = VerifiedSuffixSetting.DefaultValue;
+        string VerifiedSuffix = Settings.VerifiedSuffix;
         ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(methodName + VerifiedSuffix);
 
         List<ArgumentSyntax> Arguments = new();

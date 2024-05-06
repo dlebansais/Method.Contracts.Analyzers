@@ -1,15 +1,33 @@
 ﻿namespace Contracts.Analyzers.Helper;
 
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
-/// Represents the model of a method contract.
+/// Represents a setting in the .csproj project file.
+/// <para>
+/// <PropertyGroup>
+///     <ContractSourceGenerator_VerifiedSuffix>DemoVerified</ContractSourceGenerator_VerifiedSuffix>
+/// </PropertyGroup>
+/// <ItemGroup>
+///     <CompilerVisibleProperty Include="ContractSourceGenerator_VerifiedSuffix" />
+/// </ItemGroup>
+/// </para>
 /// </summary>
-/// <param name="EditorConfigKey">The key in the .editorconfig file.</param>
+/// <param name="BuildKey">The key in the project file.</param>
 /// <param name="DefaultValue">The default value.</param>
-internal record GeneratorSettingsEntry(string EditorConfigKey, string DefaultValue)
+internal record GeneratorSettingsEntry(string BuildKey, string DefaultValue)
 {
+    private const string BuilProperty = "build_property";
+    private const string ContractSourceGenerator = "ContractSourceGenerator";
+
+    private static string ProjectKey(string key)
+    {
+        return $"{BuilProperty}.{ContractSourceGenerator}_{key}";
+    }
+
     /// <summary>
     /// Reads the setting as a string, always returning a valid value, using the default value if necessary.
     /// </summary>
@@ -18,7 +36,7 @@ internal record GeneratorSettingsEntry(string EditorConfigKey, string DefaultVal
     /// <returns>The current setting value as a string if valid, the default value otherwise.</returns>
     public string ReadAsString(AnalyzerConfigOptionsProvider options, out bool isDefault)
     {
-        _ = options.GlobalOptions.TryGetValue(EditorConfigKey, out string? Value);
+        _ = options.GlobalOptions.TryGetValue(ProjectKey(BuildKey), out string? Value);
         return StringValueOrDefault(Value, out isDefault);
     }
 
@@ -48,7 +66,7 @@ internal record GeneratorSettingsEntry(string EditorConfigKey, string DefaultVal
     /// <returns>The current setting value as an int if valid, the default value otherwise.</returns>
     public int ReadAsInt(AnalyzerConfigOptionsProvider options, out bool isDefault)
     {
-        _ = options.GlobalOptions.TryGetValue(EditorConfigKey, out string? Value);
+        _ = options.GlobalOptions.TryGetValue(ProjectKey(BuildKey), out string? Value);
         return IntValueOrDefault(Value, out isDefault);
     }
 
