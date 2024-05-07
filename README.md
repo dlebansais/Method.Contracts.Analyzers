@@ -135,4 +135,28 @@ protected internal void Foo()
 
 Note that `public` is the default access when the `Access` attribute is not present. If you need `private` you must specify it explicitely.
 
-If there is no `Access` attribute and the method is `static`, the generated code is also `static`. Otherwise, you have to specify it explicitely.
+If there is no `Access` attribute and the method is `static` or `async`, the generated code is also `static` (or `async`, respectively). Otherwise, you have to specify it explicitely.
+
+## Configuration
+
+You can configure the generator with the following settings:
+
++ `SuffixVerifier`: specifies which suffix a method should have to support contract attributes. The default value is `Verified` (see `TryParseFooVerified` above in sample code).
++ `TabLength`: the number of whitespace for a tab in generated code. The default value is 4.
++ `ReturnIdentifier`: the name of the identifier that can be used in `Ensure` expressions to indicate the value returned by the method. The default is `Result`.
+
+To change a setting, modify the `.csproj` file of your project as follow (*Demo* is just an example):
+
+````xml
+    <PropertyGroup>
+        <ContractSourceGenerator_VerifiedSuffix>DemoVerified</ContractSourceGenerator_VerifiedSuffix>
+        <ContractSourceGenerator_TabLength>8</ContractSourceGenerator_TabLength>
+        <ContractSourceGenerator_ResultIdentifier>DemoResult</ContractSourceGenerator_ResultIdentifier>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <CompilerVisibleProperty Include="ContractSourceGenerator_VerifiedSuffix;ContractSourceGenerator_TabLength;ContractSourceGenerator_ResultIdentifier" />
+    </ItemGroup>
+````
+
+You don't have to specify all values if you're changing just one setting. Note that empty strings for `SuffixVerifier` and `ReturnIdentifier` are ignored, as well `TabLength` if not a strictly positive integer value.

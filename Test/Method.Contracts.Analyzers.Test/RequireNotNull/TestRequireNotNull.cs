@@ -143,6 +143,79 @@ internal partial class Program
     }
 
     [Test]
+    public async Task TestDefaultAsyncCommand()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using System.Threading.Tasks;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        Task.Run(async () => {
+            await HelloFrom(""Hello, World"", out string Text);
+            Console.WriteLine(Text);
+        });
+    }
+
+    [RequireNotNull(""text"")]
+    private static async Task HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+        return Task.CompletedTask;
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(1).Items);
+    }
+
+    [Test]
+    public async Task TestDefaultAsyncQuery()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using System.Threading.Tasks;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        Task.Run(async () => {
+            string Text = await HelloFrom(""Hello, World"");
+            Console.WriteLine(Text);
+        });
+    }
+
+    [RequireNotNull(""text"")]
+    private async static Task<string> HelloFromVerified(string text)
+    {
+        return await Task.FromResult(text + ""!"");
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(1).Items);
+    }
+
+    [Test]
     public async Task TestMultipleArguments()
     {
         // The source code to test
