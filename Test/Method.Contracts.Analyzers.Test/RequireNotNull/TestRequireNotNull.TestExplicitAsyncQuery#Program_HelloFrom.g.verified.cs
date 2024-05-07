@@ -7,10 +7,12 @@ using System.CodeDom.Compiler;
 partial class Program
 {
     [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.3.2.4")]
-    public static void HelloFrom(string text, out string textPlus)
+    public static async Task<string> HelloFrom(string text)
     {
-        HelloFromVerified(text, out textPlus);
+        Contract.RequireNotNull(text, out string Text);
 
-        Contract.Ensure(textPlus.Length > text.Length);
+        var Result = await HelloFromVerified(Text);
+
+        return Result;
     }
 }

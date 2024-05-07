@@ -6,7 +6,7 @@ using System.CodeDom.Compiler;
 
 partial class Program
 {
-    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.3.1.3")]
+    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.3.2.4")]
     public static void HelloFrom(string text1, string text2, out string textPlus)
     {
         Contract.RequireNotNull(text1, out string Text1);
