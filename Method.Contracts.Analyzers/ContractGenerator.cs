@@ -803,7 +803,7 @@ public class ContractGenerator : IIncrementalGenerator
 
     private static void OutputContractMethod(SourceProductionContext context, (GeneratorSettings Settings, ImmutableArray<ContractModel> Models) modelAndSettings)
     {
-        string DisableWarnings = SettingHelper.AddPrefixAndSuffixIfNotEmpty(Settings.DisabledWarnings, "#pragma disable warning ", "\n\n");
+        string DisableWarnings = SettingHelper.AddPrefixAndSuffixIfNotEmpty(Settings.DisabledWarnings, "#pragma warning disable ", "\n\n");
 
         foreach (ContractModel Model in modelAndSettings.Models)
         {
