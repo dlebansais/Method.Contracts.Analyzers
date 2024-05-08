@@ -12,6 +12,11 @@ internal partial class Program
         Console.WriteLine(Text);
     }
 
+    /// <summary>
+    /// Test doc.
+    /// </summary>
+    /// <param name="text">Test parameter.</param>
+    /// <returns>Test value.</returns>
     [RequireNotNull("text")]
     [Require("text.Length > 0")]
     [Ensure("DemoResult.Length == text.Length + 1")]

@@ -192,6 +192,7 @@ public class ContractGenerator : IIncrementalGenerator
     private static ContractModel TransformContractAttributes(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
     {
         ContractModel Model = GetModelWithoutContract(context);
+        Model = Model with { Documentation = GetMethodDocumentation(context) };
         Model = Model with { Attributes = GetModelContract(context) };
         Model = Model with { GeneratedMethodDeclaration = GetGeneratedMethodDeclaration(Model, context) };
 
@@ -216,8 +217,33 @@ public class ContractGenerator : IIncrementalGenerator
             Namespace: Namespace,
             ClassName: ClassName,
             ShortMethodName: ShortMethodName,
+            Documentation: string.Empty,
             Attributes: new List<AttributeModel>(),
             GeneratedMethodDeclaration: string.Empty);
+    }
+
+    private static string GetMethodDocumentation(GeneratorAttributeSyntaxContext context)
+    {
+        SyntaxNode TargetNode = context.TargetNode;
+
+        Debug.Assert(TargetNode is MethodDeclarationSyntax, $"Expected MethodDeclarationSyntax, but got instead: '{TargetNode}'.");
+        MethodDeclarationSyntax MethodDeclaration = (MethodDeclarationSyntax)TargetNode;
+
+        string Documentation = string.Empty;
+
+        if (MethodDeclaration.HasLeadingTrivia)
+        {
+            var LeadingTrivia = MethodDeclaration.GetLeadingTrivia();
+
+            foreach (var Trivia in LeadingTrivia)
+                if (Trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia))
+                {
+                    Documentation = LeadingTrivia.ToString().Trim('\r').Trim('\n').TrimEnd(' ');
+                    break;
+                }
+        }
+
+        return Documentation;
     }
 
     private static List<AttributeModel> GetModelContract(GeneratorAttributeSyntaxContext context)
@@ -225,7 +251,6 @@ public class ContractGenerator : IIncrementalGenerator
         SyntaxNode TargetNode = context.TargetNode;
 
         Debug.Assert(TargetNode is MethodDeclarationSyntax, $"Expected MethodDeclarationSyntax, but got instead: '{TargetNode}'.");
-
         MethodDeclarationSyntax MethodDeclaration = (MethodDeclarationSyntax)TargetNode;
 
         List<AttributeModel> Result = new();
@@ -816,7 +841,7 @@ public class ContractGenerator : IIncrementalGenerator
 
                 partial class {{Model.ClassName}}
                 {
-                {{Model.GeneratedMethodDeclaration}}
+                {{Model.Documentation}}{{Model.GeneratedMethodDeclaration}}
                 }
                 """;
             SourceText = SourceText.Replace("\r\n", "\n");
