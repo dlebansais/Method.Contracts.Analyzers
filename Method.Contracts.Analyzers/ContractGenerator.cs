@@ -15,7 +15,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis.Text;
 
 /// <summary>
 /// Represents a code generator.
@@ -150,7 +149,7 @@ public class ContractGenerator : IIncrementalGenerator
                 string AttributeName = ToAttributeName(Attribute);
                 if (SupportedAttributeNames.Contains(AttributeName) && Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
                 {
-                    bool AreAllArgumentsValid = AttributeArgumentList.Arguments.All(attributeArgument => attributeArgument.Expression is LiteralExpressionSyntax LiteralExpression && LiteralExpression.Kind() == SyntaxKind.StringLiteralExpression);
+                    bool AreAllArgumentsValid = AttributeArgumentList.Arguments.All(attributeArgument => IsValidAttributeArgument(attributeArgument));
 
                     if (AreAllArgumentsValid)
                         AttributeNames.Add(AttributeName);
@@ -164,6 +163,21 @@ public class ContractGenerator : IIncrementalGenerator
             return false;
 
         return true;
+    }
+
+    private static bool IsValidAttributeArgument(AttributeArgumentSyntax attributeArgument)
+    {
+        if (attributeArgument.Expression is InvocationExpressionSyntax InvocationExpression &&
+            InvocationExpression.Expression is IdentifierNameSyntax IdentifierName &&
+            IdentifierName.Identifier.Text == "nameof" &&
+            InvocationExpression.ArgumentList.Arguments.Count == 1 &&
+            InvocationExpression.ArgumentList.Arguments[0].Expression is IdentifierNameSyntax)
+            return true;
+
+        if (attributeArgument.Expression is LiteralExpressionSyntax LiteralExpression && LiteralExpression.Kind() == SyntaxKind.StringLiteralExpression)
+            return true;
+
+        return false;
     }
 
     private static ContractModel TransformContractAttributes(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
@@ -226,13 +240,31 @@ public class ContractGenerator : IIncrementalGenerator
                     for (int IndexArgument = 0; IndexArgument < AttributeArgumentList.Arguments.Count; IndexArgument++)
                     {
                         AttributeArgumentSyntax AttributeArgument = AttributeArgumentList.Arguments[IndexArgument];
+                        Debug.Assert(IsValidAttributeArgument(AttributeArgument));
 
-                        Debug.Assert(AttributeArgument.Expression is LiteralExpressionSyntax);
-                        LiteralExpressionSyntax LiteralExpression = (LiteralExpressionSyntax)AttributeArgument.Expression;
+                        string ArgumentText = string.Empty;
 
-                        Debug.Assert(LiteralExpression.Kind() == SyntaxKind.StringLiteralExpression);
-                        string ArgumentText = LiteralExpression.Token.Text;
-                        ArgumentText = ArgumentText.Trim('"');
+                        if (AttributeArgument.Expression is InvocationExpressionSyntax InvocationExpression)
+                        {
+                            Debug.Assert(InvocationExpression.Expression is IdentifierNameSyntax);
+                            IdentifierNameSyntax IdentifierName = (IdentifierNameSyntax)InvocationExpression.Expression;
+
+                            Debug.Assert(IdentifierName.Identifier.Text == "nameof");
+                            Debug.Assert(InvocationExpression.ArgumentList.Arguments.Count == 1);
+
+                            Debug.Assert(InvocationExpression.ArgumentList.Arguments[0].Expression is IdentifierNameSyntax);
+                            IdentifierNameSyntax ArgumentIdentifierName = (IdentifierNameSyntax)InvocationExpression.ArgumentList.Arguments[0].Expression;
+                            ArgumentText = ArgumentIdentifierName.Identifier.Text;
+                        }
+
+                        if (AttributeArgument.Expression is LiteralExpressionSyntax LiteralExpression)
+                        {
+                            Debug.Assert(LiteralExpression.Kind() == SyntaxKind.StringLiteralExpression);
+                            ArgumentText = LiteralExpression.Token.Text;
+                            ArgumentText = ArgumentText.Trim('"');
+                        }
+
+                        Debug.Assert(ArgumentText != string.Empty);
 
                         Arguments.Add(ArgumentText);
                     }

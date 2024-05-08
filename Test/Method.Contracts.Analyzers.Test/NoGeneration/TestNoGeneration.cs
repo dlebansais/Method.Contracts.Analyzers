@@ -117,4 +117,96 @@ public class SimpleTest
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
+
+    [Test]
+    public async Task TestInvalidAttributeArgumentNotNameof()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+public class SimpleTest
+{
+    [Access(arg(System.String))]
+    public void FooVerified()
+    {
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidAttributeArgumentBadNameof1()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+public class SimpleTest
+{
+    [Access(nameof(System.String))]
+    public void FooVerified()
+    {
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidAttributeArgumentBadNameof2()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+public class SimpleTest
+{
+    [Access(nameof(System.String)(System.String))]
+    public void FooVerified()
+    {
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidAttributeArgumentBadNameof3()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+public class SimpleTest
+{
+    [Access(nameof(System.String, System.String))]
+    public void FooVerified()
+    {
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
 }
