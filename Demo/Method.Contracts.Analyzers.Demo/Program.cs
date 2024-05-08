@@ -14,8 +14,8 @@ internal partial class Program
 
     [RequireNotNull("text")]
     [Require("text.Length > 0")]
-    [Ensure("Result.Length == text.Length + 1")]
-    private static string  HelloFromVerified(string text)
+    [Ensure("DemoResult.Length == text.Length + 1")]
+    private static string  HelloFromDemoVerified(string text)
     {
         return text + "!";
     }
