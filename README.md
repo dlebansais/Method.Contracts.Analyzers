@@ -144,6 +144,7 @@ You can configure the generator with the following settings:
 + `SuffixVerifier`: specifies which suffix a method should have to support contract attributes. The default value is `Verified` (see `TryParseFooVerified` above in sample code).
 + `TabLength`: the number of whitespace for a tab in generated code. The default value is 4.
 + `ReturnIdentifier`: the name of the identifier that can be used in `Ensure` expressions to indicate the value returned by the method. The default is `Result`.
++ `DisabledWarnings`: a comma-separated list of warnings to disable in the generated code with `#pragma warning disable`.
 
 To change a setting, modify the `.csproj` file of your project as follow (*Demo* is just an example):
 

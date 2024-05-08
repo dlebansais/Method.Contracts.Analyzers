@@ -6,6 +6,7 @@ extern alias Analyzers;
 using NUnit.Framework;
 using ContractGenerator = Analyzers::Contracts.Analyzers.ContractGenerator;
 using GeneratorSettingsEntry = Helper::Contracts.Analyzers.Helper.GeneratorSettingsEntry;
+using SettingHelper = Helper::Contracts.Analyzers.Helper.SettingHelper;
 
 [TestFixture]
 public class TestSettings
@@ -57,5 +58,19 @@ public class TestSettings
         Value = Entry.IntValueOrDefault($"{ValidIntTestValue}", out IsDefault);
         Assert.That(Value, Is.EqualTo(ValidIntTestValue));
         Assert.That(IsDefault, Is.False);
+    }
+
+    [Test]
+    public void TestPrefixAndSuffix()
+    {
+        const string Prefix = " prefix ";
+        const string Suffix = " suffix ";
+        const string Text = " test ";
+
+        string Empty = SettingHelper.AddPrefixAndSuffixIfNotEmpty(string.Empty, Prefix, Suffix);
+        Assert.That(Empty, Is.Empty);
+
+        string NotEmpty = SettingHelper.AddPrefixAndSuffixIfNotEmpty(Text, Prefix, Suffix);
+        Assert.That(NotEmpty, Is.EqualTo($"{Prefix}{Text}{Suffix}"));
     }
 }

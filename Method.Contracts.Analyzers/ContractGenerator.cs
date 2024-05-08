@@ -42,7 +42,7 @@ public class ContractGenerator : IIncrementalGenerator
     public const string ContractClassName = "Contract";
 
     /// <summary>
-    /// The key in .editorconfig for the suffix that a method must have for code to be generated.
+    /// The key in .csproj for the suffix that a method must have for code to be generated.
     /// </summary>
     public const string VerifiedSuffixKey = "VerifiedSuffix";
 
@@ -52,7 +52,7 @@ public class ContractGenerator : IIncrementalGenerator
     public const string DefaultVerifiedSuffix = "Verified";
 
     /// <summary>
-    /// The key in .editorconfig for the tab length in generated code.
+    /// The key in .csproj for the tab length in generated code.
     /// </summary>
     public const string TabLengthKey = "TabLength";
 
@@ -62,7 +62,7 @@ public class ContractGenerator : IIncrementalGenerator
     public const int DefaultTabLength = 4;
 
     /// <summary>
-    /// The key in .editorconfig for the name of the result identifier in generated queries.
+    /// The key in .csproj for the name of the result identifier in generated queries.
     /// </summary>
     public const string ResultIdentifierKey = "ResultIdentifier";
 
@@ -71,11 +71,17 @@ public class ContractGenerator : IIncrementalGenerator
     /// </summary>
     public const string DefaultResultIdentifier = "Result";
 
+    /// <summary>
+    /// The key in .csproj for the comma-separated list of disabled warnings in generated code.
+    /// </summary>
+    public const string DisabledWarningsKey = "DisabledWarnings";
+
     // The settings values.
     private static readonly GeneratorSettingsEntry VerifiedSuffixSetting = new(BuildKey: VerifiedSuffixKey, DefaultValue: DefaultVerifiedSuffix);
     private static readonly GeneratorSettingsEntry TabLengthSetting = new(BuildKey: TabLengthKey, DefaultValue: $"{DefaultTabLength}");
     private static readonly GeneratorSettingsEntry ResultIdentifierSetting = new(BuildKey: ResultIdentifierKey, DefaultValue: DefaultResultIdentifier);
-    private static GeneratorSettings Settings = new(VerifiedSuffix: DefaultVerifiedSuffix, TabLength: DefaultTabLength, ResultIdentifier: DefaultResultIdentifier);
+    private static readonly GeneratorSettingsEntry DisabledWarningsSetting = new(BuildKey: DisabledWarningsKey, DefaultValue: string.Empty);
+    private static GeneratorSettings Settings = new(VerifiedSuffix: DefaultVerifiedSuffix, TabLength: DefaultTabLength, ResultIdentifier: DefaultResultIdentifier, DisabledWarnings: string.Empty);
 
     /// <inheritdoc cref="IIncrementalGenerator.Initialize"/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -93,12 +99,14 @@ public class ContractGenerator : IIncrementalGenerator
         string VerifiedSuffix = VerifiedSuffixSetting.ReadAsString(options, out _);
         int TabLength = TabLengthSetting.ReadAsInt(options, out _);
         string ResultIdentifier = ResultIdentifierSetting.ReadAsString(options, out _);
+        string DisabledWarnings = DisabledWarningsSetting.ReadAsString(options, out _);
 
         Settings = Settings with
         {
             VerifiedSuffix = VerifiedSuffix,
             TabLength = TabLength,
             ResultIdentifier = ResultIdentifier,
+            DisabledWarnings = DisabledWarnings,
         };
 
         return new List<GeneratorSettings>() { Settings };
@@ -795,10 +803,12 @@ public class ContractGenerator : IIncrementalGenerator
 
     private static void OutputContractMethod(SourceProductionContext context, (GeneratorSettings Settings, ImmutableArray<ContractModel> Models) modelAndSettings)
     {
+        string DisableWarnings = SettingHelper.AddPrefixAndSuffixIfNotEmpty(Settings.DisabledWarnings, "#pragma disable warning ", "\n\n");
+
         foreach (ContractModel Model in modelAndSettings.Models)
         {
             string SourceText = $$"""
-                namespace {{Model.Namespace}};
+                {{DisableWarnings}}namespace {{Model.Namespace}};
 
                 using System;
                 using System.CodeDom.Compiler;
