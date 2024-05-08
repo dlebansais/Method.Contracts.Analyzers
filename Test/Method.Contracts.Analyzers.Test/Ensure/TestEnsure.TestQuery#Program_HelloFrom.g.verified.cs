@@ -3,10 +3,11 @@ namespace Contracts.TestSuite;
 
 using System;
 using System.CodeDom.Compiler;
+using Contracts;
 
 partial class Program
 {
-    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.3.2.4")]
+    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.3.3.5")]
     public static string HelloFrom(string text)
     {
         var Result = HelloFromVerified(text);

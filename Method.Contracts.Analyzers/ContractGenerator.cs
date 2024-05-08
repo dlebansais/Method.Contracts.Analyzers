@@ -389,7 +389,7 @@ public class ContractGenerator : IIncrementalGenerator
     {
         List<SyntaxTrivia> Trivias = new()
         {
-            SyntaxFactory.EndOfLine("\r\n"),
+            SyntaxFactory.EndOfLine("\n"),
             SyntaxFactory.Whitespace(tab),
         };
 
@@ -421,7 +421,7 @@ public class ContractGenerator : IIncrementalGenerator
         SyntaxTriviaList TabStatementTrivia = SyntaxFactory.TriviaList(TrivialList);
 
         List<SyntaxTrivia> TrivialListExtraLineEnd = new(tabTrivia);
-        TrivialListExtraLineEnd.Insert(0, SyntaxFactory.EndOfLine("\r\n"));
+        TrivialListExtraLineEnd.Insert(0, SyntaxFactory.EndOfLine("\n"));
         TrivialListExtraLineEnd.Add(SyntaxFactory.Whitespace(tab));
         SyntaxTriviaList TabStatementExtraLineEndTrivia = SyntaxFactory.TriviaList(TrivialListExtraLineEnd);
 
@@ -762,20 +762,21 @@ public class ContractGenerator : IIncrementalGenerator
     {
         foreach (ContractModel Model in modelAndSettings.Models)
         {
-            var sourceText = SourceText.From($$"""
+            string SourceText = $$"""
                 namespace {{Model.Namespace}};
 
                 using System;
                 using System.CodeDom.Compiler;
+                using Contracts;
 
                 partial class {{Model.ClassName}}
                 {
                 {{Model.GeneratedMethodDeclaration}}
                 }
-                """,
-                Encoding.UTF8);
+                """;
+            SourceText = SourceText.Replace("\r\n", "\n");
 
-            context.AddSource($"{Model.ClassName}_{Model.ShortMethodName}.g.cs", sourceText);
+            context.AddSource($"{Model.ClassName}_{Model.ShortMethodName}.g.cs", Microsoft.CodeAnalysis.Text.SourceText.From(SourceText, Encoding.UTF8));
         }
     }
 }
