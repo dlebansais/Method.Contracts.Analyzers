@@ -149,9 +149,10 @@ public class ContractGenerator : IIncrementalGenerator
                 string AttributeName = ToAttributeName(Attribute);
                 if (SupportedAttributeNames.Contains(AttributeName) && Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
                 {
+                    bool HasAtLeastOneArgument = AttributeArgumentList.Arguments.Any();
                     bool AreAllArgumentsValid = AttributeArgumentList.Arguments.All(attributeArgument => IsValidAttributeArgument(attributeArgument));
 
-                    if (AreAllArgumentsValid)
+                    if (HasAtLeastOneArgument && AreAllArgumentsValid)
                         AttributeNames.Add(AttributeName);
                 }
             }
@@ -215,7 +216,7 @@ public class ContractGenerator : IIncrementalGenerator
     {
         SyntaxNode TargetNode = context.TargetNode;
 
-        Debug.Assert(TargetNode is MethodDeclarationSyntax);
+        Debug.Assert(TargetNode is MethodDeclarationSyntax, $"Expected MethodDeclarationSyntax, but got instead: '{TargetNode}'.");
 
         MethodDeclarationSyntax MethodDeclaration = (MethodDeclarationSyntax)TargetNode;
 
@@ -240,7 +241,7 @@ public class ContractGenerator : IIncrementalGenerator
                     for (int IndexArgument = 0; IndexArgument < AttributeArgumentList.Arguments.Count; IndexArgument++)
                     {
                         AttributeArgumentSyntax AttributeArgument = AttributeArgumentList.Arguments[IndexArgument];
-                        Debug.Assert(IsValidAttributeArgument(AttributeArgument));
+                        Debug.Assert(IsValidAttributeArgument(AttributeArgument), $"Invalid attribute argument: {AttributeArgument}.");
 
                         string ArgumentText = string.Empty;
 
@@ -249,22 +250,24 @@ public class ContractGenerator : IIncrementalGenerator
                             Debug.Assert(InvocationExpression.Expression is IdentifierNameSyntax);
                             IdentifierNameSyntax IdentifierName = (IdentifierNameSyntax)InvocationExpression.Expression;
 
-                            Debug.Assert(IdentifierName.Identifier.Text == "nameof");
-                            Debug.Assert(InvocationExpression.ArgumentList.Arguments.Count == 1);
+                            Debug.Assert(IdentifierName.Identifier.Text == "nameof", $"Expected nameof but got: '{IdentifierName.Identifier.Text}'.");
+                            Debug.Assert(InvocationExpression.ArgumentList.Arguments.Count == 1, $"Expected one name but got {InvocationExpression.ArgumentList.Arguments.Count}.");
 
-                            Debug.Assert(InvocationExpression.ArgumentList.Arguments[0].Expression is IdentifierNameSyntax);
-                            IdentifierNameSyntax ArgumentIdentifierName = (IdentifierNameSyntax)InvocationExpression.ArgumentList.Arguments[0].Expression;
+                            ExpressionSyntax FirstArgumentExpression = InvocationExpression.ArgumentList.Arguments[0].Expression;
+                            Debug.Assert(FirstArgumentExpression is IdentifierNameSyntax, $"Expected a name but got: '{FirstArgumentExpression}'.");
+
+                            IdentifierNameSyntax ArgumentIdentifierName = (IdentifierNameSyntax)FirstArgumentExpression;
                             ArgumentText = ArgumentIdentifierName.Identifier.Text;
                         }
 
                         if (AttributeArgument.Expression is LiteralExpressionSyntax LiteralExpression)
                         {
-                            Debug.Assert(LiteralExpression.Kind() == SyntaxKind.StringLiteralExpression);
+                            Debug.Assert(LiteralExpression.Kind() == SyntaxKind.StringLiteralExpression, $"Expected a literal string but got: '{LiteralExpression.Kind()}'.");
                             ArgumentText = LiteralExpression.Token.Text;
                             ArgumentText = ArgumentText.Trim('"');
                         }
 
-                        Debug.Assert(ArgumentText != string.Empty);
+                        Debug.Assert(ArgumentText != string.Empty, $"Argument name found empty.");
 
                         Arguments.Add(ArgumentText);
                     }
