@@ -146,6 +146,8 @@ public class ContractGenerator : IIncrementalGenerator
 
         // Get a list of all supported attributes for this method.
         List<string> AttributeNames = new();
+        bool IsInvalidAttributeFound = false;
+
         for (int IndexList = 0; IndexList < MethodDeclaration.AttributeLists.Count; IndexList++)
         {
             AttributeListSyntax AttributeList = MethodDeclaration.AttributeLists[IndexList];
@@ -158,17 +160,19 @@ public class ContractGenerator : IIncrementalGenerator
                 if (SupportedAttributeNames.Contains(AttributeName) && Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
                 {
                     bool HasAtLeastOneArgument = AttributeArgumentList.Arguments.Any();
-                    bool AreAllArgumentsValid = AttributeArgumentList.Arguments.All(attributeArgument => IsValidAttributeArgument(attributeArgument));
+                    bool AreAllArgumentsValid = AttributeArgumentList.Arguments.All(IsValidAttributeArgument);
 
                     if (HasAtLeastOneArgument && AreAllArgumentsValid)
                         AttributeNames.Add(AttributeName);
+                    else
+                        IsInvalidAttributeFound = true;
                 }
             }
         }
 
         // One of these attributes has to be the first, and we only return true for this one.
         // This way, multiple calls with different T return true exactly once.
-        if (AttributeNames.Count == 0 || AttributeNames[0] != typeof(T).Name)
+        if (IsInvalidAttributeFound || AttributeNames.Count == 0 || AttributeNames[0] != typeof(T).Name)
             return false;
 
         return true;
@@ -183,8 +187,14 @@ public class ContractGenerator : IIncrementalGenerator
             InvocationExpression.ArgumentList.Arguments[0].Expression is IdentifierNameSyntax)
             return true;
 
-        if (attributeArgument.Expression is LiteralExpressionSyntax LiteralExpression && LiteralExpression.Kind() == SyntaxKind.StringLiteralExpression)
-            return true;
+        if (attributeArgument.Expression is LiteralExpressionSyntax LiteralExpression &&
+            LiteralExpression.Kind() == SyntaxKind.StringLiteralExpression)
+        {
+            string ArgumentText = LiteralExpression.Token.Text;
+            ArgumentText = ArgumentText.Trim('"');
+            if (ArgumentText != string.Empty)
+                return true;
+        }
 
         return false;
     }
