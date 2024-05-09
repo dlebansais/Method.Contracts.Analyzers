@@ -1,4 +1,6 @@
 ﻿//HintName: Program_ByeByeFrom.g.cs
+#nullable enable
+
 namespace Contracts.TestSuite;
 
 using System;

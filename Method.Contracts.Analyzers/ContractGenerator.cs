@@ -264,17 +264,14 @@ public class ContractGenerator : IIncrementalGenerator
                 AttributeSyntax Attribute = AttributeList.Attributes[Index];
 
                 string AttributeName = ToAttributeName(Attribute);
-                if (SupportedAttributeNames.Contains(AttributeName))
+                if (SupportedAttributeNames.Contains(AttributeName) && Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
                 {
-                    Debug.Assert(Attribute.ArgumentList is AttributeArgumentListSyntax, "Nodes for attributes without arguments are filtered away.");
-                    AttributeArgumentListSyntax AttributeArgumentList = Attribute.ArgumentList!;
-
                     List<string> Arguments = new();
 
                     for (int IndexArgument = 0; IndexArgument < AttributeArgumentList.Arguments.Count; IndexArgument++)
                     {
                         AttributeArgumentSyntax AttributeArgument = AttributeArgumentList.Arguments[IndexArgument];
-                        Debug.Assert(IsValidAttributeArgument(AttributeArgument), $"Invalid attribute argument: {AttributeArgument}.");
+                        Debug.Assert(IsValidAttributeArgument(AttributeArgument), $"Attribute argument '{AttributeArgument}' is expected to be valid.");
 
                         string ArgumentText = string.Empty;
 
@@ -828,11 +825,12 @@ public class ContractGenerator : IIncrementalGenerator
 
     private static void OutputContractMethod(SourceProductionContext context, (GeneratorSettings Settings, ImmutableArray<ContractModel> Models) modelAndSettings)
     {
-        string DisableWarnings = SettingHelper.AddPrefixAndSuffixIfNotEmpty(Settings.DisabledWarnings, "#pragma warning disable ", "\n\n");
+        string DisableWarnings = SettingHelper.AddPrefixAndSuffixIfNotEmpty(Settings.DisabledWarnings, "#pragma warning disable ", "\n") + "\n";
 
         foreach (ContractModel Model in modelAndSettings.Models)
         {
             string SourceText = $$"""
+                #nullable enable
                 {{DisableWarnings}}namespace {{Model.Namespace}};
 
                 using System;
