@@ -5,6 +5,7 @@ namespace Contracts.TestSuite;
 
 using System;
 using System.CodeDom.Compiler;
+using System.Threading.Tasks;
 using Contracts;
 
 partial class Program

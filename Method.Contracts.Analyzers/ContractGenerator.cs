@@ -204,7 +204,9 @@ public class ContractGenerator : IIncrementalGenerator
         ContractModel Model = GetModelWithoutContract(context);
         Model = Model with { Documentation = GetMethodDocumentation(context) };
         Model = Model with { Attributes = GetModelContract(context) };
-        Model = Model with { GeneratedMethodDeclaration = GetGeneratedMethodDeclaration(Model, context) };
+        Model = Model with { GeneratedMethodDeclaration = GetGeneratedMethodDeclaration(Model, context, out bool IsAsync) };
+        (string UsingsBeforeNamespace, string UsingsAfterNamespace) = GetUsings(context, IsAsync);
+        Model = Model with { UsingsBeforeNamespace = UsingsBeforeNamespace, UsingsAfterNamespace = UsingsAfterNamespace, IsAsync = IsAsync };
 
         return Model;
     }
@@ -225,11 +227,55 @@ public class ContractGenerator : IIncrementalGenerator
 
         return new ContractModel(
             Namespace: Namespace,
+            UsingsBeforeNamespace: string.Empty,
+            UsingsAfterNamespace: string.Empty,
             ClassName: ClassName,
             ShortMethodName: ShortMethodName,
             Documentation: string.Empty,
             Attributes: new List<AttributeModel>(),
-            GeneratedMethodDeclaration: string.Empty);
+            GeneratedMethodDeclaration: string.Empty,
+            IsAsync: false);
+    }
+
+    private static (string BeforeNamespaceDeclaration, string AfterNamespaceDeclaration) GetUsings(GeneratorAttributeSyntaxContext context, bool isAsync)
+    {
+        string RawBeforeNamespaceDeclaration = string.Empty;
+        string RawAfterNamespaceDeclaration = string.Empty;
+
+        SyntaxNode TargetNode = context.TargetNode;
+        if (TargetNode.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>() is BaseNamespaceDeclarationSyntax BaseNamespaceDeclaration)
+        {
+            RawAfterNamespaceDeclaration = BaseNamespaceDeclaration.Usings.ToFullString();
+
+            if (BaseNamespaceDeclaration.Parent is CompilationUnitSyntax CompilationUnit)
+                RawBeforeNamespaceDeclaration = CompilationUnit.Usings.ToFullString();
+        }
+
+        return FixUsings(RawBeforeNamespaceDeclaration, RawAfterNamespaceDeclaration, isAsync);
+    }
+
+    private static (string BeforeNamespaceDeclaration, string AfterNamespaceDeclaration) FixUsings(string rawBeforeNamespaceDeclaration, string rawAfterNamespaceDeclaration, bool isAsync)
+    {
+        string BeforeNamespaceDeclaration = GeneratorHelper.SortUsings(rawBeforeNamespaceDeclaration);
+        string AfterNamespaceDeclaration = GeneratorHelper.SortUsings(rawAfterNamespaceDeclaration);
+
+        (BeforeNamespaceDeclaration, AfterNamespaceDeclaration) = AddMissingUsing(BeforeNamespaceDeclaration, AfterNamespaceDeclaration, "using Contracts;");
+        (BeforeNamespaceDeclaration, AfterNamespaceDeclaration) = AddMissingUsing(BeforeNamespaceDeclaration, AfterNamespaceDeclaration, "using System.CodeDom.Compiler;");
+
+        if (isAsync)
+            (BeforeNamespaceDeclaration, AfterNamespaceDeclaration) = AddMissingUsing(BeforeNamespaceDeclaration, AfterNamespaceDeclaration, "using System.Threading.Tasks;");
+
+        AfterNamespaceDeclaration = GeneratorHelper.SortUsings(AfterNamespaceDeclaration);
+
+        return (BeforeNamespaceDeclaration, AfterNamespaceDeclaration);
+    }
+
+    private static (string BeforeNamespaceDeclaration, string AfterNamespaceDeclaration) AddMissingUsing(string beforeNamespaceDeclaration, string afterNamespaceDeclaration, string usingDirective)
+    {
+        if (!beforeNamespaceDeclaration.Contains(usingDirective) && !afterNamespaceDeclaration.Contains(usingDirective))
+            afterNamespaceDeclaration += $"{usingDirective}\n";
+
+        return (beforeNamespaceDeclaration, afterNamespaceDeclaration);
     }
 
     private static string GetMethodDocumentation(GeneratorAttributeSyntaxContext context)
@@ -322,7 +368,7 @@ public class ContractGenerator : IIncrementalGenerator
         return Result;
     }
 
-    private static string GetGeneratedMethodDeclaration(ContractModel model, GeneratorAttributeSyntaxContext context)
+    private static string GetGeneratedMethodDeclaration(ContractModel model, GeneratorAttributeSyntaxContext context, out bool isAsync)
     {
         SyntaxNode TargetNode = context.TargetNode;
 
@@ -340,11 +386,14 @@ public class ContractGenerator : IIncrementalGenerator
         SyntaxToken ShortIdentifier = SyntaxFactory.Identifier(model.ShortMethodName);
         MethodDeclaration = MethodDeclaration.WithIdentifier(ShortIdentifier);
 
-        SyntaxTokenList Modifiers = GenerateContractModifiers(model, MethodDeclaration, LeadingTrivia, TrailingTrivia, out bool IsAsync);
+        SyntaxTokenList Modifiers = GenerateContractModifiers(model, MethodDeclaration, LeadingTrivia, TrailingTrivia, out isAsync);
         MethodDeclaration = MethodDeclaration.WithModifiers(Modifiers);
 
-        BlockSyntax MethodBody = GenerateBody(model, MethodDeclaration, LeadingTrivia, LeadingTriviaWithoutLineEnd, IsAsync, Tab);
+        BlockSyntax MethodBody = GenerateBody(model, MethodDeclaration, LeadingTrivia, LeadingTriviaWithoutLineEnd, isAsync, Tab);
         MethodDeclaration = MethodDeclaration.WithBody(MethodBody);
+
+        if (isAsync && IsTaskType(MethodDeclaration.ReturnType))
+            MethodDeclaration = MethodDeclaration.WithReturnType(SyntaxFactory.IdentifierName("Task").WithTrailingTrivia(SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "))));
 
         MethodDeclaration = MethodDeclaration.WithLeadingTrivia(LeadingTriviaWithoutLineEnd);
 
@@ -585,8 +634,38 @@ public class ContractGenerator : IIncrementalGenerator
 
     private static bool IsCommandMethod(MethodDeclarationSyntax methodDeclaration, bool isAsync)
     {
-        return (isAsync && methodDeclaration.ReturnType is IdentifierNameSyntax IdentifierName && IdentifierName.Identifier.IsKind(SyntaxKind.IdentifierToken) && IdentifierName.Identifier.Text == "Task") ||
-               (!isAsync && methodDeclaration.ReturnType is PredefinedTypeSyntax PredefinedType && PredefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword));
+        return (isAsync && IsTaskType(methodDeclaration.ReturnType)) || (!isAsync && IsVoidType(methodDeclaration.ReturnType));
+    }
+
+    private static bool IsTaskType(TypeSyntax returnType)
+    {
+        string? ReturnIdentifierWithNamespace = null;
+        NameSyntax? Name = returnType as NameSyntax;
+
+        while (Name is QualifiedNameSyntax QualifiedName)
+        {
+            if (ReturnIdentifierWithNamespace is null)
+                ReturnIdentifierWithNamespace = $"{QualifiedName.Right}";
+            else
+                ReturnIdentifierWithNamespace = $"{QualifiedName.Right}.{ReturnIdentifierWithNamespace}";
+
+            Name = QualifiedName.Left;
+        }
+
+        if (Name is IdentifierNameSyntax IdentifierName)
+        {
+            if (ReturnIdentifierWithNamespace is null)
+                ReturnIdentifierWithNamespace = IdentifierName.Identifier.Text;
+            else
+                ReturnIdentifierWithNamespace = $"{IdentifierName.Identifier.Text}.{ReturnIdentifierWithNamespace}";
+        }
+
+        return ReturnIdentifierWithNamespace is "Task" or "System.Threading.Tasks.Task";
+    }
+
+    private static bool IsVoidType(TypeSyntax returnType)
+    {
+        return returnType is PredefinedTypeSyntax PredefinedType && PredefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword);
     }
 
     private static void AddStatement(MethodDeclarationSyntax methodDeclaration,
@@ -835,18 +914,15 @@ public class ContractGenerator : IIncrementalGenerator
 
     private static void OutputContractMethod(SourceProductionContext context, (GeneratorSettings Settings, ImmutableArray<ContractModel> Models) modelAndSettings)
     {
-        string DisableWarnings = SettingHelper.AddPrefixAndSuffixIfNotEmpty(Settings.DisabledWarnings, "#pragma warning disable ", "\n") + "\n";
+        string DisableWarnings = GeneratorHelper.AddPrefixAndSuffixIfNotEmpty(Settings.DisabledWarnings, "#pragma warning disable ", "\n");
 
         foreach (ContractModel Model in modelAndSettings.Models)
         {
             string SourceText = $$"""
                 #nullable enable
-                {{DisableWarnings}}namespace {{Model.Namespace}};
-
-                using System;
-                using System.CodeDom.Compiler;
-                using Contracts;
-
+                {{DisableWarnings}}{{Model.UsingsBeforeNamespace}}
+                namespace {{Model.Namespace}};
+                {{Model.UsingsAfterNamespace}}
                 partial class {{Model.ClassName}}
                 {
                 {{Model.Documentation}}{{Model.GeneratedMethodDeclaration}}

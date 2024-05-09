@@ -365,8 +365,8 @@ internal partial class Program
         const string Source = @"
 namespace Contracts.TestSuite;
 
-using System;
-using Contracts;
+using  System;
+using  Contracts;
 
 internal partial class Program
 {
