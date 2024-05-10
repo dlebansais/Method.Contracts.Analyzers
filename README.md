@@ -2,7 +2,7 @@
 
 A code generator companion for [Method.Contracts](https://github.com/dlebansais/Method.Contracts).
 
-[![Build status](https://ci.appveyor.com/api/projects/status/ex06fppm0o8d8fh1?svg=true)](https://ci.appveyor.com/project/dlebansais/method-contracts) [![CodeFactor](https://www.codefactor.io/repository/github/dlebansais/method.contracts/badge)](https://www.codefactor.io/repository/github/dlebansais/method.contracts) [![NuGet](https://img.shields.io/nuget/v/Method.Contracts.svg)](https://www.nuget.org/packages/Method.Contracts)
+[![Build status](https://ci.appveyor.com/api/projects/status/hh3eks1b9v66mx2f?svg=true)](https://ci.appveyor.com/project/dlebansais/method-contracts-analyzers) [![CodeFactor](https://www.codefactor.io/repository/github/dlebansais/method.contracts.analyzers/badge)](https://www.codefactor.io/repository/github/dlebansais/method.contracts.analyzers) [![NuGet](https://img.shields.io/nuget/v/Method.Contracts.Analyzers.svg)](https://www.nuget.org/packages/Method.Contracts.Analyzers)
 
 This assembly applies to projects using **C# 8 or higher** and with **Nullable** enabled.
 
@@ -16,7 +16,7 @@ using Contracts;
 
 ## Summary
 
-This code generators can be used to decorate methods with contracts. The general principle is to declare private method `FooVerified` with arguments, and attributes specifying the contract around these arguments. The genertor will then add a public method `Foo` with the same arguments, and code to check these contracts, then call `FooVerified`.
+This code generators can be used to decorate methods with contracts. The general principle is to declare private method `FooVerified` with arguments, and attributes specifying the contract around these arguments. The generator will then add a public method `Foo` with the same arguments, and code to check these contracts, then call `FooVerified`.
 
 For instance, consider:
 
@@ -24,7 +24,7 @@ For instance, consider:
 using Contracts;
 
 [Access("public")]
-[RequireNotNull("text")]
+[RequireNotNull(nameof(text))]
 private bool TryParseFooVerified(string text, out Foo parsedFoo)
 {
     if (text.Length > 0)
@@ -40,7 +40,9 @@ public bool TryParseFoo(string text, out Foo parsedFoo)
 {
     Contract.RequireNotNull(text, out string Text);
 
-    return TryParseFooVerified(Text, out Foo parsedFoo);
+    var Result = TryParseFooVerified(Text, out parsedFoo);
+
+    return Result;
 }
 ````
 
@@ -53,7 +55,7 @@ Usage:
 ````csharp
 using Contracts;
 
-[RequireNotNull(text1, text2)]
+[RequireNotNull("text1", "text2")]
 private void FooVerified(string text1, string text2)
 {
   // ...
@@ -63,6 +65,11 @@ private void FooVerified(string text1, string text2)
 There can be multiple occurences of the `RequireNotNull` attribute for the same method. The generator will add a single call to `Contract.RequireNotNull` for each argument specified by their name, and use automatic type resolution to handle their type.
 
 The generator can handle the special case of `IDisposable` arguments.
+
+The `nameof` syntax can be used for parameter names:
+````csharp
+[RequireNotNull(nameof(text1), nameof(text2))]
+````
 
 ### Require attribute
 

@@ -100,7 +100,7 @@ public partial class ContractGenerator : IIncrementalGenerator
                 if (SupportedAttributeNames.Contains(AttributeName) && Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
                 {
                     bool HasAtLeastOneArgument = AttributeArgumentList.Arguments.Any();
-                    bool AreAllArgumentsValid = AttributeArgumentList.Arguments.All(IsValidAttributeArgument);
+                    bool AreAllArgumentsValid = AttributeArgumentList.Arguments.All(attributeArgument => IsValidAttributeArgument(AttributeName, attributeArgument, MethodDeclaration));
 
                     if (HasAtLeastOneArgument && AreAllArgumentsValid)
                         AttributeNames.Add(AttributeName);
@@ -118,14 +118,28 @@ public partial class ContractGenerator : IIncrementalGenerator
         return true;
     }
 
-    private static bool IsValidAttributeArgument(AttributeArgumentSyntax attributeArgument)
+    private static bool IsValidAttributeArgument(string attributeName, AttributeArgumentSyntax attributeArgument, MethodDeclarationSyntax methodDeclaration)
+    {
+        if (!IsValidAttributeArgumentName(attributeArgument, out string ArgumentName))
+            return false;
+
+        if (attributeName == nameof(RequireNotNullAttribute) && !GetParameterType(ArgumentName, methodDeclaration, out _))
+            return false;
+
+        return true;
+    }
+
+    private static bool IsValidAttributeArgumentName(AttributeArgumentSyntax attributeArgument, out string argumentName)
     {
         if (attributeArgument.Expression is InvocationExpressionSyntax InvocationExpression &&
             InvocationExpression.Expression is IdentifierNameSyntax IdentifierName &&
             IdentifierName.Identifier.Text == "nameof" &&
             InvocationExpression.ArgumentList.Arguments.Count == 1 &&
-            InvocationExpression.ArgumentList.Arguments[0].Expression is IdentifierNameSyntax)
+            InvocationExpression.ArgumentList.Arguments[0].Expression is IdentifierNameSyntax ExpressionIdentifierName)
+        {
+            argumentName = ExpressionIdentifierName.Identifier.Text;
             return true;
+        }
 
         if (attributeArgument.Expression is LiteralExpressionSyntax LiteralExpression &&
             LiteralExpression.Kind() == SyntaxKind.StringLiteralExpression)
@@ -133,9 +147,13 @@ public partial class ContractGenerator : IIncrementalGenerator
             string ArgumentText = LiteralExpression.Token.Text;
             ArgumentText = ArgumentText.Trim('"');
             if (ArgumentText != string.Empty)
+            {
+                argumentName = ArgumentText;
                 return true;
+            }
         }
 
+        argumentName = string.Empty;
         return false;
     }
 
@@ -292,7 +310,7 @@ public partial class ContractGenerator : IIncrementalGenerator
                     for (int IndexArgument = 0; IndexArgument < AttributeArgumentList.Arguments.Count; IndexArgument++)
                     {
                         AttributeArgumentSyntax AttributeArgument = AttributeArgumentList.Arguments[IndexArgument];
-                        Debug.Assert(IsValidAttributeArgument(AttributeArgument), $"Attribute argument '{AttributeArgument}' is expected to be valid.");
+                        Debug.Assert(IsValidAttributeArgument(AttributeName, AttributeArgument, MethodDeclaration), $"Attribute argument '{AttributeArgument}' is expected to be valid.");
 
                         string ArgumentText = string.Empty;
 

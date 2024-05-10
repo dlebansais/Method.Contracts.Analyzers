@@ -494,7 +494,9 @@ public partial class ContractGenerator
         IdentifierNameSyntax InputName = SyntaxFactory.IdentifierName(argumentName);
         ArgumentSyntax InputArgument = SyntaxFactory.Argument(InputName);
 
-        TypeSyntax ParameterType = GetParameterType(argumentName, methodDeclaration);
+        bool IsParameterTypeValid = GetParameterType(argumentName, methodDeclaration, out TypeSyntax ParameterType);
+        Debug.Assert(IsParameterTypeValid);
+
         SyntaxToken VariableName = SyntaxFactory.Identifier(ToIdentifierLocalName(argumentName));
         VariableDesignationSyntax VariableDesignation = SyntaxFactory.SingleVariableDesignation(VariableName);
         DeclarationExpressionSyntax DeclarationExpression = SyntaxFactory.DeclarationExpression(ParameterType, VariableDesignation.WithLeadingTrivia(WhitespaceTrivia));
@@ -510,9 +512,9 @@ public partial class ContractGenerator
         return ExpressionStatement;
     }
 
-    private static TypeSyntax GetParameterType(string argumentName, MethodDeclarationSyntax methodDeclaration)
+    private static bool GetParameterType(string argumentName, MethodDeclarationSyntax methodDeclaration, out TypeSyntax parameterType)
     {
-        TypeSyntax? Result = null;
+        TypeSyntax? ResultType = null;
         ParameterListSyntax ParameterList = methodDeclaration.ParameterList;
 
         foreach (var CallParameter in ParameterList.Parameters)
@@ -522,16 +524,19 @@ public partial class ContractGenerator
 
                 if (ParameterName == argumentName)
                 {
-                    Result = Parameter.Type;
+                    ResultType = Parameter.Type;
                     break;
                 }
             }
 
-        // Fallback if there is no match. This only occurs for invalid C# code anyway.
-        if (Result is null)
-            Result = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword));
+        if (ResultType is not null)
+        {
+            parameterType = ResultType.WithoutLeadingTrivia().WithoutTrailingTrivia();
+            return true;
+        }
 
-        return Result.WithoutLeadingTrivia().WithoutTrailingTrivia();
+        parameterType = null!;
+        return false;
     }
 
     private static ExpressionStatementSyntax GenerateRequireStatement(string argumentName, MethodDeclarationSyntax methodDeclaration)
