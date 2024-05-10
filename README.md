@@ -62,7 +62,7 @@ private void FooVerified(string text1, string text2)
 }
 ````
 
-There can be multiple occurences of the `RequireNotNull` attribute for the same method. The generator will add a single call to `Contract.RequireNotNull` for each argument specified by their name, and use automatic type resolution to handle their type.
+There can be multiple occurrences of the `RequireNotNull` attribute for the same method. The generator will add a single call to `Contract.RequireNotNull` for each argument specified by their name, and use automatic type resolution to handle their type.
 
 The generator can handle the special case of `IDisposable` arguments.
 
@@ -89,7 +89,7 @@ private void FooVerified(string text)
 }
 ````
 
-There can be multiple occurences of the `Require` attribute for the same method. The generator will add a single call to `Contract.Require` for each expression.
+There can be multiple occurrences of the `Require` attribute for the same method. The generator will add a single call to `Contract.Require` for each expression.
 
 If there is an error in the expression (for example, a syntax error), this can only be caught in the generated code.
 
@@ -111,7 +111,7 @@ private string FooVerified()
 }
 ````
 
-There can be multiple occurences of the `Ensure` attribute for the same method. The generator will add a single call to `Contract.Ensure` for each expression.
+There can be multiple occurrences of the `Ensure` attribute for the same method. The generator will add a single call to `Contract.Ensure` for each expression.
 
 If there is an error in the expression (for example, a syntax error), this can only be caught in the generated code.
 
@@ -140,9 +140,9 @@ protected internal void Foo()
 }
 ````
 
-Note that `public` is the default access when the `Access` attribute is not present. If you need `private` you must specify it explicitely.
+Note that `public` is the default access when the `Access` attribute is not present. If you need `private` you must specify it explicitly.
 
-If there is no `Access` attribute and the method is `static` or `async`, the generated code is also `static` (or `async`, respectively). Otherwise, you have to specify it explicitely.
+If there is no `Access` attribute and the method is `static` or `async`, the generated code is also `static` (or `async`, respectively). Otherwise, you have to specify it explicitly.
 
 ## Configuration
 
