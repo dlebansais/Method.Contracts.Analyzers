@@ -526,4 +526,40 @@ internal partial class Program
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
     }
+
+    [Test]
+    public async Task TestDisposable()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using System.IO;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        Stream Stream = new FileStream(""foo.txt"", FileMode.Open, FileAccess.Read);
+        string Text = HelloFrom(Stream);
+        Console.WriteLine(Text);
+    }
+
+    [RequireNotNull(""stream"")]
+    private static void HelloFromVerified(Stream stream)
+    {
+        StreamReader sr = new(stream);
+        return sr.ReadToEnd();
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(1).Items);
+    }
 }
