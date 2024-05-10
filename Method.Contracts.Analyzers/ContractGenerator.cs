@@ -171,10 +171,35 @@ public partial class ContractGenerator : IIncrementalGenerator
             UsingsAfterNamespace: string.Empty,
             ClassName: ClassName,
             ShortMethodName: ShortMethodName,
+            UniqueOverloadIdentifier: GetUniqueOverloadIdentifier(context),
             Documentation: string.Empty,
             Attributes: new List<AttributeModel>(),
             GeneratedMethodDeclaration: string.Empty,
             IsAsync: false);
+    }
+
+    private static string GetUniqueOverloadIdentifier(GeneratorAttributeSyntaxContext context)
+    {
+        SyntaxNode TargetNode = context.TargetNode;
+
+        Debug.Assert(TargetNode is MethodDeclarationSyntax, $"Expected MethodDeclarationSyntax, but got instead: '{TargetNode}'.");
+        MethodDeclarationSyntax MethodDeclaration = (MethodDeclarationSyntax)TargetNode;
+
+        ParameterListSyntax ParameterList = MethodDeclaration.ParameterList;
+        string Result = string.Empty;
+
+        foreach (var CallParameter in ParameterList.Parameters)
+            if (CallParameter is ParameterSyntax Parameter)
+            {
+                if (Parameter.Type is TypeSyntax Type)
+                {
+                    string TypeAsString = Type.ToString();
+                    uint HashCode = unchecked((uint)GeneratorHelper.GetStableHashCode(TypeAsString));
+                    Result += $"_{HashCode}";
+                }
+            }
+
+        return Result;
     }
 
     private static (string BeforeNamespaceDeclaration, string AfterNamespaceDeclaration) GetUsings(GeneratorAttributeSyntaxContext context, bool isAsync)
@@ -326,7 +351,7 @@ public partial class ContractGenerator : IIncrementalGenerator
                 """;
             SourceText = SourceText.Replace("\r\n", "\n");
 
-            context.AddSource($"{Model.ClassName}_{Model.ShortMethodName}.g.cs", Microsoft.CodeAnalysis.Text.SourceText.From(SourceText, Encoding.UTF8));
+            context.AddSource($"{Model.ClassName}_{Model.ShortMethodName}{Model.UniqueOverloadIdentifier}.g.cs", Microsoft.CodeAnalysis.Text.SourceText.From(SourceText, Encoding.UTF8));
         }
     }
 }

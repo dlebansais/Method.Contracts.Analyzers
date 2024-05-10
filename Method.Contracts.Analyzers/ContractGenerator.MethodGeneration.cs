@@ -510,9 +510,26 @@ public partial class ContractGenerator
         return ExpressionStatement;
     }
 
-    private static PredefinedTypeSyntax GetParameterType(string argumentName, MethodDeclarationSyntax methodDeclaration)
+    private static TypeSyntax GetParameterType(string argumentName, MethodDeclarationSyntax methodDeclaration)
     {
-        return SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.StringKeyword));
+        TypeSyntax? Result = null;
+        ParameterListSyntax ParameterList = methodDeclaration.ParameterList;
+
+        foreach (var CallParameter in ParameterList.Parameters)
+            if (CallParameter is ParameterSyntax Parameter)
+            {
+                string ParameterName = Parameter.Identifier.Text;
+
+                if (ParameterName == argumentName)
+                {
+                    Result = Parameter.Type;
+                    break;
+                }
+            }
+
+        Debug.Assert(Result is not null);
+
+        return Result!.WithoutLeadingTrivia().WithoutTrailingTrivia();
     }
 
     private static ExpressionStatementSyntax GenerateRequireStatement(string argumentName, MethodDeclarationSyntax methodDeclaration)

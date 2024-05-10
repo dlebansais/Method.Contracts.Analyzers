@@ -11,6 +11,7 @@ using System.Collections.Generic;
 /// <param name="ClassName">The name of the class containing the method.</param>
 /// <param name="Documentation">The method documentation, if any.</param>
 /// <param name="ShortMethodName">The method name, without the expected suffix.</param>
+/// <param name="UniqueOverloadIdentifier">The unique identifier used to identify each overload of a multiply generated method.</param>
 /// <param name="Attributes">The contract as attributes.</param>
 /// <param name="GeneratedMethodDeclaration">The generated method.</param>
 /// <param name="IsAsync">Whether the generated method is asynchronous.</param>
@@ -19,6 +20,7 @@ internal record ContractModel(string Namespace,
                               string UsingsAfterNamespace,
                               string ClassName,
                               string ShortMethodName,
+                              string UniqueOverloadIdentifier,
                               string Documentation,
                               List<AttributeModel> Attributes,
                               string GeneratedMethodDeclaration,
