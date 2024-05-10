@@ -46,7 +46,7 @@ public bool TryParseFoo(string text, out Foo parsedFoo)
 }
 ````
 
-### RequireNotNull attribute
+## RequireNotNull attribute
 
 Specifies that one or more arguments must not be null.
 
@@ -71,7 +71,55 @@ The `nameof` syntax can be used for parameter names:
 [RequireNotNull(nameof(text1), nameof(text2))]
 ````
 
-### Require attribute
+### Alias name
+
+The default strategy for naming the parameter alias is as follow:
+
++ If the parameter begins with a lowercase letter, use the same name but begining with an uppercase letter. For instance, `text` is changed to `Text`.
++ Otherwise, add an underscore prefix. For instance, `Text` is changed to `_Text` and `_text` is changed to `__text`.
+
+You can specify your own aliasing with the `AliasName` attribute option:
+
+````csharp
+[RequireNotNull(nameof(text), AliasName = "Text")] // This is the same as using the default alias.
+[RequireNotNull(nameof(text), AliasName = "_textFoo")]
+````
+
+Note that in this case only one parameter name is allowed. To alias multiple parameters, use multiple `RequireNotNull` attributes.
+
+### Alias type
+
+You can also specify a subtype for the parameter. For example, WPF converters must implement the `IValueConverter` interface, and specifically the following method:
+
+````csharp
+object Convert(object value, Type targetType, object parameter, CultureInfo culture);
+````
+
+When `value` can only be of a specific type (such as `string`, `IList`...), there must be a cast within the verified method:
+
+````csharp
+[RequireNotNull(nameof(value))]
+[Require("Value is IList)]
+private static object ConvertVerified(object value, Type targetType, object parameter, CultureInfo culture)
+{
+    IList Items = (IList)parameter;
+    //...
+}
+````
+
+You can specify the expected subtype with the `AliasType` attribute parameter, and, in combination with `AliasName` the code above can be simplified as follow:
+
+````csharp
+[RequireNotNull(nameof(value), AliasType = "IList", AliasName = "items")]
+private static object ConvertVerified(IList items, Type targetType, object parameter, CultureInfo culture)
+{
+    //...
+}
+````
+
+Similarly to `AliasName`, `AliasType` can only be used if there is exactly one attribute parameter.
+
+## Require attribute
 
 Specifies that one or more conditions must be true upon entering the method. Conditions can freely mix arguments and other variables. They must provided to the attribute has a string arguments.
 
@@ -93,7 +141,7 @@ There can be multiple occurrences of the `Require` attribute for the same method
 
 If there is an error in the expression (for example, a syntax error), this can only be caught in the generated code.
 
-### Ensure attribute
+## Ensure attribute
 
 Specifies that one or more conditions are guaranteed to be true on method exit. Conditions can freely mix arguments (`in`, `out` or `ref`) and other variables. They must provided to the attribute has a string arguments.
 
@@ -117,7 +165,7 @@ If there is an error in the expression (for example, a syntax error), this can o
 
 You can use the special name `Result` in expression that test the returned value.
 
-### Access attribute
+## Access attribute
 
 Indicates that the generated method access has one or more specifiers. These can be `public`, `internal` and so on. If multiple specifiers are needed, such as `protected internal`, provide each of them as separate argument.
 

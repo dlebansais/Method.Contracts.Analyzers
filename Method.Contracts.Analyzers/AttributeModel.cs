@@ -7,4 +7,4 @@ using System.Collections.Generic;
 /// </summary>
 /// <param name="Name">The attribute name.</param>
 /// <param name="Arguments">The attribute arguments.</param>
-internal record AttributeModel(string Name, List<string> Arguments);
+internal record AttributeModel(string Name, List<AttributeArgumentModel> Arguments);

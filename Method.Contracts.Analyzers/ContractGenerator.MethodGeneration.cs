@@ -105,8 +105,9 @@ public partial class ContractGenerator
 
         for (int i = 0; i < accessAttributeModel.Arguments.Count; i++)
         {
-            string Argument = accessAttributeModel.Arguments[i];
-            SyntaxToken ModifierToken = SyntaxFactory.Identifier(Argument);
+            AttributeArgumentModel ArgumentModel = accessAttributeModel.Arguments[i];
+            string ArgumentValue = ArgumentModel.Value;
+            SyntaxToken ModifierToken = SyntaxFactory.Identifier(ArgumentValue);
 
             if (i == 0)
                 ModifierToken = ModifierToken.WithLeadingTrivia(leadingTrivia);
@@ -121,7 +122,7 @@ public partial class ContractGenerator
 
             ModifierTokens.Add(ModifierToken);
 
-            if (Argument is "async")
+            if (ArgumentValue is "async")
                 isAsync = true;
         }
 
@@ -249,8 +250,15 @@ public partial class ContractGenerator
         foreach (AttributeModel Item in model.Attributes)
             if (Item.Name == nameof(RequireNotNullAttribute))
             {
-                foreach (string Argument in Item.Arguments)
-                    parameterNameReplacementTable.Add(Argument, ToIdentifierLocalName(Argument));
+                Debug.Assert(Item.Arguments.Count > 0);
+                Debug.Assert(Item.Arguments[0].Name == string.Empty);
+                string ParameterName = Item.Arguments[0].Value;
+                parameterNameReplacementTable.Add(ParameterName, ToIdentifierLocalName(ParameterName));
+
+                // Modify the alias if requested.
+                foreach (AttributeArgumentModel ArgumentModel in Item.Arguments)
+                    if (ArgumentModel.Name == nameof(RequireNotNullAttribute.AliasName))
+                        parameterNameReplacementTable[ParameterName] = ArgumentModel.Value;
 
                 isContainingRequire = true;
             }
@@ -468,7 +476,7 @@ public partial class ContractGenerator
 
     private static List<StatementSyntax> GenerateAttributeStatements(AttributeModel attributeModel, MethodDeclarationSyntax methodDeclaration)
     {
-        Dictionary<string, Func<string, MethodDeclarationSyntax, StatementSyntax>> GeneratorTable = new()
+        Dictionary<string, Func<List<AttributeArgumentModel>, MethodDeclarationSyntax, List<StatementSyntax>>> GeneratorTable = new()
         {
             { nameof(RequireNotNullAttribute), GenerateRequireNotNullStatement },
             { nameof(RequireAttribute), GenerateRequireStatement },
@@ -476,30 +484,66 @@ public partial class ContractGenerator
         };
 
         Debug.Assert(GeneratorTable.ContainsKey(attributeModel.Name));
+        return GeneratorTable[attributeModel.Name](attributeModel.Arguments, methodDeclaration);
+    }
 
+    private static List<StatementSyntax> GenerateRequireNotNullStatement(List<AttributeArgumentModel> arguments, MethodDeclarationSyntax methodDeclaration)
+    {
+        if (arguments.Count > 1 && arguments.Any(argument => argument.Name != string.Empty))
+        {
+            Debug.Assert(arguments[0].Name == string.Empty);
+            string ParameterName = arguments[0].Value;
+
+            bool IsParameterTypeValid = GetParameterType(ParameterName, methodDeclaration, out TypeSyntax AliasType);
+            Debug.Assert(IsParameterTypeValid);
+
+            string AliasName = ToIdentifierLocalName(ParameterName);
+
+            foreach (AttributeArgumentModel argument in arguments)
+                if (argument.Name == nameof(RequireNotNullAttribute.AliasType))
+                    AliasType = SyntaxFactory.IdentifierName(SyntaxFactory.Identifier(argument.Value));
+                else if (argument.Name == nameof(RequireNotNullAttribute.AliasName))
+                    AliasName = argument.Value;
+
+            ExpressionStatementSyntax ExpressionStatement = GenerateOneRequireNotNullStatement(ParameterName, AliasType, AliasName);
+
+            return new List<StatementSyntax>() { ExpressionStatement };
+        }
+        else
+            return GenerateMultipleRequireNotNullStatement(arguments, methodDeclaration);
+    }
+
+    private static List<StatementSyntax> GenerateMultipleRequireNotNullStatement(List<AttributeArgumentModel> arguments, MethodDeclarationSyntax methodDeclaration)
+    {
         List<StatementSyntax> Statements = new();
-        foreach (string ArgumentName in attributeModel.Arguments)
-            Statements.Add(GeneratorTable[attributeModel.Name](ArgumentName, methodDeclaration));
+
+        foreach (AttributeArgumentModel argument in arguments)
+        {
+            string ParameterName = argument.Value;
+            bool IsParameterTypeValid = GetParameterType(ParameterName, methodDeclaration, out TypeSyntax AliasType);
+            Debug.Assert(IsParameterTypeValid);
+            string AliasName = ToIdentifierLocalName(ParameterName);
+
+            ExpressionStatementSyntax ExpressionStatement = GenerateOneRequireNotNullStatement(ParameterName, AliasType, AliasName);
+            Statements.Add(ExpressionStatement);
+        }
 
         return Statements;
     }
 
-    private static StatementSyntax GenerateRequireNotNullStatement(string argumentName, MethodDeclarationSyntax methodDeclaration)
+    private static ExpressionStatementSyntax GenerateOneRequireNotNullStatement(string parameterName, TypeSyntax aliasType, string aliasName)
     {
         ExpressionSyntax ContractName = SyntaxFactory.IdentifierName(ContractClassName);
         SimpleNameSyntax RequireNotNullName = SyntaxFactory.IdentifierName(ToNameWithoutAttribute<RequireNotNullAttribute>());
         MemberAccessExpressionSyntax MemberAccessExpression = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, ContractName, RequireNotNullName);
 
         SyntaxTriviaList WhitespaceTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "));
-        IdentifierNameSyntax InputName = SyntaxFactory.IdentifierName(argumentName);
+        IdentifierNameSyntax InputName = SyntaxFactory.IdentifierName(parameterName);
         ArgumentSyntax InputArgument = SyntaxFactory.Argument(InputName);
 
-        bool IsParameterTypeValid = GetParameterType(argumentName, methodDeclaration, out TypeSyntax ParameterType);
-        Debug.Assert(IsParameterTypeValid);
-
-        SyntaxToken VariableName = SyntaxFactory.Identifier(ToIdentifierLocalName(argumentName));
+        SyntaxToken VariableName = SyntaxFactory.Identifier(aliasName);
         VariableDesignationSyntax VariableDesignation = SyntaxFactory.SingleVariableDesignation(VariableName);
-        DeclarationExpressionSyntax DeclarationExpression = SyntaxFactory.DeclarationExpression(ParameterType, VariableDesignation.WithLeadingTrivia(WhitespaceTrivia));
+        DeclarationExpressionSyntax DeclarationExpression = SyntaxFactory.DeclarationExpression(aliasType, VariableDesignation.WithLeadingTrivia(WhitespaceTrivia));
         ArgumentSyntax OutputArgument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), DeclarationExpression.WithLeadingTrivia(WhitespaceTrivia));
         OutputArgument = OutputArgument.WithLeadingTrivia(WhitespaceTrivia);
 
@@ -539,30 +583,37 @@ public partial class ContractGenerator
         return false;
     }
 
-    private static ExpressionStatementSyntax GenerateRequireStatement(string argumentName, MethodDeclarationSyntax methodDeclaration)
+    private static List<StatementSyntax> GenerateRequireStatement(List<AttributeArgumentModel> arguments, MethodDeclarationSyntax methodDeclaration)
     {
-        return GenerateRequireOrEnsureStatement(argumentName, methodDeclaration, "Require");
+        return GenerateRequireOrEnsureStatement(arguments, methodDeclaration, "Require");
     }
 
-    private static ExpressionStatementSyntax GenerateEnsureStatement(string argumentName, MethodDeclarationSyntax methodDeclaration)
+    private static List<StatementSyntax> GenerateEnsureStatement(List<AttributeArgumentModel> arguments, MethodDeclarationSyntax methodDeclaration)
     {
-        return GenerateRequireOrEnsureStatement(argumentName, methodDeclaration, "Ensure");
+        return GenerateRequireOrEnsureStatement(arguments, methodDeclaration, "Ensure");
     }
 
-    private static ExpressionStatementSyntax GenerateRequireOrEnsureStatement(string argumentName, MethodDeclarationSyntax methodDeclaration, string contractMethodName)
+    private static List<StatementSyntax> GenerateRequireOrEnsureStatement(List<AttributeArgumentModel> arguments, MethodDeclarationSyntax methodDeclaration, string contractMethodName)
     {
-        ExpressionSyntax ContractName = SyntaxFactory.IdentifierName(ContractClassName);
-        SimpleNameSyntax ContractMethodSimpleName = SyntaxFactory.IdentifierName(contractMethodName);
-        MemberAccessExpressionSyntax MemberAccessExpression = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, ContractName, ContractMethodSimpleName);
+        List<StatementSyntax> Statements = new();
 
-        IdentifierNameSyntax InputName = SyntaxFactory.IdentifierName(argumentName);
-        ArgumentSyntax InputArgument = SyntaxFactory.Argument(InputName);
-        List<ArgumentSyntax> Arguments = new() { InputArgument };
-        ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(Arguments));
-        ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(MemberAccessExpression, ArgumentList);
-        ExpressionStatementSyntax ExpressionStatement = SyntaxFactory.ExpressionStatement(CallExpression);
+        foreach (AttributeArgumentModel argument in arguments)
+        {
+            ExpressionSyntax ContractName = SyntaxFactory.IdentifierName(ContractClassName);
+            SimpleNameSyntax ContractMethodSimpleName = SyntaxFactory.IdentifierName(contractMethodName);
+            MemberAccessExpressionSyntax MemberAccessExpression = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, ContractName, ContractMethodSimpleName);
 
-        return ExpressionStatement;
+            IdentifierNameSyntax InputName = SyntaxFactory.IdentifierName(argument.Value);
+            ArgumentSyntax InputArgument = SyntaxFactory.Argument(InputName);
+            List<ArgumentSyntax> Arguments = new() { InputArgument };
+            ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(Arguments));
+            ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(MemberAccessExpression, ArgumentList);
+            ExpressionStatementSyntax ExpressionStatement = SyntaxFactory.ExpressionStatement(CallExpression);
+
+            Statements.Add(ExpressionStatement);
+        }
+
+        return Statements;
     }
 
     private static string ToAttributeName(AttributeSyntax attribute)

@@ -99,10 +99,12 @@ public partial class ContractGenerator : IIncrementalGenerator
                 string AttributeName = ToAttributeName(Attribute);
                 if (SupportedAttributeNames.Contains(AttributeName) && Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
                 {
-                    bool HasAtLeastOneArgument = AttributeArgumentList.Arguments.Any();
-                    bool AreAllArgumentsValid = AttributeArgumentList.Arguments.All(attributeArgument => IsValidAttributeArgument(AttributeName, attributeArgument, MethodDeclaration));
+                    List<int> NamelessArgumentPositions = GetNamelessArgumentPositions(AttributeArgumentList);
+                    bool HasAtLeastOneNamelessArgument = NamelessArgumentPositions.Count > 0;
+                    bool NamelessArgumentIsFirstAndOnly = NamelessArgumentPositions.Count == 1 && NamelessArgumentPositions[0] == 0;
+                    bool AreAllArgumentsValid = AttributeArgumentList.Arguments.All(attributeArgument => IsValidAttributeArgument(AttributeName, NamelessArgumentIsFirstAndOnly, attributeArgument, MethodDeclaration, out _, out _));
 
-                    if (HasAtLeastOneArgument && AreAllArgumentsValid)
+                    if (HasAtLeastOneNamelessArgument && AreAllArgumentsValid)
                         AttributeNames.Add(AttributeName);
                     else
                         IsInvalidAttributeFound = true;
@@ -118,27 +120,65 @@ public partial class ContractGenerator : IIncrementalGenerator
         return true;
     }
 
-    private static bool IsValidAttributeArgument(string attributeName, AttributeArgumentSyntax attributeArgument, MethodDeclarationSyntax methodDeclaration)
+    private static List<int> GetNamelessArgumentPositions(AttributeArgumentListSyntax attributeArgumentList)
     {
-        if (!IsValidAttributeArgumentName(attributeArgument, out string ArgumentName))
+        List<int> Result = new();
+        int Index = 0;
+
+        foreach (var AttributeArgument in attributeArgumentList.Arguments)
+        {
+            if (AttributeArgument.NameEquals is null)
+                Result.Add(Index);
+
+            Index++;
+        }
+
+        return Result;
+    }
+
+    private static bool IsValidAttributeArgument(string attributeName, bool namelessArgumentIsFirstAndOnly, AttributeArgumentSyntax attributeArgument, MethodDeclarationSyntax methodDeclaration, out string argumentName, out string argumentValue)
+    {
+        if (!IsValidAttributeArgumentNameAndValue(attributeArgument, out argumentName, out argumentValue))
             return false;
 
-        if (attributeName == nameof(RequireNotNullAttribute) && !GetParameterType(ArgumentName, methodDeclaration, out _))
-            return false;
+        if (attributeName == nameof(RequireNotNullAttribute))
+        {
+            if (argumentName == string.Empty)
+            {
+                if (!GetParameterType(argumentValue, methodDeclaration, out _))
+                    return false;
+            }
+            else if (argumentName is nameof(RequireNotNullAttribute.AliasType) or nameof(RequireNotNullAttribute.AliasName))
+            {
+                if (argumentValue == string.Empty)
+                    return false;
+            }
+            else
+                return false;
+        }
 
         return true;
     }
 
-    private static bool IsValidAttributeArgumentName(AttributeArgumentSyntax attributeArgument, out string argumentName)
+    private static bool IsValidAttributeArgumentNameAndValue(AttributeArgumentSyntax attributeArgument, out string argumentName, out string argumentValue)
     {
+        if (attributeArgument.NameEquals is NameEqualsSyntax NameEquals)
+            argumentName = NameEquals.Name.Identifier.Text;
+        else
+            argumentName = string.Empty;
+
         if (attributeArgument.Expression is InvocationExpressionSyntax InvocationExpression &&
             InvocationExpression.Expression is IdentifierNameSyntax IdentifierName &&
             IdentifierName.Identifier.Text == "nameof" &&
             InvocationExpression.ArgumentList.Arguments.Count == 1 &&
             InvocationExpression.ArgumentList.Arguments[0].Expression is IdentifierNameSyntax ExpressionIdentifierName)
         {
-            argumentName = ExpressionIdentifierName.Identifier.Text;
-            return true;
+            string ArgumentText = ExpressionIdentifierName.Identifier.Text;
+            if (ArgumentText != string.Empty)
+            {
+                argumentValue = ArgumentText;
+                return true;
+            }
         }
 
         if (attributeArgument.Expression is LiteralExpressionSyntax LiteralExpression &&
@@ -148,12 +188,12 @@ public partial class ContractGenerator : IIncrementalGenerator
             ArgumentText = ArgumentText.Trim('"');
             if (ArgumentText != string.Empty)
             {
-                argumentName = ArgumentText;
+                argumentValue = ArgumentText;
                 return true;
             }
         }
 
-        argumentName = string.Empty;
+        argumentValue = string.Empty;
         return false;
     }
 
@@ -305,40 +345,18 @@ public partial class ContractGenerator : IIncrementalGenerator
                 string AttributeName = ToAttributeName(Attribute);
                 if (SupportedAttributeNames.Contains(AttributeName) && Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
                 {
-                    List<string> Arguments = new();
+                    List<AttributeArgumentModel> Arguments = new();
+                    List<int> NamelessArgumentPositions = GetNamelessArgumentPositions(AttributeArgumentList);
+                    bool NamelessArgumentIsFirstAndOnly = NamelessArgumentPositions.Count == 1 && NamelessArgumentPositions[0] == 0;
 
                     for (int IndexArgument = 0; IndexArgument < AttributeArgumentList.Arguments.Count; IndexArgument++)
                     {
                         AttributeArgumentSyntax AttributeArgument = AttributeArgumentList.Arguments[IndexArgument];
-                        Debug.Assert(IsValidAttributeArgument(AttributeName, AttributeArgument, MethodDeclaration), $"Attribute argument '{AttributeArgument}' is expected to be valid.");
+                        bool IsValid = IsValidAttributeArgument(AttributeName, NamelessArgumentIsFirstAndOnly, AttributeArgument, MethodDeclaration, out string ArgumentName, out string ArgumentValue);
+                        Debug.Assert(IsValid, $"Attribute argument '{AttributeArgument}' is expected to be valid.");
+                        Debug.Assert(ArgumentValue != string.Empty, $"Argument value found empty.");
 
-                        string ArgumentText = string.Empty;
-
-                        if (AttributeArgument.Expression is InvocationExpressionSyntax InvocationExpression)
-                        {
-                            Debug.Assert(InvocationExpression.Expression is IdentifierNameSyntax);
-                            IdentifierNameSyntax IdentifierName = (IdentifierNameSyntax)InvocationExpression.Expression;
-
-                            Debug.Assert(IdentifierName.Identifier.Text == "nameof", $"Expected nameof but got: '{IdentifierName.Identifier.Text}'.");
-                            Debug.Assert(InvocationExpression.ArgumentList.Arguments.Count == 1, $"Expected one name but got {InvocationExpression.ArgumentList.Arguments.Count}.");
-
-                            ExpressionSyntax FirstArgumentExpression = InvocationExpression.ArgumentList.Arguments[0].Expression;
-                            Debug.Assert(FirstArgumentExpression is IdentifierNameSyntax, $"Expected a name but got: '{FirstArgumentExpression}'.");
-
-                            IdentifierNameSyntax ArgumentIdentifierName = (IdentifierNameSyntax)FirstArgumentExpression;
-                            ArgumentText = ArgumentIdentifierName.Identifier.Text;
-                        }
-
-                        if (AttributeArgument.Expression is LiteralExpressionSyntax LiteralExpression)
-                        {
-                            Debug.Assert(LiteralExpression.Kind() == SyntaxKind.StringLiteralExpression, $"Expected a literal string but got: '{LiteralExpression.Kind()}'.");
-                            ArgumentText = LiteralExpression.Token.Text;
-                            ArgumentText = ArgumentText.Trim('"');
-                        }
-
-                        Debug.Assert(ArgumentText != string.Empty, $"Argument name found empty.");
-
-                        Arguments.Add(ArgumentText);
+                        Arguments.Add(new AttributeArgumentModel(Name: ArgumentName, Value: ArgumentValue));
                     }
 
                     AttributeModel Model = new(AttributeName, Arguments);
