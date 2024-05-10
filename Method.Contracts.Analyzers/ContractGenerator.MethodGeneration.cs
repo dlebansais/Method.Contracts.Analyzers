@@ -250,15 +250,25 @@ public partial class ContractGenerator
         foreach (AttributeModel Item in model.Attributes)
             if (Item.Name == nameof(RequireNotNullAttribute))
             {
-                Debug.Assert(Item.Arguments.Count > 0);
-                Debug.Assert(Item.Arguments[0].Name == string.Empty);
-                string ParameterName = Item.Arguments[0].Value;
-                parameterNameReplacementTable.Add(ParameterName, ToIdentifierLocalName(ParameterName));
+                if (Item.Arguments.Count > 1 && Item.Arguments.Any(argument => argument.Name != string.Empty))
+                {
+                    Debug.Assert(Item.Arguments[0].Name == string.Empty);
+                    string ParameterName = Item.Arguments[0].Value;
+                    parameterNameReplacementTable.Add(ParameterName, ToIdentifierLocalName(ParameterName));
 
-                // Modify the alias if requested.
-                foreach (AttributeArgumentModel ArgumentModel in Item.Arguments)
-                    if (ArgumentModel.Name == nameof(RequireNotNullAttribute.AliasName))
-                        parameterNameReplacementTable[ParameterName] = ArgumentModel.Value;
+                    // Modify the alias if requested.
+                    foreach (AttributeArgumentModel ArgumentModel in Item.Arguments)
+                        if (ArgumentModel.Name == nameof(RequireNotNullAttribute.AliasName))
+                            parameterNameReplacementTable[ParameterName] = ArgumentModel.Value;
+                }
+                else
+                {
+                    foreach (var Argument in Item.Arguments)
+                    {
+                        string ParameterName = Argument.Value;
+                        parameterNameReplacementTable.Add(ParameterName, ToIdentifierLocalName(ParameterName));
+                    }
+                }
 
                 isContainingRequire = true;
             }
