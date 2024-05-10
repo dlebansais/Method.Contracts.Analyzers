@@ -148,12 +148,7 @@ public partial class ContractGenerator : IIncrementalGenerator
                 if (!GetParameterType(argumentValue, methodDeclaration, out _))
                     return false;
             }
-            else if (argumentName is nameof(RequireNotNullAttribute.AliasType) or nameof(RequireNotNullAttribute.AliasName))
-            {
-                if (argumentValue == string.Empty)
-                    return false;
-            }
-            else
+            else if (argumentName is not nameof(RequireNotNullAttribute.AliasType) and not nameof(RequireNotNullAttribute.AliasName))
                 return false;
         }
 
@@ -174,11 +169,10 @@ public partial class ContractGenerator : IIncrementalGenerator
             InvocationExpression.ArgumentList.Arguments[0].Expression is IdentifierNameSyntax ExpressionIdentifierName)
         {
             string ArgumentText = ExpressionIdentifierName.Identifier.Text;
-            if (ArgumentText != string.Empty)
-            {
-                argumentValue = ArgumentText;
-                return true;
-            }
+            Debug.Assert(ArgumentText != string.Empty, "If there is exactly one argument, it cannot be empty, otherwise there would be no argument.");
+
+            argumentValue = ArgumentText;
+            return true;
         }
 
         if (attributeArgument.Expression is LiteralExpressionSyntax LiteralExpression &&
