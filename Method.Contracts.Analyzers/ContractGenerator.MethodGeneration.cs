@@ -527,9 +527,11 @@ public partial class ContractGenerator
                 }
             }
 
-        Debug.Assert(Result is not null);
+        // Fallback if there is no match. This only occurs for invalid C# code anyway.
+        if (Result is null)
+            Result = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword));
 
-        return Result!.WithoutLeadingTrivia().WithoutTrailingTrivia();
+        return Result.WithoutLeadingTrivia().WithoutTrailingTrivia();
     }
 
     private static ExpressionStatementSyntax GenerateRequireStatement(string argumentName, MethodDeclarationSyntax methodDeclaration)
