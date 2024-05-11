@@ -224,4 +224,45 @@ public partial class ContractGenerator
 
         return Result;
     }
+
+    private static (string BeforeNamespaceDeclaration, string AfterNamespaceDeclaration) GetUsings(GeneratorAttributeSyntaxContext context, bool isAsync)
+    {
+        string RawBeforeNamespaceDeclaration = string.Empty;
+        string RawAfterNamespaceDeclaration = string.Empty;
+
+        SyntaxNode TargetNode = context.TargetNode;
+        if (TargetNode.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>() is BaseNamespaceDeclarationSyntax BaseNamespaceDeclaration)
+        {
+            RawAfterNamespaceDeclaration = BaseNamespaceDeclaration.Usings.ToFullString();
+
+            if (BaseNamespaceDeclaration.Parent is CompilationUnitSyntax CompilationUnit)
+                RawBeforeNamespaceDeclaration = CompilationUnit.Usings.ToFullString();
+        }
+
+        return FixUsings(RawBeforeNamespaceDeclaration, RawAfterNamespaceDeclaration, isAsync);
+    }
+
+    private static (string BeforeNamespaceDeclaration, string AfterNamespaceDeclaration) FixUsings(string rawBeforeNamespaceDeclaration, string rawAfterNamespaceDeclaration, bool isAsync)
+    {
+        string BeforeNamespaceDeclaration = GeneratorHelper.SortUsings(rawBeforeNamespaceDeclaration);
+        string AfterNamespaceDeclaration = GeneratorHelper.SortUsings(rawAfterNamespaceDeclaration);
+
+        (BeforeNamespaceDeclaration, AfterNamespaceDeclaration) = AddMissingUsing(BeforeNamespaceDeclaration, AfterNamespaceDeclaration, "using Contracts;");
+        (BeforeNamespaceDeclaration, AfterNamespaceDeclaration) = AddMissingUsing(BeforeNamespaceDeclaration, AfterNamespaceDeclaration, "using System.CodeDom.Compiler;");
+
+        if (isAsync)
+            (BeforeNamespaceDeclaration, AfterNamespaceDeclaration) = AddMissingUsing(BeforeNamespaceDeclaration, AfterNamespaceDeclaration, "using System.Threading.Tasks;");
+
+        AfterNamespaceDeclaration = GeneratorHelper.SortUsings(AfterNamespaceDeclaration);
+
+        return (BeforeNamespaceDeclaration, AfterNamespaceDeclaration);
+    }
+
+    private static (string BeforeNamespaceDeclaration, string AfterNamespaceDeclaration) AddMissingUsing(string beforeNamespaceDeclaration, string afterNamespaceDeclaration, string usingDirective)
+    {
+        if (!beforeNamespaceDeclaration.Contains(usingDirective) && !afterNamespaceDeclaration.Contains(usingDirective))
+            afterNamespaceDeclaration += $"{usingDirective}\n";
+
+        return (beforeNamespaceDeclaration, afterNamespaceDeclaration);
+    }
 }

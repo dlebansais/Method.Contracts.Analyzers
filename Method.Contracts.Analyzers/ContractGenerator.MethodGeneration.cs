@@ -500,27 +500,31 @@ public partial class ContractGenerator
     private static List<StatementSyntax> GenerateRequireNotNullStatement(List<AttributeArgumentModel> arguments, MethodDeclarationSyntax methodDeclaration)
     {
         if (arguments.Count > 1 && arguments.Any(argument => argument.Name != string.Empty))
-        {
-            Debug.Assert(arguments[0].Name == string.Empty);
-            string ParameterName = arguments[0].Value;
-
-            bool IsParameterTypeValid = GetParameterType(ParameterName, methodDeclaration, out TypeSyntax AliasType);
-            Debug.Assert(IsParameterTypeValid);
-
-            string AliasName = ToIdentifierLocalName(ParameterName);
-
-            foreach (AttributeArgumentModel argument in arguments)
-                if (argument.Name == nameof(RequireNotNullAttribute.AliasType))
-                    AliasType = SyntaxFactory.IdentifierName(SyntaxFactory.Identifier(argument.Value));
-                else if (argument.Name == nameof(RequireNotNullAttribute.AliasName))
-                    AliasName = argument.Value;
-
-            ExpressionStatementSyntax ExpressionStatement = GenerateOneRequireNotNullStatement(ParameterName, AliasType, AliasName);
-
-            return new List<StatementSyntax>() { ExpressionStatement };
-        }
+            return GenerateRequireNotNullStatementWithAlias(arguments, methodDeclaration);
         else
             return GenerateMultipleRequireNotNullStatement(arguments, methodDeclaration);
+    }
+
+    private static List<StatementSyntax> GenerateRequireNotNullStatementWithAlias(List<AttributeArgumentModel> arguments, MethodDeclarationSyntax methodDeclaration)
+    {
+        Debug.Assert(arguments.Count > 0);
+        Debug.Assert(arguments[0].Name == string.Empty);
+        string ParameterName = arguments[0].Value;
+
+        bool IsParameterTypeValid = GetParameterType(ParameterName, methodDeclaration, out TypeSyntax AliasType);
+        Debug.Assert(IsParameterTypeValid);
+
+        string AliasName = ToIdentifierLocalName(ParameterName);
+
+        foreach (AttributeArgumentModel argument in arguments)
+            if (argument.Name == nameof(RequireNotNullAttribute.AliasType))
+                AliasType = SyntaxFactory.IdentifierName(SyntaxFactory.Identifier(argument.Value));
+            else if (argument.Name == nameof(RequireNotNullAttribute.AliasName))
+                AliasName = argument.Value;
+
+        ExpressionStatementSyntax ExpressionStatement = GenerateOneRequireNotNullStatement(ParameterName, AliasType, AliasName);
+
+        return new List<StatementSyntax>() { ExpressionStatement };
     }
 
     private static List<StatementSyntax> GenerateMultipleRequireNotNullStatement(List<AttributeArgumentModel> arguments, MethodDeclarationSyntax methodDeclaration)
@@ -564,33 +568,6 @@ public partial class ContractGenerator
         ExpressionStatementSyntax ExpressionStatement = SyntaxFactory.ExpressionStatement(CallExpression);
 
         return ExpressionStatement;
-    }
-
-    private static bool GetParameterType(string argumentName, MethodDeclarationSyntax methodDeclaration, out TypeSyntax parameterType)
-    {
-        TypeSyntax? ResultType = null;
-        ParameterListSyntax ParameterList = methodDeclaration.ParameterList;
-
-        foreach (var CallParameter in ParameterList.Parameters)
-            if (CallParameter is ParameterSyntax Parameter)
-            {
-                string ParameterName = Parameter.Identifier.Text;
-
-                if (ParameterName == argumentName)
-                {
-                    ResultType = Parameter.Type;
-                    break;
-                }
-            }
-
-        if (ResultType is not null)
-        {
-            parameterType = ResultType.WithoutLeadingTrivia().WithoutTrailingTrivia();
-            return true;
-        }
-
-        parameterType = null!;
-        return false;
     }
 
     private static List<StatementSyntax> GenerateRequireStatement(List<AttributeArgumentModel> arguments, MethodDeclarationSyntax methodDeclaration)
