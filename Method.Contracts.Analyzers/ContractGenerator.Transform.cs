@@ -1,0 +1,227 @@
+﻿namespace Contracts.Analyzers;
+
+using System;
+using System.CodeDom.Compiler;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading;
+using Contracts.Analyzers.Helper;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
+
+/// <summary>
+/// Represents a code generator.
+/// </summary>
+public partial class ContractGenerator
+{
+    private static ContractModel TransformContractAttributes(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
+    {
+        SyntaxNode TargetNode = context.TargetNode;
+
+        Debug.Assert(TargetNode is MethodDeclarationSyntax, $"Expected MethodDeclarationSyntax, but got instead: '{TargetNode}'.");
+        MethodDeclarationSyntax MethodDeclaration = (MethodDeclarationSyntax)TargetNode;
+
+        ContractModel Model = GetModelWithoutContract(context, MethodDeclaration);
+        Model = Model with { Documentation = GetMethodDocumentation(MethodDeclaration) };
+        Model = Model with { Attributes = GetModelContract(MethodDeclaration) };
+        Model = Model with { GeneratedMethodDeclaration = GetGeneratedMethodDeclaration(Model, context, out bool IsAsync) };
+        (string UsingsBeforeNamespace, string UsingsAfterNamespace) = GetUsings(context, IsAsync);
+        Model = Model with { UsingsBeforeNamespace = UsingsBeforeNamespace, UsingsAfterNamespace = UsingsAfterNamespace, IsAsync = IsAsync };
+
+        return Model;
+    }
+
+    private static ContractModel GetModelWithoutContract(GeneratorAttributeSyntaxContext context, MethodDeclarationSyntax methodDeclaration)
+    {
+        var ContainingClass = context.TargetSymbol.ContainingType;
+        Debug.Assert(ContainingClass is not null);
+
+        var ContainingNamespace = ContainingClass!.ContainingNamespace;
+        Debug.Assert(ContainingNamespace is not null);
+
+        string Namespace = ContainingNamespace!.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
+        string ClassName = ContainingClass!.Name;
+        string SymbolName = context.TargetSymbol.Name;
+
+        string VerifiedSuffix = Settings.VerifiedSuffix;
+
+        Debug.Assert(GeneratorHelper.StringEndsWith(SymbolName, VerifiedSuffix));
+        Debug.Assert(SymbolName.Length > VerifiedSuffix.Length);
+        string ShortMethodName = SymbolName.Substring(0, SymbolName.Length - VerifiedSuffix.Length);
+
+        return new ContractModel(
+            Namespace: Namespace,
+            UsingsBeforeNamespace: string.Empty,
+            UsingsAfterNamespace: string.Empty,
+            ClassName: ClassName,
+            ShortMethodName: ShortMethodName,
+            UniqueOverloadIdentifier: GetUniqueOverloadIdentifier(methodDeclaration),
+            Documentation: string.Empty,
+            Attributes: new List<AttributeModel>(),
+            GeneratedMethodDeclaration: string.Empty,
+            IsAsync: false);
+    }
+
+    private static string GetUniqueOverloadIdentifier(MethodDeclarationSyntax methodDeclaration)
+    {
+        ParameterListSyntax ParameterList = methodDeclaration.ParameterList;
+        string Result = string.Empty;
+
+        foreach (var CallParameter in ParameterList.Parameters)
+            if (CallParameter is ParameterSyntax Parameter)
+                if (Parameter.Type is TypeSyntax Type)
+                {
+                    string TypeAsString = Type.ToString();
+                    uint HashCode = unchecked((uint)GeneratorHelper.GetStableHashCode(TypeAsString));
+                    Result += $"_{HashCode}";
+                }
+
+        return Result;
+    }
+
+    private static string GetMethodDocumentation(MethodDeclarationSyntax methodDeclaration)
+    {
+        string Documentation = string.Empty;
+
+        if (methodDeclaration.HasLeadingTrivia)
+        {
+            var LeadingTrivia = methodDeclaration.GetLeadingTrivia();
+
+            foreach (var Trivia in LeadingTrivia)
+                if (Trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia))
+                {
+                    Documentation = LeadingTrivia.ToString().Trim('\r').Trim('\n').TrimEnd(' ');
+                    break;
+                }
+        }
+
+        return Documentation;
+    }
+
+    private static List<AttributeModel> GetModelContract(MethodDeclarationSyntax methodDeclaration)
+    {
+        List<AttributeModel> Result = new();
+        List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMethodSupportedAttributes(methodDeclaration, SupportedAttributeNames);
+
+        Dictionary<string, Func<MethodDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, List<AttributeArgumentModel>>> AttributeTransformTable = new()
+        {
+            { nameof(AccessAttribute), TransformAccessAttribute },
+            { nameof(RequireNotNullAttribute), TransformRequireNotNullAttribute },
+            { nameof(RequireAttribute), TransformRequireAttribute },
+            { nameof(EnsureAttribute), TransformEnsureAttribute },
+        };
+
+        foreach (AttributeSyntax Attribute in MethodAttributes)
+            if (Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
+            {
+                string AttributeName = GeneratorHelper.ToAttributeName(Attribute);
+                IReadOnlyList<AttributeArgumentSyntax> AttributeArguments = AttributeArgumentList.Arguments;
+
+                Debug.Assert(AttributeTransformTable.ContainsKey(AttributeName));
+                var AttributeTransform = AttributeTransformTable[AttributeName];
+                List<AttributeArgumentModel> Arguments = AttributeTransform(methodDeclaration, AttributeArguments);
+
+                AttributeModel Model = new(AttributeName, Arguments);
+
+                Result.Add(Model);
+            }
+
+        return Result;
+    }
+
+    private static List<AttributeArgumentModel> TransformAccessAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    {
+        return TransformStringOnlyAttribute(methodDeclaration, attributeArguments);
+    }
+
+    private static List<AttributeArgumentModel> TransformRequireNotNullAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    {
+        if (IsRequireNotNullAttributeWithAlias(attributeArguments))
+            return TransformRequireNotNullAttributeWithAlias(methodDeclaration, attributeArguments);
+        else
+            return TransformRequireNotNullAttributeNoAlias(methodDeclaration, attributeArguments);
+    }
+
+    private static List<AttributeArgumentModel> TransformRequireNotNullAttributeWithAlias(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    {
+        Debug.Assert(attributeArguments.Count > 0, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+        AttributeArgumentSyntax FirstAttributeArgument = attributeArguments[0];
+
+        Debug.Assert(FirstAttributeArgument.NameEquals is null, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+
+        bool IsValidParameterName = IsStringOrNameofAttributeArgument(FirstAttributeArgument, out string ParameterName);
+        Debug.Assert(IsValidParameterName, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+
+        bool IsValidParameterType = GetParameterType(ParameterName, methodDeclaration, out _);
+        Debug.Assert(IsValidParameterType, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+
+        string AliasType = string.Empty;
+        string AliasName = string.Empty;
+
+        for (int i = 1; i < attributeArguments.Count; i++)
+        {
+            bool IsValidAttributeArgument = IsValidArgumentWithAlias(methodDeclaration, attributeArguments[i], ref AliasType, ref AliasName);
+            Debug.Assert(IsValidAttributeArgument, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+        }
+
+        Debug.Assert(AliasType != string.Empty || AliasName != string.Empty, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+
+        List<AttributeArgumentModel> Result = new() { new AttributeArgumentModel(Name: string.Empty, Value: ParameterName) };
+
+        if (AliasType != string.Empty)
+            Result.Add(new AttributeArgumentModel(Name: nameof(RequireNotNullAttribute.AliasType), Value: AliasType));
+
+        if (AliasName != string.Empty)
+            Result.Add(new AttributeArgumentModel(Name: nameof(RequireNotNullAttribute.AliasName), Value: AliasName));
+
+        Debug.Assert(Result.Count > 1);
+
+        return Result;
+    }
+
+    private static List<AttributeArgumentModel> TransformRequireNotNullAttributeNoAlias(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    {
+        List<AttributeArgumentModel> Result = new();
+
+        foreach (var AttributeArgument in attributeArguments)
+        {
+            Debug.Assert(AttributeArgument.NameEquals is null, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+
+            bool IsValidParameterName = IsStringOrNameofAttributeArgument(AttributeArgument, out string ParameterName);
+            Debug.Assert(IsValidParameterName, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+
+            Result.Add(new AttributeArgumentModel(Name: string.Empty, Value: ParameterName));
+        }
+
+        return Result;
+    }
+
+    private static List<AttributeArgumentModel> TransformRequireAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    {
+        return TransformStringOnlyAttribute(methodDeclaration, attributeArguments);
+    }
+
+    private static List<AttributeArgumentModel> TransformEnsureAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    {
+        return TransformStringOnlyAttribute(methodDeclaration, attributeArguments);
+    }
+
+    private static List<AttributeArgumentModel> TransformStringOnlyAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    {
+        bool IsValid = IsValidStringOnlyAttribute(methodDeclaration, attributeArguments, out List<string> ArgumentValues);
+        Debug.Assert(IsValid);
+
+        List<AttributeArgumentModel> Result = new();
+        foreach (string ArgumentValue in ArgumentValues)
+            Result.Add(new AttributeArgumentModel(Name: string.Empty, Value: ArgumentValue));
+
+        return Result;
+    }
+}

@@ -41,11 +41,16 @@ public partial class ContractGenerator
         if (MethodName == VerifiedSuffix)
             return false;
 
+        // Ignore methods that are not in a class and a namespace.
+        if (MethodDeclaration.FirstAncestorOrSelf<ClassDeclarationSyntax>() is null ||
+            MethodDeclaration.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>() is null)
+            return false;
+
         // Get a list of all supported attributes for this method.
         List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMethodSupportedAttributes(MethodDeclaration, SupportedAttributeNames);
         List<string> AttributeNames = new();
 
-        Dictionary<string, Func<MethodDeclarationSyntax, string, IReadOnlyList<AttributeArgumentSyntax>, bool>> ValidityVerifierTable = new()
+        Dictionary<string, Func<MethodDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, bool>> ValidityVerifierTable = new()
         {
             { nameof(AccessAttribute), IsValidAccessAttribute },
             { nameof(RequireNotNullAttribute), IsValidRequireNotNullAttribute },
@@ -62,7 +67,7 @@ public partial class ContractGenerator
                 Debug.Assert(ValidityVerifierTable.ContainsKey(AttributeName));
                 var ValidityVerifier = ValidityVerifierTable[AttributeName];
 
-                if (ValidityVerifier(MethodDeclaration, AttributeName, AttributeArguments))
+                if (ValidityVerifier(MethodDeclaration, AttributeArguments))
                     AttributeNames.Add(AttributeName);
                 else
                     return false;
@@ -76,12 +81,12 @@ public partial class ContractGenerator
         return true;
     }
 
-    private static bool IsValidAccessAttribute(MethodDeclarationSyntax methodDeclaration, string attributeName, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static bool IsValidAccessAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        return IsValidStringOnlyAttribute(methodDeclaration, attributeName, attributeArguments);
+        return IsValidStringOnlyAttribute(methodDeclaration, attributeArguments, out _);
     }
 
-    private static bool IsValidRequireNotNullAttribute(MethodDeclarationSyntax methodDeclaration, string attributeName, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static bool IsValidRequireNotNullAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
         if (IsRequireNotNullAttributeWithAlias(attributeArguments))
             return IsValidRequireNotNullAttributeWithAlias(methodDeclaration, attributeArguments);
@@ -162,24 +167,30 @@ public partial class ContractGenerator
         return true;
     }
 
-    private static bool IsValidRequireAttribute(MethodDeclarationSyntax methodDeclaration, string attributeName, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static bool IsValidRequireAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        return IsValidStringOnlyAttribute(methodDeclaration, attributeName, attributeArguments);
+        return IsValidStringOnlyAttribute(methodDeclaration, attributeArguments, out _);
     }
 
-    private static bool IsValidEnsureAttribute(MethodDeclarationSyntax methodDeclaration, string attributeName, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static bool IsValidEnsureAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        return IsValidStringOnlyAttribute(methodDeclaration, attributeName, attributeArguments);
+        return IsValidStringOnlyAttribute(methodDeclaration, attributeArguments, out _);
     }
 
-    private static bool IsValidStringOnlyAttribute(MethodDeclarationSyntax methodDeclaration, string attributeName, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static bool IsValidStringOnlyAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments, out List<string> argumentValues)
     {
+        argumentValues = new();
+
         if (attributeArguments.Count == 0)
             return false;
 
         foreach (var AttributeArgument in attributeArguments)
-            if (!IsStringOrNameofAttributeArgument(AttributeArgument, out _))
+        {
+            if (!IsStringOrNameofAttributeArgument(AttributeArgument, out string ArgumentValue))
                 return false;
+
+            argumentValues.Add(ArgumentValue);
+        }
 
         return true;
     }
