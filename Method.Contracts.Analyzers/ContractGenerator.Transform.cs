@@ -74,14 +74,16 @@ public partial class ContractGenerator
         ParameterListSyntax ParameterList = methodDeclaration.ParameterList;
         string Result = string.Empty;
 
-        foreach (var CallParameter in ParameterList.Parameters)
-            if (CallParameter is ParameterSyntax Parameter)
-                if (Parameter.Type is TypeSyntax Type)
-                {
-                    string TypeAsString = Type.ToString();
-                    uint HashCode = unchecked((uint)GeneratorHelper.GetStableHashCode(TypeAsString));
-                    Result += $"_{HashCode}";
-                }
+        for (int i = 0; i < ParameterList.Parameters.Count; i++)
+        {
+            ParameterSyntax Parameter = ParameterList.Parameters[i];
+            if (Parameter.Type is TypeSyntax Type)
+            {
+                string TypeAsString = Type.ToString();
+                uint HashCode = unchecked((uint)GeneratorHelper.GetStableHashCode(TypeAsString));
+                Result += $"_{HashCode}";
+            }
+        }
 
         return Result;
     }
@@ -231,13 +233,13 @@ public partial class ContractGenerator
         string RawAfterNamespaceDeclaration = string.Empty;
 
         SyntaxNode TargetNode = context.TargetNode;
-        if (TargetNode.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>() is BaseNamespaceDeclarationSyntax BaseNamespaceDeclaration)
-        {
-            RawAfterNamespaceDeclaration = BaseNamespaceDeclaration.Usings.ToFullString();
+        BaseNamespaceDeclarationSyntax? BaseNamespaceDeclaration = TargetNode.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
 
-            if (BaseNamespaceDeclaration.Parent is CompilationUnitSyntax CompilationUnit)
-                RawBeforeNamespaceDeclaration = CompilationUnit.Usings.ToFullString();
-        }
+        Debug.Assert(BaseNamespaceDeclaration is not null, "We know it's not null from KeepNodeForPipeline().");
+        RawAfterNamespaceDeclaration = BaseNamespaceDeclaration!.Usings.ToFullString();
+
+        if (BaseNamespaceDeclaration.Parent is CompilationUnitSyntax CompilationUnit)
+            RawBeforeNamespaceDeclaration = CompilationUnit.Usings.ToFullString();
 
         return FixUsings(RawBeforeNamespaceDeclaration, RawAfterNamespaceDeclaration, isAsync);
     }

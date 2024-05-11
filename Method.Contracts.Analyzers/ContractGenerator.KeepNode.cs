@@ -34,7 +34,7 @@ public partial class ContractGenerator
 
         // Only accept methods with the 'Verified' suffix in their name.
         string MethodName = MethodDeclaration.Identifier.Text;
-        if (!GeneratorHelper.StringEndsWith(MethodName, VerifiedSuffix) || MethodName.Length == VerifiedSuffix.Length)
+        if (!GeneratorHelper.StringEndsWith(MethodName, VerifiedSuffix))
             return false;
 
         // Do not accept methods that are the suffix and nothing else.

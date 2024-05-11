@@ -89,7 +89,7 @@ public class SimpleTest
     }
 
     [Test]
-    public async Task TestNotAVerifiedMethod()
+    public async Task TestNotAVerifiedMethod1()
     {
         // The source code to test
         const string Source = @"
@@ -99,6 +99,29 @@ public class SimpleTest
 {
     [Access(""public"")]
     public void Foo()
+    {
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestNotAVerifiedMethod2()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+public class SimpleTest
+{
+    [Access(""public"")]
+    public void Verified()
     {
     }
 }
@@ -135,7 +158,30 @@ public class SimpleTest
     }
 
     [Test]
-    public async Task TestEmptyAttributeArguments()
+    public async Task TestEmptyAttributeArguments1()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+public class SimpleTest
+{
+    [Access()]
+    public void FooVerified()
+    {
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestEmptyAttributeArguments2()
     {
         // The source code to test
         const string Source = @"
@@ -398,6 +444,176 @@ internal partial class Program
 
     [Access(""public"", ""static"")]
     [RequireNotNull(""text"", BadAlias = ""Foo"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidAlias1()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(AliasName = ""Foo"", ""text"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidAlias2()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(nameof(), AliasName = ""Foo"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidAlias3()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""foo"", AliasName = ""Foo"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidAlias4()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"", AliasName = ""Foo"", ""foo"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidAlias5()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"", AliasName = nameof())]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";
