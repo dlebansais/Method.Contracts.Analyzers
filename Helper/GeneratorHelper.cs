@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 /// <summary>
 /// Helper class for the code generator.
@@ -91,14 +92,24 @@ internal static class GeneratorHelper
         return usingNamespace == "System" || StringStartsWith(usingNamespace, "System.");
     }
 
-    private static bool StringStartsWith(string s, string prefix)
+    /// <summary>
+    /// Returns whether the string <paramref name="s"/> starts with the prefix <paramref name="prefix"/>, performing a <see cref="StringComparison.Ordinal"/> comparison.
+    /// </summary>
+    /// <param name="s">The string.</param>
+    /// <param name="prefix">The prefix.</param>
+    public static bool StringStartsWith(string s, string prefix)
     {
         return s.StartsWith(prefix, StringComparison.Ordinal);
     }
 
-    private static bool StringEndsWith(string s, string prefix)
+    /// <summary>
+    /// Returns whether the string <paramref name="s"/> ends with the suffix <paramref name="suffix"/>, performing a <see cref="StringComparison.Ordinal"/> comparison.
+    /// </summary>
+    /// <param name="s">The string.</param>
+    /// <param name="suffix">The suffix.</param>
+    public static bool StringEndsWith(string s, string suffix)
     {
-        return s.EndsWith(prefix, StringComparison.Ordinal);
+        return s.EndsWith(suffix, StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -122,5 +133,42 @@ internal static class GeneratorHelper
 
             return hash1 + (hash2 * 1566083941);
         }
+    }
+
+    /// <summary>
+    /// Gets all supported attributes of a method.
+    /// </summary>
+    /// <param name="methodDeclaration">The method.</param>
+    /// <param name="supportedAttributeNames">The list of supported attributes.</param>
+    public static List<AttributeSyntax> GetMethodSupportedAttributes(MethodDeclarationSyntax methodDeclaration, List<string> supportedAttributeNames)
+    {
+        List<AttributeSyntax> Result = new();
+
+        for (int IndexList = 0; IndexList < methodDeclaration.AttributeLists.Count; IndexList++)
+        {
+            AttributeListSyntax AttributeList = methodDeclaration.AttributeLists[IndexList];
+
+            for (int Index = 0; Index < AttributeList.Attributes.Count; Index++)
+            {
+                AttributeSyntax Attribute = AttributeList.Attributes[Index];
+                string AttributeName = ToAttributeName(Attribute);
+
+                if (supportedAttributeNames.Contains(AttributeName))
+                {
+                    Result.Add(Attribute);
+                }
+            }
+        }
+
+        return Result;
+    }
+
+    /// <summary>
+    /// Returns the full name of an attribute.
+    /// </summary>
+    /// <param name="attribute">The attribute.</param>
+    public static string ToAttributeName(AttributeSyntax attribute)
+    {
+        return $"{attribute.Name.GetText()}{nameof(Attribute)}";
     }
 }

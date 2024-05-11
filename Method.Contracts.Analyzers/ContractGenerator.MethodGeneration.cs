@@ -626,11 +626,6 @@ public partial class ContractGenerator
         return Statements;
     }
 
-    private static string ToAttributeName(AttributeSyntax attribute)
-    {
-        return $"{attribute.Name.GetText()}{nameof(Attribute)}";
-    }
-
     private static string ToNameWithoutAttribute<T>()
     {
         string LongName = typeof(T).Name;

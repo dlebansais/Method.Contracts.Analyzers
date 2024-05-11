@@ -68,58 +68,6 @@ public partial class ContractGenerator : IIncrementalGenerator
         return $"{ContractsNamespace}.{typeof(T).Name}";
     }
 
-    private static bool KeepNodeForPipeline<T>(SyntaxNode syntaxNode, CancellationToken cancellationToken)
-        where T : Attribute
-    {
-        // Only accept methods with the 'Verified' suffix in their name.
-        if (syntaxNode is not MethodDeclarationSyntax MethodDeclaration)
-            return false;
-
-        string MethodName = MethodDeclaration.Identifier.ToString();
-        string VerifiedSuffix = Settings.VerifiedSuffix;
-
-        // The suffix can't be empty: if invalid in user settings, it's the default suffix.
-        Debug.Assert(VerifiedSuffix != string.Empty);
-
-        if (!MethodName.EndsWith(VerifiedSuffix, StringComparison.Ordinal) || MethodName.Length == VerifiedSuffix.Length)
-            return false;
-
-        // Get a list of all supported attributes for this method.
-        List<string> AttributeNames = new();
-        bool IsInvalidAttributeFound = false;
-
-        for (int IndexList = 0; IndexList < MethodDeclaration.AttributeLists.Count; IndexList++)
-        {
-            AttributeListSyntax AttributeList = MethodDeclaration.AttributeLists[IndexList];
-
-            for (int Index = 0; Index < AttributeList.Attributes.Count; Index++)
-            {
-                AttributeSyntax Attribute = AttributeList.Attributes[Index];
-
-                string AttributeName = ToAttributeName(Attribute);
-                if (SupportedAttributeNames.Contains(AttributeName) && Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
-                {
-                    List<int> NamelessArgumentPositions = GetNamelessArgumentPositions(AttributeArgumentList);
-                    bool HasAtLeastOneNamelessArgument = NamelessArgumentPositions.Count > 0;
-                    bool NamelessArgumentIsFirstAndOnly = NamelessArgumentPositions.Count == 1 && NamelessArgumentPositions[0] == 0;
-                    bool AreAllArgumentsValid = AttributeArgumentList.Arguments.All(attributeArgument => IsValidAttributeArgument(AttributeName, NamelessArgumentIsFirstAndOnly, attributeArgument, MethodDeclaration, out _, out _));
-
-                    if (HasAtLeastOneNamelessArgument && AreAllArgumentsValid)
-                        AttributeNames.Add(AttributeName);
-                    else
-                        IsInvalidAttributeFound = true;
-                }
-            }
-        }
-
-        // One of these attributes has to be the first, and we only return true for this one.
-        // This way, multiple calls with different T return true exactly once.
-        if (IsInvalidAttributeFound || AttributeNames.Count == 0 || AttributeNames[0] != typeof(T).Name)
-            return false;
-
-        return true;
-    }
-
     private static List<int> GetNamelessArgumentPositions(AttributeArgumentListSyntax attributeArgumentList)
     {
         List<int> Result = new();
@@ -134,61 +82,6 @@ public partial class ContractGenerator : IIncrementalGenerator
         }
 
         return Result;
-    }
-
-    private static bool IsValidAttributeArgument(string attributeName, bool namelessArgumentIsFirstAndOnly, AttributeArgumentSyntax attributeArgument, MethodDeclarationSyntax methodDeclaration, out string argumentName, out string argumentValue)
-    {
-        if (!IsValidAttributeArgumentNameAndValue(attributeArgument, out argumentName, out argumentValue))
-            return false;
-
-        if (attributeName == nameof(RequireNotNullAttribute))
-        {
-            if (argumentName == string.Empty)
-            {
-                if (!GetParameterType(argumentValue, methodDeclaration, out _))
-                    return false;
-            }
-            else if (argumentName is not nameof(RequireNotNullAttribute.AliasType) and not nameof(RequireNotNullAttribute.AliasName))
-                return false;
-        }
-
-        return true;
-    }
-
-    private static bool IsValidAttributeArgumentNameAndValue(AttributeArgumentSyntax attributeArgument, out string argumentName, out string argumentValue)
-    {
-        if (attributeArgument.NameEquals is NameEqualsSyntax NameEquals)
-            argumentName = NameEquals.Name.Identifier.Text;
-        else
-            argumentName = string.Empty;
-
-        if (attributeArgument.Expression is InvocationExpressionSyntax InvocationExpression &&
-            InvocationExpression.Expression is IdentifierNameSyntax IdentifierName &&
-            IdentifierName.Identifier.Text == "nameof" &&
-            InvocationExpression.ArgumentList.Arguments.Count == 1 &&
-            InvocationExpression.ArgumentList.Arguments[0].Expression is IdentifierNameSyntax ExpressionIdentifierName)
-        {
-            string ArgumentText = ExpressionIdentifierName.Identifier.Text;
-            Debug.Assert(ArgumentText != string.Empty, "If there is exactly one argument, it cannot be empty, otherwise there would be no argument.");
-
-            argumentValue = ArgumentText;
-            return true;
-        }
-
-        if (attributeArgument.Expression is LiteralExpressionSyntax LiteralExpression &&
-            LiteralExpression.Kind() == SyntaxKind.StringLiteralExpression)
-        {
-            string ArgumentText = LiteralExpression.Token.Text;
-            ArgumentText = ArgumentText.Trim('"');
-            if (ArgumentText != string.Empty)
-            {
-                argumentValue = ArgumentText;
-                return true;
-            }
-        }
-
-        argumentValue = string.Empty;
-        return false;
     }
 
     private static ContractModel TransformContractAttributes(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
@@ -327,40 +220,67 @@ public partial class ContractGenerator : IIncrementalGenerator
         MethodDeclarationSyntax MethodDeclaration = (MethodDeclarationSyntax)TargetNode;
 
         List<AttributeModel> Result = new();
+        List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMethodSupportedAttributes(MethodDeclaration, SupportedAttributeNames);
 
-        for (int IndexList = 0; IndexList < MethodDeclaration.AttributeLists.Count; IndexList++)
+        foreach (AttributeSyntax Attribute in MethodAttributes)
         {
-            AttributeListSyntax AttributeList = MethodDeclaration.AttributeLists[IndexList];
-
-            for (int Index = 0; Index < AttributeList.Attributes.Count; Index++)
+            string AttributeName = GeneratorHelper.ToAttributeName(Attribute);
+            if (SupportedAttributeNames.Contains(AttributeName) && Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
             {
-                AttributeSyntax Attribute = AttributeList.Attributes[Index];
+                List<AttributeArgumentModel> Arguments = new();
+                List<int> NamelessArgumentPositions = GetNamelessArgumentPositions(AttributeArgumentList);
+                bool NamelessArgumentIsFirstAndOnly = NamelessArgumentPositions.Count == 1 && NamelessArgumentPositions[0] == 0;
 
-                string AttributeName = ToAttributeName(Attribute);
-                if (SupportedAttributeNames.Contains(AttributeName) && Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
+                for (int IndexArgument = 0; IndexArgument < AttributeArgumentList.Arguments.Count; IndexArgument++)
                 {
-                    List<AttributeArgumentModel> Arguments = new();
-                    List<int> NamelessArgumentPositions = GetNamelessArgumentPositions(AttributeArgumentList);
-                    bool NamelessArgumentIsFirstAndOnly = NamelessArgumentPositions.Count == 1 && NamelessArgumentPositions[0] == 0;
+                    AttributeArgumentSyntax AttributeArgument = AttributeArgumentList.Arguments[IndexArgument];
+                    bool IsValid = IsValidAttributeArgument(AttributeName, NamelessArgumentIsFirstAndOnly, AttributeArgument, MethodDeclaration, out string ArgumentName, out string ArgumentValue);
+                    Debug.Assert(IsValid, $"Attribute argument '{AttributeArgument}' is expected to be valid.");
+                    Debug.Assert(ArgumentValue != string.Empty, $"Argument value found empty.");
 
-                    for (int IndexArgument = 0; IndexArgument < AttributeArgumentList.Arguments.Count; IndexArgument++)
-                    {
-                        AttributeArgumentSyntax AttributeArgument = AttributeArgumentList.Arguments[IndexArgument];
-                        bool IsValid = IsValidAttributeArgument(AttributeName, NamelessArgumentIsFirstAndOnly, AttributeArgument, MethodDeclaration, out string ArgumentName, out string ArgumentValue);
-                        Debug.Assert(IsValid, $"Attribute argument '{AttributeArgument}' is expected to be valid.");
-                        Debug.Assert(ArgumentValue != string.Empty, $"Argument value found empty.");
-
-                        Arguments.Add(new AttributeArgumentModel(Name: ArgumentName, Value: ArgumentValue));
-                    }
-
-                    AttributeModel Model = new(AttributeName, Arguments);
-
-                    Result.Add(Model);
+                    Arguments.Add(new AttributeArgumentModel(Name: ArgumentName, Value: ArgumentValue));
                 }
+
+                AttributeModel Model = new(AttributeName, Arguments);
+
+                Result.Add(Model);
             }
         }
 
         return Result;
+    }
+
+    private static bool IsValidAttributeArgument(string attributeName, bool namelessArgumentIsFirstAndOnly, AttributeArgumentSyntax attributeArgument, MethodDeclarationSyntax methodDeclaration, out string argumentName, out string argumentValue)
+    {
+        if (!IsValidAttributeArgumentNameAndValue(attributeArgument, out argumentName, out argumentValue))
+            return false;
+
+        if (attributeName == nameof(RequireNotNullAttribute))
+        {
+            if (argumentName == string.Empty)
+            {
+                if (!GetParameterType(argumentValue, methodDeclaration, out _))
+                    return false;
+            }
+            else if (argumentName is not nameof(RequireNotNullAttribute.AliasType) and not nameof(RequireNotNullAttribute.AliasName))
+                return false;
+        }
+
+        return true;
+    }
+
+    private static bool IsValidAttributeArgumentNameAndValue(AttributeArgumentSyntax attributeArgument, out string argumentName, out string argumentValue)
+    {
+        if (attributeArgument.NameEquals is NameEqualsSyntax NameEquals)
+            argumentName = NameEquals.Name.Identifier.Text;
+        else
+            argumentName = string.Empty;
+
+        if (IsStringOrNameofAttributeArgument(attributeArgument, out argumentValue))
+            return true;
+
+        argumentValue = string.Empty;
+        return false;
     }
 
     private static void OutputContractMethod(SourceProductionContext context, (GeneratorSettings Settings, ImmutableArray<ContractModel> Models) modelAndSettings)
