@@ -1,19 +1,8 @@
 ﻿namespace Contracts.Analyzers;
 
-using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 using Contracts.Analyzers.Helper;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>

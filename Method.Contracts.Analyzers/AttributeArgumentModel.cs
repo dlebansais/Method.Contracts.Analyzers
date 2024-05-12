@@ -1,7 +1,5 @@
 ﻿namespace Contracts.Analyzers;
 
-using System.Collections.Generic;
-
 /// <summary>
 /// Represents the model of a contract attribute argument.
 /// </summary>

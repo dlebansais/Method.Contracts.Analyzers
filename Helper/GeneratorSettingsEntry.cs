@@ -1,8 +1,6 @@
 ﻿namespace Contracts.Analyzers.Helper;
 
-using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
