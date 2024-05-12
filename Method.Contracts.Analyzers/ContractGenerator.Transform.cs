@@ -147,8 +147,8 @@ public partial class ContractGenerator
         {
             { nameof(AccessAttribute), TransformAccessAttribute },
             { nameof(RequireNotNullAttribute), TransformRequireNotNullAttribute },
-            { nameof(RequireAttribute), TransformRequireAttribute },
-            { nameof(EnsureAttribute), TransformEnsureAttribute },
+            { nameof(RequireAttribute), TransformRequireOrEnsureAttribute },
+            { nameof(EnsureAttribute), TransformRequireOrEnsureAttribute },
         };
 
         foreach (AttributeSyntax Attribute in MethodAttributes)
@@ -184,7 +184,7 @@ public partial class ContractGenerator
 
     private static List<AttributeArgumentModel> TransformRequireNotNullAttributeWithAlias(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        Debug.Assert(attributeArguments.Count > 0, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+        Debug.Assert(attributeArguments.Count > 0, "This was verified in IsRequireNotNullAttributeWithAlias().");
         AttributeArgumentSyntax FirstAttributeArgument = attributeArguments[0];
 
         Debug.Assert(FirstAttributeArgument.NameEquals is null, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
@@ -240,14 +240,41 @@ public partial class ContractGenerator
         return Result;
     }
 
-    private static List<AttributeArgumentModel> TransformRequireAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static List<AttributeArgumentModel> TransformRequireOrEnsureAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        return TransformStringOnlyAttribute(methodDeclaration, attributeArguments);
+        if (IsRequireOrEnsureAttributeWithDebugOnly(attributeArguments))
+            return TransformRequireOrEnsureAttributeWithDebugOnly(methodDeclaration, attributeArguments);
+        else
+            return TransformStringOnlyAttribute(methodDeclaration, attributeArguments);
     }
 
-    private static List<AttributeArgumentModel> TransformEnsureAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static List<AttributeArgumentModel> TransformRequireOrEnsureAttributeWithDebugOnly(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        return TransformStringOnlyAttribute(methodDeclaration, attributeArguments);
+        Debug.Assert(attributeArguments.Count > 0, "This was verified in IsRequireOrEnsureAttributeWithDebugOnly().");
+        AttributeArgumentSyntax FirstAttributeArgument = attributeArguments[0];
+
+        Debug.Assert(FirstAttributeArgument.NameEquals is null, "This was verified in IsValidRequireOrEnsureAttributeWithDebugOnly().");
+
+        bool IsValidParameterName = IsStringAttributeArgument(FirstAttributeArgument, out string Expression);
+        Debug.Assert(IsValidParameterName, "This was verified in IsValidRequireOrEnsureAttributeWithDebugOnly().");
+
+        bool? IsDebugOnly = null;
+
+        for (int i = 1; i < attributeArguments.Count; i++)
+        {
+            bool IsValidAttributeArgument = IsValidDebugOnlyArgument(methodDeclaration, attributeArguments[i], ref IsDebugOnly);
+            Debug.Assert(IsValidAttributeArgument, "This was verified in IsValidRequireOrEnsureAttributeWithDebugOnly().");
+        }
+
+        Debug.Assert(IsDebugOnly.HasValue, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+
+        List<AttributeArgumentModel> Result = new()
+        {
+            new AttributeArgumentModel(Name: string.Empty, Value: Expression),
+            new AttributeArgumentModel(Name: nameof(RequireAttribute.DebugOnly), Value: IsDebugOnly == true ? "true" : "false"),
+        };
+
+        return Result;
     }
 
     private static List<AttributeArgumentModel> TransformStringOnlyAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)

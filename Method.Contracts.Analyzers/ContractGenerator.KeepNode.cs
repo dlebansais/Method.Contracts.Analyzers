@@ -46,12 +46,12 @@ public partial class ContractGenerator
         List<string> AttributeNames = new();
         bool IsDebugGeneration = MethodDeclaration.SyntaxTree.Options.PreprocessorSymbolNames.Contains("DEBUG");
 
-        Dictionary<string, Func<MethodDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, bool>> ValidityVerifierTable = new()
+        Dictionary<string, Func<MethodDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, AttributeGeneration>> ValidityVerifierTable = new()
         {
             { nameof(AccessAttribute), IsValidAccessAttribute },
             { nameof(RequireNotNullAttribute), IsValidRequireNotNullAttribute },
-            { nameof(RequireAttribute), IsValidRequireAttribute },
-            { nameof(EnsureAttribute), IsValidEnsureAttribute },
+            { nameof(RequireAttribute), IsValidRequireOrEnsureAttribute },
+            { nameof(EnsureAttribute), IsValidRequireOrEnsureAttribute },
         };
 
         foreach (AttributeSyntax Attribute in MethodAttributes)
@@ -62,11 +62,12 @@ public partial class ContractGenerator
 
                 Debug.Assert(ValidityVerifierTable.ContainsKey(AttributeName));
                 var ValidityVerifier = ValidityVerifierTable[AttributeName];
+                AttributeGeneration AttributeGeneration = ValidityVerifier(MethodDeclaration, AttributeArguments);
 
-                if (ValidityVerifier(MethodDeclaration, AttributeArguments))
-                    AttributeNames.Add(AttributeName);
-                else
+                if (AttributeGeneration == AttributeGeneration.Invalid)
                     return false;
+                else if (AttributeGeneration == AttributeGeneration.Valid || (AttributeGeneration == AttributeGeneration.DebugOnly && IsDebugGeneration))
+                    AttributeNames.Add(AttributeName);
             }
 
         // One of these attributes has to be the first, and we only return true for this one.
@@ -77,19 +78,19 @@ public partial class ContractGenerator
         return true;
     }
 
-    private static bool IsValidAccessAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static AttributeGeneration IsValidAccessAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        return IsValidStringOnlyAttribute(methodDeclaration, attributeArguments, out _);
+        return IsValidStringOnlyAttribute(methodDeclaration, attributeArguments, out _) ? AttributeGeneration.Valid : AttributeGeneration.Invalid;
     }
 
-    private static bool IsValidRequireNotNullAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static AttributeGeneration IsValidRequireNotNullAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
         if (IsRequireNotNullAttributeWithAlias(attributeArguments))
             return IsValidRequireNotNullAttributeWithAlias(methodDeclaration, attributeArguments);
         else if (attributeArguments.Count > 0)
             return IsValidRequireNotNullAttributeNoAlias(methodDeclaration, attributeArguments);
         else
-            return false;
+            return AttributeGeneration.Invalid;
     }
 
     private static bool IsRequireNotNullAttributeWithAlias(IReadOnlyList<AttributeArgumentSyntax> arguments)
@@ -97,19 +98,19 @@ public partial class ContractGenerator
         return arguments.Count > 0 && arguments.Any(argument => argument.NameEquals is not null);
     }
 
-    private static bool IsValidRequireNotNullAttributeWithAlias(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static AttributeGeneration IsValidRequireNotNullAttributeWithAlias(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
         Debug.Assert(attributeArguments.Count > 0, "We reach this step only if IsRequireNotNullAttributeWithAlias() returned true.");
         AttributeArgumentSyntax FirstAttributeArgument = attributeArguments[0];
 
         if (FirstAttributeArgument.NameEquals is not null)
-            return false;
+            return AttributeGeneration.Invalid;
 
         if (!IsStringOrNameofAttributeArgument(FirstAttributeArgument, out string ParameterName))
-            return false;
+            return AttributeGeneration.Invalid;
 
         if (!GetParameterType(ParameterName, methodDeclaration, out _))
-            return false;
+            return AttributeGeneration.Invalid;
 
         string Type = string.Empty;
         string Name = string.Empty;
@@ -119,11 +120,11 @@ public partial class ContractGenerator
 
         for (int i = 1; i < attributeArguments.Count; i++)
             if (!IsValidArgumentWithAlias(methodDeclaration, attributeArguments[i], ref Type, ref Name, ref AliasName))
-                return false;
+                return AttributeGeneration.Invalid;
 
         Debug.Assert(Type != string.Empty || Name != string.Empty || AliasName != string.Empty, "At this step there is at least one valid argument that is either Type, Name or AliasName.");
 
-        return true;
+        return AttributeGeneration.Valid;
     }
 
     private static bool IsValidArgumentWithAlias(MethodDeclarationSyntax methodDeclaration, AttributeArgumentSyntax attributeArgument, ref string type, ref string name, ref string aliasName)
@@ -150,30 +151,77 @@ public partial class ContractGenerator
         return true;
     }
 
-    private static bool IsValidRequireNotNullAttributeNoAlias(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static AttributeGeneration IsValidRequireNotNullAttributeNoAlias(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
         foreach (var AttributeArgument in attributeArguments)
         {
             Debug.Assert(AttributeArgument.NameEquals is null, "If not null, we would be running IsValidRequireNotNullAttributeWithAlias().");
 
             if (!IsStringOrNameofAttributeArgument(AttributeArgument, out string ArgumentValue))
-                return false;
+                return AttributeGeneration.Invalid;
 
             if (!GetParameterType(ArgumentValue, methodDeclaration, out _))
-                return false;
+                return AttributeGeneration.Invalid;
         }
 
+        return AttributeGeneration.Valid;
+    }
+
+    private static AttributeGeneration IsValidRequireOrEnsureAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    {
+        if (IsRequireOrEnsureAttributeWithDebugOnly(attributeArguments))
+            return IsValidRequireOrEnsureAttributeWithDebugOnly(methodDeclaration, attributeArguments);
+        else if (attributeArguments.Count > 0)
+            return IsValidStringOnlyAttribute(methodDeclaration, attributeArguments, out _) ? AttributeGeneration.Valid : AttributeGeneration.Invalid;
+        else
+            return AttributeGeneration.Invalid;
+    }
+
+    private static bool IsRequireOrEnsureAttributeWithDebugOnly(IReadOnlyList<AttributeArgumentSyntax> arguments)
+    {
+        return arguments.Count > 0 && arguments.Any(argument => argument.NameEquals is not null);
+    }
+
+    private static AttributeGeneration IsValidRequireOrEnsureAttributeWithDebugOnly(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    {
+        Debug.Assert(attributeArguments.Count > 0, "We reach this step only if IsRequireOrEnsureAttributeWithDebugOnly() returned true.");
+        AttributeArgumentSyntax FirstAttributeArgument = attributeArguments[0];
+
+        if (FirstAttributeArgument.NameEquals is not null)
+            return AttributeGeneration.Invalid;
+
+        if (!IsStringAttributeArgument(FirstAttributeArgument, out _))
+            return AttributeGeneration.Invalid;
+
+        bool? IsDebugOnly = null;
+
+        Debug.Assert(attributeArguments.Count > 1, "The first argument has no name, there has to be a second argument because IsRequireOrEnsureAttributeWithDebugOnly() returned true.");
+
+        for (int i = 1; i < attributeArguments.Count; i++)
+            if (!IsValidDebugOnlyArgument(methodDeclaration, attributeArguments[i], ref IsDebugOnly))
+                return AttributeGeneration.Invalid;
+
+        Debug.Assert(IsDebugOnly.HasValue, "At this step the DebugOnly argument must have been processed.");
+
+        return IsDebugOnly == false ? AttributeGeneration.Valid : AttributeGeneration.DebugOnly;
+    }
+
+    private static bool IsValidDebugOnlyArgument(MethodDeclarationSyntax methodDeclaration, AttributeArgumentSyntax attributeArgument, ref bool? isDebugOnly)
+    {
+        if (attributeArgument.NameEquals is not NameEqualsSyntax NameEquals)
+            return false;
+
+        string ArgumentName = NameEquals.Name.Identifier.Text;
+
+        if (!IsBoolAttributeArgument(attributeArgument, out bool ArgumentValue))
+            return false;
+
+        if (ArgumentName == nameof(RequireAttribute.DebugOnly))
+            isDebugOnly = ArgumentValue;
+        else
+            return false;
+
         return true;
-    }
-
-    private static bool IsValidRequireAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
-    {
-        return IsValidStringOnlyAttribute(methodDeclaration, attributeArguments, out _);
-    }
-
-    private static bool IsValidEnsureAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
-    {
-        return IsValidStringOnlyAttribute(methodDeclaration, attributeArguments, out _);
     }
 
     private static bool IsValidStringOnlyAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments, out List<string> argumentValues)
@@ -185,7 +233,7 @@ public partial class ContractGenerator
 
         foreach (var AttributeArgument in attributeArguments)
         {
-            if (!IsStringOrNameofAttributeArgument(AttributeArgument, out string ArgumentValue))
+            if (!IsStringAttributeArgument(AttributeArgument, out string ArgumentValue))
                 return false;
 
             argumentValues.Add(ArgumentValue);
@@ -240,6 +288,29 @@ public partial class ContractGenerator
         }
 
         argumentValue = string.Empty;
+        return false;
+    }
+
+    private static bool IsBoolAttributeArgument(AttributeArgumentSyntax attributeArgument, out bool argumentValue)
+    {
+        if (attributeArgument.Expression is LiteralExpressionSyntax LiteralExpression)
+        {
+            SyntaxKind Kind = LiteralExpression.Kind();
+
+            if (Kind == SyntaxKind.TrueLiteralExpression)
+            {
+                argumentValue = true;
+                return true;
+            }
+
+            if (Kind == SyntaxKind.FalseLiteralExpression)
+            {
+                argumentValue = false;
+                return true;
+            }
+        }
+
+        argumentValue = false;
         return false;
     }
 }
