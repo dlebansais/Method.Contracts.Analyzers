@@ -147,8 +147,8 @@ public partial class ContractGenerator
         {
             { nameof(AccessAttribute), TransformAccessAttribute },
             { nameof(RequireNotNullAttribute), TransformRequireNotNullAttribute },
-            { nameof(RequireAttribute), TransformRequireOrEnsureAttribute },
-            { nameof(EnsureAttribute), TransformRequireOrEnsureAttribute },
+            { nameof(RequireAttribute), TransformRequireAttribute },
+            { nameof(EnsureAttribute), TransformEnsureAttribute },
         };
 
         foreach (AttributeSyntax Attribute in MethodAttributes)
@@ -238,6 +238,16 @@ public partial class ContractGenerator
         }
 
         return Result;
+    }
+
+    private static List<AttributeArgumentModel> TransformRequireAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    {
+        return TransformRequireOrEnsureAttribute(methodDeclaration, attributeArguments);
+    }
+
+    private static List<AttributeArgumentModel> TransformEnsureAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    {
+        return TransformRequireOrEnsureAttribute(methodDeclaration, attributeArguments);
     }
 
     private static List<AttributeArgumentModel> TransformRequireOrEnsureAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)

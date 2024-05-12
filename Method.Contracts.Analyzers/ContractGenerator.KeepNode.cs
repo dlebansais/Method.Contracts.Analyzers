@@ -50,8 +50,8 @@ public partial class ContractGenerator
         {
             { nameof(AccessAttribute), IsValidAccessAttribute },
             { nameof(RequireNotNullAttribute), IsValidRequireNotNullAttribute },
-            { nameof(RequireAttribute), IsValidRequireOrEnsureAttribute },
-            { nameof(EnsureAttribute), IsValidRequireOrEnsureAttribute },
+            { nameof(RequireAttribute), IsValidRequireAttribute },
+            { nameof(EnsureAttribute), IsValidEnsureAttribute },
         };
 
         foreach (AttributeSyntax Attribute in MethodAttributes)
@@ -165,6 +165,16 @@ public partial class ContractGenerator
         }
 
         return AttributeGeneration.Valid;
+    }
+
+    private static AttributeGeneration IsValidRequireAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    {
+        return IsValidRequireOrEnsureAttribute(methodDeclaration, attributeArguments);
+    }
+
+    private static AttributeGeneration IsValidEnsureAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    {
+        return IsValidRequireOrEnsureAttribute(methodDeclaration, attributeArguments);
     }
 
     private static AttributeGeneration IsValidRequireOrEnsureAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
