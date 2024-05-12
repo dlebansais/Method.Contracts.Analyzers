@@ -135,7 +135,7 @@ public class SimpleTest
     }
 
     [Test]
-    public async Task TestNoAttributeArguments()
+    public async Task TestNoAttributeArguments1()
     {
         // The source code to test
         const string Source = @"
@@ -144,6 +144,75 @@ namespace Contracts.TestSuite;
 public class SimpleTest
 {
     [Access]
+    public void FooVerified()
+    {
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestNoAttributeArguments2()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+public class SimpleTest
+{
+    [RequireNotNull]
+    public void FooVerified()
+    {
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestNoAttributeArguments3()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+public class SimpleTest
+{
+    [Require]
+    public void FooVerified()
+    {
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestNoAttributeArguments4()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+public class SimpleTest
+{
+    [Ensure]
     public void FooVerified()
     {
     }
@@ -204,6 +273,52 @@ public class SimpleTest
     }
 
     [Test]
+    public async Task TestEmptyAttributeArguments3()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+public class SimpleTest
+{
+    [Require()]
+    public void FooVerified()
+    {
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestEmptyAttributeArguments4()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+public class SimpleTest
+{
+    [Ensure()]
+    public void FooVerified()
+    {
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
     public async Task TestEmptyStringAttributeArgument()
     {
         // The source code to test
@@ -238,6 +353,156 @@ public class SimpleTest
     private const int Arg = 0;
 
     [Access(""public"", Arg)]
+    public void FooVerified()
+    {
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidEnsureAttributeArguments1()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+public class SimpleTest
+{
+    private const int Arg = 0;
+
+    [Ensure(DebugOnly = true)]
+    public void FooVerified()
+    {
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidEnsureAttributeArguments2()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+public class SimpleTest
+{
+    private const int Arg = 0;
+
+    [Ensure(nameof(FooVerified), DebugOnly = true)]
+    public void FooVerified()
+    {
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidEnsureAttributeArguments3()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+public class SimpleTest
+{
+    private const int Arg = 0;
+
+    [Ensure(""true"", BadArg = true)]
+    public void FooVerified()
+    {
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidDebugOnly1()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+public class SimpleTest
+{
+    private const bool Arg = false;
+
+    [Ensure(""true"", ""true"", DebugOnly = true)]
+    public void FooVerified()
+    {
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidDebugOnly2()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+public class SimpleTest
+{
+    private const bool Arg = false;
+
+    [Ensure(""true"", DebugOnly = Arg)]
+    public void FooVerified()
+    {
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidDebugOnly3()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+public class SimpleTest
+{
+    private const bool Arg = false;
+
+    [Ensure(""true"", NotDebugOnly = true)]
     public void FooVerified()
     {
     }

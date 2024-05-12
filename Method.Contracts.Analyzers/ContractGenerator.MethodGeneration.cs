@@ -276,7 +276,7 @@ public partial class ContractGenerator
     {
         List<StatementSyntax> Statements = new();
 
-        GetParameterReplacementTable(model, out Dictionary<string, string> AliasNameReplacementTable, out bool IsContainingRequire);
+        GetParameterReplacementTable(model, isDebugGeneration, out Dictionary<string, string> AliasNameReplacementTable, out bool IsContainingRequire);
         GetCallAndReturnStatements(model,
                                    methodDeclaration,
                                    tabStatementTrivia,
@@ -303,16 +303,17 @@ public partial class ContractGenerator
         return Statements;
     }
 
-    private static void GetParameterReplacementTable(ContractModel model, out Dictionary<string, string> aliasNameReplacementTable, out bool isContainingRequire)
+    private static void GetParameterReplacementTable(ContractModel model, bool isDebugGeneration, out Dictionary<string, string> aliasNameReplacementTable, out bool isContainingRequire)
     {
         aliasNameReplacementTable = new();
         isContainingRequire = false;
 
         foreach (AttributeModel Item in model.Attributes)
+        {
+            List<AttributeArgumentModel> Arguments = Item.Arguments;
+
             if (Item.Name == nameof(RequireNotNullAttribute))
             {
-                List<AttributeArgumentModel> Arguments = Item.Arguments;
-
                 if (Arguments.Count > 0 && Arguments.Any(argument => argument.Name != string.Empty))
                 {
                     Debug.Assert(Arguments[0].Name == string.Empty);
@@ -335,7 +336,11 @@ public partial class ContractGenerator
                 isContainingRequire = true;
             }
             else if (Item.Name == nameof(RequireAttribute))
-                isContainingRequire = true;
+            {
+                if (Arguments.Count <= 1 || Arguments[1].Name == string.Empty || Arguments[1].Value == "false" || isDebugGeneration)
+                    isContainingRequire = true;
+            }
+        }
     }
 
     private static void GetCallAndReturnStatements(ContractModel model,
