@@ -45,17 +45,11 @@ public partial class ContractGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var Settings = context.AnalyzerConfigOptionsProvider.SelectMany(ReadSettings);
-        _ = context.ParseOptionsProvider.SelectMany(ReadParseOptionsProvider);
 
         InitializePipeline<AccessAttribute>(context, Settings);
         InitializePipeline<RequireNotNullAttribute>(context, Settings);
         InitializePipeline<RequireAttribute>(context, Settings);
         InitializePipeline<EnsureAttribute>(context, Settings);
-    }
-
-    private static string ReadParseOptionsProvider(ParseOptions options, CancellationToken cancellationToken)
-    {
-        return string.Empty;
     }
 
     private static void InitializePipeline<T>(IncrementalGeneratorInitializationContext context, IncrementalValuesProvider<GeneratorSettings> settings)
