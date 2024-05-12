@@ -10,7 +10,7 @@ using Contracts;
 
 partial class Program
 {
-    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.4.0.10")]
+    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.4.1.11")]
     public static void HelloFrom(Stream stream)
     {
         Contract.RequireNotNull(stream, out Stream Stream);

@@ -581,6 +581,11 @@ internal partial class Program
         Console.WriteLine(Text);
     }
 
+    /// <summary>
+    /// Test doc.
+    /// </summary>
+    /// <param name=""text"">Test parameter 1.</param>
+    /// <param name=""textPlus"">Test parameter 2, a copy of <paramref name=""text""/>.</param>
     [RequireNotNull(""text"", AliasName = ""Text"")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
@@ -614,6 +619,11 @@ internal partial class Program
         Console.WriteLine(Text);
     }
 
+    /// <summary>
+    /// Test doc.
+    /// </summary>
+    /// <param name=""text"">Test parameter 1.</param>
+    /// <param name=""textPlus"">Test parameter 2, a copy of <paramref name=""text""/>.</param>
     [RequireNotNull(""text"", AliasName = ""Foo"")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
@@ -647,6 +657,11 @@ internal partial class Program
         Console.WriteLine(Text);
     }
 
+    /// <summary>
+    /// Test doc.
+    /// </summary>
+    /// <param name=""text"">Test parameter 1.</param>
+    /// <param name=""textPlus"">Test parameter 2, a copy of <paramref name=""text""/>.</param>
     [RequireNotNull(""text"", Type = ""string"")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
@@ -680,6 +695,11 @@ internal partial class Program
         Console.WriteLine(Text);
     }
 
+    /// <summary>
+    /// Test doc.
+    /// </summary>
+    /// <param name=""text"">Test parameter 1.</param>
+    /// <param name=""textPlus"">Test parameter 2, a copy of <paramref name=""text""/>.</param>
     [RequireNotNull(""text"", Type = ""object"")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
@@ -713,6 +733,11 @@ internal partial class Program
         Console.WriteLine(Text);
     }
 
+    /// <summary>
+    /// Test doc.
+    /// </summary>
+    /// <param name=""s"">Test parameter 1.</param>
+    /// <param name=""textPlus"">Test parameter 2, a copy of <paramref name=""s""/>.</param>
     [RequireNotNull(""s"", Type = ""object"", Name = ""text"")]
     private static void HelloFromVerified(string s, out string textPlus)
     {
@@ -746,6 +771,11 @@ internal partial class Program
         Console.WriteLine(Text);
     }
 
+    /// <summary>
+    /// Test doc.
+    /// </summary>
+    /// <param name=""s"">Test parameter 1.</param>
+    /// <param name=""textPlus"">Test parameter 2, a copy of <paramref name=""s""/>.</param>
     [RequireNotNull(""s"", Type = ""object"", Name = ""text"", AliasName = ""Foo"")]
     private static void HelloFromVerified(string s, out string textPlus)
     {
@@ -779,6 +809,11 @@ internal partial class Program
         Console.WriteLine(Text);
     }
 
+    /// <summary>
+    /// Test doc.
+    /// </summary>
+    /// <param name=""text"">Test parameter 1.</param>
+    /// <param name=""textPlus"">Test parameter 2, a copy of <paramref name=""text""/>.</param>
     [RequireNotNull(""text"", Type = ""string"", AliasName = ""Foo"")]
     private static void HelloFromVerified(object text, out string textPlus)
     {

@@ -22,8 +22,8 @@ public partial class ContractGenerator
         MethodDeclarationSyntax MethodDeclaration = (MethodDeclarationSyntax)TargetNode;
 
         ContractModel Model = GetModelWithoutContract(context, MethodDeclaration);
-        Model = Model with { Documentation = GetMethodDocumentation(MethodDeclaration) };
         Model = Model with { Attributes = GetModelContract(MethodDeclaration) };
+        Model = Model with { Documentation = GetMethodDocumentation(Model, MethodDeclaration) };
         Model = Model with { GeneratedMethodDeclaration = GetGeneratedMethodDeclaration(Model, context, out bool IsAsync) };
         (string UsingsBeforeNamespace, string UsingsAfterNamespace) = GetUsings(context, IsAsync);
         Model = Model with { UsingsBeforeNamespace = UsingsBeforeNamespace, UsingsAfterNamespace = UsingsAfterNamespace, IsAsync = IsAsync };
@@ -81,7 +81,7 @@ public partial class ContractGenerator
         return Result;
     }
 
-    private static string GetMethodDocumentation(MethodDeclarationSyntax methodDeclaration)
+    private static string GetMethodDocumentation(ContractModel model, MethodDeclarationSyntax methodDeclaration)
     {
         string Documentation = string.Empty;
 
@@ -97,7 +97,45 @@ public partial class ContractGenerator
                 }
         }
 
+        Dictionary<string, string> ParameterNameReplacementTable = GetParameterNameReplacementTable(model, methodDeclaration);
+        foreach (KeyValuePair<string, string> Entry in ParameterNameReplacementTable)
+        {
+            string OldParameterName = $"<param name=\"{Entry.Key}\">";
+            string NewParameterName = $"<param name=\"{Entry.Value}\">";
+            Documentation = Documentation.Replace(OldParameterName, NewParameterName);
+
+            string OldParameterRef = $"<paramref name=\"{Entry.Key}\"/>";
+            string NewParameterRef = $"<paramref name=\"{Entry.Value}\"/>";
+            Documentation = Documentation.Replace(OldParameterRef, NewParameterRef);
+        }
+
         return Documentation;
+    }
+
+    private static Dictionary<string, string> GetParameterNameReplacementTable(ContractModel model, MethodDeclarationSyntax methodDeclaration)
+    {
+        Dictionary<string, string> Result = new();
+
+        ParameterListSyntax ParameterList = methodDeclaration.ParameterList;
+        SeparatedSyntaxList<ParameterSyntax> Parameters = ParameterList.Parameters;
+
+        foreach (var Parameter in Parameters)
+            if (IsParameterNameReplaced(model, Parameter, out string ParameterName, out string ReplacementName))
+                Result.Add(ParameterName, ReplacementName);
+
+        return Result;
+    }
+
+    private static bool IsParameterNameReplaced(ContractModel model, ParameterSyntax parameter, out string parameterName, out string replacementName)
+    {
+        parameterName = string.Empty;
+        replacementName = string.Empty;
+
+        foreach (AttributeModel Attribute in model.Attributes)
+            if (AttributeHasTypeOrName(Attribute, out parameterName, out _, out replacementName) && parameterName == parameter.Identifier.Text && replacementName != string.Empty)
+                return true;
+
+        return false;
     }
 
     private static List<AttributeModel> GetModelContract(MethodDeclarationSyntax methodDeclaration)

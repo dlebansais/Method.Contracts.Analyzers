@@ -9,7 +9,12 @@ using Contracts;
 
 partial class Program
 {
-    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.4.0.10")]
+    /// <summary>
+    /// Test doc.
+    /// </summary>
+    /// <param name="text">Test parameter 1.</param>
+    /// <param name="textPlus">Test parameter 2, a copy of <paramref name="text"/>.</param>
+    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.4.1.11")]
     public static void HelloFrom(object text, out string textPlus)
     {
         Contract.RequireNotNull(text, out string Text);

@@ -15,7 +15,7 @@ internal partial class Program
     /// <summary>
     /// Test doc.
     /// </summary>
-    /// <param name="text">Test parameter.</param>
+    /// <param name="text">Test parameter, a copy of <paramref name="text"/>.</param>
     /// <returns>Test value.</returns>
     [RequireNotNull("text")]
     [Require("text.Length > 0")]
