@@ -49,6 +49,7 @@ public partial class ContractGenerator
         // Get a list of all supported attributes for this method.
         List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMethodSupportedAttributes(MethodDeclaration, SupportedAttributeNames);
         List<string> AttributeNames = new();
+        bool IsDebugGeneration = MethodDeclaration.SyntaxTree.Options.PreprocessorSymbolNames.Contains("DEBUG");
 
         Dictionary<string, Func<MethodDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, bool>> ValidityVerifierTable = new()
         {
@@ -115,21 +116,22 @@ public partial class ContractGenerator
         if (!GetParameterType(ParameterName, methodDeclaration, out _))
             return false;
 
-        string AliasType = string.Empty;
+        string Type = string.Empty;
+        string Name = string.Empty;
         string AliasName = string.Empty;
 
         Debug.Assert(attributeArguments.Count > 1, "The first argument has no name, there has to be a second argument because IsRequireNotNullAttributeWithAlias() returned true.");
 
         for (int i = 1; i < attributeArguments.Count; i++)
-            if (!IsValidArgumentWithAlias(methodDeclaration, attributeArguments[i], ref AliasType, ref AliasName))
+            if (!IsValidArgumentWithAlias(methodDeclaration, attributeArguments[i], ref Type, ref Name, ref AliasName))
                 return false;
 
-        Debug.Assert(AliasType != string.Empty || AliasName != string.Empty, "At this step there is at least one valid argument that is either AliasType or AliasName.");
+        Debug.Assert(Type != string.Empty || Name != string.Empty || AliasName != string.Empty, "At this step there is at least one valid argument that is either Type, Name or AliasName.");
 
         return true;
     }
 
-    private static bool IsValidArgumentWithAlias(MethodDeclarationSyntax methodDeclaration, AttributeArgumentSyntax attributeArgument, ref string aliasType, ref string aliasName)
+    private static bool IsValidArgumentWithAlias(MethodDeclarationSyntax methodDeclaration, AttributeArgumentSyntax attributeArgument, ref string type, ref string name, ref string aliasName)
     {
         if (attributeArgument.NameEquals is not NameEqualsSyntax NameEquals)
             return false;
@@ -141,8 +143,10 @@ public partial class ContractGenerator
 
         Debug.Assert(ArgumentValue != string.Empty, "Valid string or nameof attribute arguments are never empty.");
 
-        if (ArgumentName == nameof(RequireNotNullAttribute.AliasType))
-            aliasType = ArgumentValue;
+        if (ArgumentName == nameof(RequireNotNullAttribute.Type))
+            type = ArgumentValue;
+        else if (ArgumentName == nameof(RequireNotNullAttribute.Name))
+            name = ArgumentValue;
         else if (ArgumentName == nameof(RequireNotNullAttribute.AliasName))
             aliasName = ArgumentValue;
         else

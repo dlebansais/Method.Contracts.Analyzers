@@ -7,11 +7,14 @@ internal partial class Program
 {
     public static void Main(string[] args)
     {
+#if NO
         Console.WriteLine("Started...");
         string Text = HelloFrom("Hello, World");
         Console.WriteLine(Text);
+#endif
     }
 
+#if NO
     /// <summary>
     /// Test doc.
     /// </summary>
@@ -24,4 +27,5 @@ internal partial class Program
     {
         return text + "!";
     }
+#endif
 }

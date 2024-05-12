@@ -12,8 +12,8 @@ partial class Program
     [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.4.0.10")]
     public static void HelloFrom(string text, out string textPlus)
     {
-        HelloFromVerified(text, out textPlus);
+        Contract.RequireNotNull(text, out string Foo);
 
-        Contract.Ensure(textPlus.Length > text.Length);
+        HelloFromVerified(Foo, out textPlus);
     }
 }

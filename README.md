@@ -87,7 +87,7 @@ You can specify your own aliasing with the `AliasName` attribute option:
 
 Note that in this case only one parameter name is allowed. To alias multiple parameters, use multiple `RequireNotNull` attributes.
 
-### Alias type
+### Type and name of the generate code
 
 You can also specify a subtype for the parameter. For example, WPF converters must implement the `IValueConverter` interface, and specifically the following method:
 
@@ -107,17 +107,17 @@ private static object ConvertVerified(object value, Type targetType, object para
 }
 ````
 
-You can specify the expected subtype with the `AliasType` attribute parameter, and, in combination with `AliasName` the code above can be simplified as follow:
+You can specify the expected subtype with the `Type` and `Name` attribute parameters, and the code above can then be simplified as follow:
 
 ````csharp
-[RequireNotNull(nameof(value), AliasType = "IList", AliasName = "items")]
+[RequireNotNull(nameof(items), Type = "object", Name = "value")]
 private static object ConvertVerified(IList items, Type targetType, object parameter, CultureInfo culture)
 {
     //...
 }
 ````
 
-Similarly to `AliasName`, `AliasType` can only be used if there is exactly one attribute parameter.
+Similarly to `AliasName`, `Type` and `Name` can only be used if there is exactly one attribute parameter.
 
 ## Require attribute
 
@@ -140,6 +140,10 @@ private void FooVerified(string text)
 There can be multiple occurrences of the `Require` attribute for the same method. The generator will add a single call to `Contract.Require` for each expression.
 
 If there is an error in the expression (for example, a syntax error), this can only be caught in the generated code.
+
+### Debug only
+
+The optional `DebugOnly` argument can be set to `true` to generate code that compiles only if `DEBUG` is set.
 
 ## Ensure attribute
 
@@ -164,6 +168,10 @@ There can be multiple occurrences of the `Ensure` attribute for the same method.
 If there is an error in the expression (for example, a syntax error), this can only be caught in the generated code.
 
 You can use the special name `Result` in expression that test the returned value.
+
+### Debug only
+
+The optional `DebugOnly` argument can be set to `true` to generate code that compiles only if `DEBUG` is set.
 
 ## Access attribute
 

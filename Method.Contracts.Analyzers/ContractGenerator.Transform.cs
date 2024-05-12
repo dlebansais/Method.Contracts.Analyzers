@@ -164,21 +164,25 @@ public partial class ContractGenerator
         bool IsValidParameterType = GetParameterType(ParameterName, methodDeclaration, out _);
         Debug.Assert(IsValidParameterType, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
 
-        string AliasType = string.Empty;
+        string Type = string.Empty;
+        string Name = string.Empty;
         string AliasName = string.Empty;
 
         for (int i = 1; i < attributeArguments.Count; i++)
         {
-            bool IsValidAttributeArgument = IsValidArgumentWithAlias(methodDeclaration, attributeArguments[i], ref AliasType, ref AliasName);
+            bool IsValidAttributeArgument = IsValidArgumentWithAlias(methodDeclaration, attributeArguments[i], ref Type, ref Name, ref AliasName);
             Debug.Assert(IsValidAttributeArgument, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
         }
 
-        Debug.Assert(AliasType != string.Empty || AliasName != string.Empty, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+        Debug.Assert(Type != string.Empty || Name != string.Empty || AliasName != string.Empty, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
 
         List<AttributeArgumentModel> Result = new() { new AttributeArgumentModel(Name: string.Empty, Value: ParameterName) };
 
-        if (AliasType != string.Empty)
-            Result.Add(new AttributeArgumentModel(Name: nameof(RequireNotNullAttribute.AliasType), Value: AliasType));
+        if (Type != string.Empty)
+            Result.Add(new AttributeArgumentModel(Name: nameof(RequireNotNullAttribute.Type), Value: Type));
+
+        if (Name != string.Empty)
+            Result.Add(new AttributeArgumentModel(Name: nameof(RequireNotNullAttribute.Name), Value: Name));
 
         if (AliasName != string.Empty)
             Result.Add(new AttributeArgumentModel(Name: nameof(RequireNotNullAttribute.AliasName), Value: AliasName));

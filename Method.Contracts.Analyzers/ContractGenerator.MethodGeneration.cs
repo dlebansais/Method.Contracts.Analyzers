@@ -3,18 +3,14 @@
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading;
-using Contracts.Analyzers.Helper;
+using System.Reflection.Metadata;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
 /// Represents a code generator.
@@ -44,6 +40,9 @@ public partial class ContractGenerator
 
         BlockSyntax MethodBody = GenerateBody(model, MethodDeclaration, LeadingTrivia, LeadingTriviaWithoutLineEnd, isAsync, Tab);
         MethodDeclaration = MethodDeclaration.WithBody(MethodBody);
+
+        if (HasUpdatedParameterList(model, MethodDeclaration, out ParameterListSyntax ParameterList))
+            MethodDeclaration = MethodDeclaration.WithParameterList(ParameterList);
 
         if (isAsync && IsTaskType(MethodDeclaration.ReturnType))
             MethodDeclaration = MethodDeclaration.WithReturnType(SyntaxFactory.IdentifierName("Task").WithTrailingTrivia(SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "))));
@@ -189,6 +188,68 @@ public partial class ContractGenerator
         return methodDeclaration.Modifiers.Count > 0 ? methodDeclaration.Modifiers.Last().TrailingTrivia : null;
     }
 
+    private static bool HasUpdatedParameterList(ContractModel model, MethodDeclarationSyntax methodDeclaration, out ParameterListSyntax updatedParameterList)
+    {
+        ParameterListSyntax ParameterList = methodDeclaration.ParameterList;
+        updatedParameterList = ParameterList;
+
+        SeparatedSyntaxList<ParameterSyntax> Parameters = ParameterList.Parameters;
+        SeparatedSyntaxList<ParameterSyntax> UpdatedParameters = Parameters;
+
+        foreach (var Parameter in UpdatedParameters)
+            if (ModifiedParameterTypeOrName(model, Parameter, out ParameterSyntax UpdatedParameter))
+            {
+                UpdatedParameters = UpdatedParameters.Replace(Parameter, UpdatedParameter);
+                updatedParameterList = updatedParameterList.WithParameters(UpdatedParameters);
+            }
+
+        return updatedParameterList != ParameterList;
+    }
+
+    private static bool ModifiedParameterTypeOrName(ContractModel model, ParameterSyntax parameter, out ParameterSyntax updatedParameter)
+    {
+        updatedParameter = parameter;
+
+        foreach (AttributeModel Attribute in model.Attributes)
+            if (AttributeHasTypeOrName(Attribute, out string ParameterName, out string Type, out string Name) && ParameterName == parameter.Identifier.Text)
+            {
+                if (Type != string.Empty)
+                {
+                    TypeSyntax UpatedType = SyntaxFactory.IdentifierName(Type).WithTrailingTrivia(WhitespaceTrivia);
+                    updatedParameter = updatedParameter.WithType(UpatedType);
+                }
+
+                if (Name != string.Empty)
+                {
+                    SyntaxToken UpdatedIdentifier = SyntaxFactory.Identifier(Name);
+                    updatedParameter = updatedParameter.WithIdentifier(UpdatedIdentifier);
+                }
+            }
+
+        return updatedParameter != parameter;
+    }
+
+    private static bool AttributeHasTypeOrName(AttributeModel attribute, out string parameterName, out string type, out string name)
+    {
+        parameterName = string.Empty;
+        type = string.Empty;
+        name = string.Empty;
+
+        foreach (AttributeArgumentModel AttributeArgument in attribute.Arguments)
+        {
+            if (AttributeArgument.Name == string.Empty)
+                parameterName = AttributeArgument.Value;
+            if (AttributeArgument.Name == nameof(RequireNotNullAttribute.Type))
+                type = AttributeArgument.Value;
+            if (AttributeArgument.Name == nameof(RequireNotNullAttribute.Name))
+                name = AttributeArgument.Value;
+        }
+
+        Debug.Assert(parameterName != string.Empty, "Valid attribute for RequireNotNull always have a parameter name.");
+
+        return type != string.Empty || name != string.Empty;
+    }
+
     private static BlockSyntax GenerateBody(ContractModel model, MethodDeclarationSyntax methodDeclaration, SyntaxTriviaList tabTrivia, SyntaxTriviaList tabTriviaWithoutLineEnd, bool isAsync, string tab)
     {
         SyntaxToken OpenBraceToken = SyntaxFactory.Token(SyntaxKind.OpenBraceToken);
@@ -215,12 +276,12 @@ public partial class ContractGenerator
     {
         List<StatementSyntax> Statements = new();
 
-        GetParameterReplacementTable(model, out Dictionary<string, string> ParameterNameReplacementTable, out bool IsContainingRequire);
+        GetParameterReplacementTable(model, out Dictionary<string, string> AliasNameReplacementTable, out bool IsContainingRequire);
         GetCallAndReturnStatements(model,
                                    methodDeclaration,
                                    tabStatementTrivia,
                                    tabStatementExtraLineEndTrivia,
-                                   ParameterNameReplacementTable,
+                                   AliasNameReplacementTable,
                                    IsContainingRequire,
                                    isAsync,
                                    out StatementSyntax CallStatement,
@@ -242,31 +303,32 @@ public partial class ContractGenerator
         return Statements;
     }
 
-    private static void GetParameterReplacementTable(ContractModel model, out Dictionary<string, string> parameterNameReplacementTable, out bool isContainingRequire)
+    private static void GetParameterReplacementTable(ContractModel model, out Dictionary<string, string> aliasNameReplacementTable, out bool isContainingRequire)
     {
-        parameterNameReplacementTable = new();
+        aliasNameReplacementTable = new();
         isContainingRequire = false;
 
         foreach (AttributeModel Item in model.Attributes)
             if (Item.Name == nameof(RequireNotNullAttribute))
             {
-                if (Item.Arguments.Count > 1 && Item.Arguments.Any(argument => argument.Name != string.Empty))
-                {
-                    Debug.Assert(Item.Arguments[0].Name == string.Empty);
-                    string ParameterName = Item.Arguments[0].Value;
-                    parameterNameReplacementTable.Add(ParameterName, ToIdentifierLocalName(ParameterName));
+                List<AttributeArgumentModel> Arguments = Item.Arguments;
 
-                    // Modify the alias if requested.
-                    foreach (AttributeArgumentModel ArgumentModel in Item.Arguments)
-                        if (ArgumentModel.Name == nameof(RequireNotNullAttribute.AliasName))
-                            parameterNameReplacementTable[ParameterName] = ArgumentModel.Value;
+                if (Arguments.Count > 0 && Arguments.Any(argument => argument.Name != string.Empty))
+                {
+                    Debug.Assert(Arguments[0].Name == string.Empty);
+                    string ParameterName = Arguments[0].Value;
+                    string OriginalParameterName = ParameterName;
+
+                    GetModifiedIdentifiers(Arguments, ref ParameterName, out string AliasName);
+
+                    aliasNameReplacementTable.Add(OriginalParameterName, AliasName);
                 }
                 else
                 {
                     foreach (var Argument in Item.Arguments)
                     {
                         string ParameterName = Argument.Value;
-                        parameterNameReplacementTable.Add(ParameterName, ToIdentifierLocalName(ParameterName));
+                        aliasNameReplacementTable.Add(ParameterName, ToIdentifierLocalName(ParameterName));
                     }
                 }
 
@@ -280,7 +342,7 @@ public partial class ContractGenerator
                                                    MethodDeclarationSyntax methodDeclaration,
                                                    SyntaxTriviaList tabStatementTrivia,
                                                    SyntaxTriviaList tabStatementExtraLineEndTrivia,
-                                                   Dictionary<string, string> parameterNameReplacementTable,
+                                                   Dictionary<string, string> aliasNameReplacementTable,
                                                    bool isContainingRequire,
                                                    bool isAsync,
                                                    out StatementSyntax callStatement,
@@ -288,12 +350,12 @@ public partial class ContractGenerator
     {
         if (IsCommandMethod(methodDeclaration, isAsync))
         {
-            callStatement = GenerateCommandStatement(model.ShortMethodName, methodDeclaration.ParameterList, parameterNameReplacementTable, isAsync);
+            callStatement = GenerateCommandStatement(model.ShortMethodName, methodDeclaration.ParameterList, aliasNameReplacementTable, isAsync);
             returnStatement = null;
         }
         else
         {
-            callStatement = GenerateQueryStatement(model.ShortMethodName, methodDeclaration.ParameterList, parameterNameReplacementTable, isAsync);
+            callStatement = GenerateQueryStatement(model.ShortMethodName, methodDeclaration.ParameterList, aliasNameReplacementTable, isAsync);
             returnStatement = GenerateReturnStatement();
         }
 
@@ -366,9 +428,11 @@ public partial class ContractGenerator
         }
     }
 
-    private static ExpressionStatementSyntax GenerateCommandStatement(string methodName, ParameterListSyntax parameterList, Dictionary<string, string> parameterNameReplacementTable, bool isAsync)
+    private static ExpressionStatementSyntax GenerateCommandStatement(string methodName,
+                                                                      ParameterListSyntax parameterList,
+                                                                      Dictionary<string, string> aliasNameReplacementTable,
+                                                                      bool isAsync)
     {
-        SyntaxTriviaList WhitespaceTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "));
         string VerifiedSuffix = Settings.VerifiedSuffix;
         ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(methodName + VerifiedSuffix);
 
@@ -388,7 +452,7 @@ public partial class ContractGenerator
                 }
 
                 string ParameterName = Parameter.Identifier.Text;
-                if (parameterNameReplacementTable.TryGetValue(ParameterName, out string ReplacedParameterName))
+                if (aliasNameReplacementTable.TryGetValue(ParameterName, out string ReplacedParameterName))
                     ParameterName = ReplacedParameterName;
 
                 IdentifierNameSyntax ParameterIdentifier = SyntaxFactory.IdentifierName(ParameterName);
@@ -418,9 +482,11 @@ public partial class ContractGenerator
         return ExpressionStatement;
     }
 
-    private static LocalDeclarationStatementSyntax GenerateQueryStatement(string methodName, ParameterListSyntax parameterList, Dictionary<string, string> parameterNameReplacementTable, bool isAsync)
+    private static LocalDeclarationStatementSyntax GenerateQueryStatement(string methodName,
+                                                                          ParameterListSyntax parameterList,
+                                                                          Dictionary<string, string> aliasNameReplacementTable,
+                                                                          bool isAsync)
     {
-        SyntaxTriviaList WhitespaceTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "));
         string VerifiedSuffix = Settings.VerifiedSuffix;
         ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(methodName + VerifiedSuffix);
 
@@ -440,7 +506,7 @@ public partial class ContractGenerator
                 }
 
                 string ParameterName = Parameter.Identifier.Text;
-                if (parameterNameReplacementTable.TryGetValue(ParameterName, out string ReplacedParameterName))
+                if (aliasNameReplacementTable.TryGetValue(ParameterName, out string ReplacedParameterName))
                     ParameterName = ReplacedParameterName;
 
                 IdentifierNameSyntax ParameterIdentifier = SyntaxFactory.IdentifierName(ParameterName);
@@ -477,7 +543,6 @@ public partial class ContractGenerator
 
     private static ReturnStatementSyntax GenerateReturnStatement()
     {
-        SyntaxTriviaList WhitespaceTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "));
         IdentifierNameSyntax ResultIdentifier = SyntaxFactory.IdentifierName(Settings.ResultIdentifier).WithLeadingTrivia(WhitespaceTrivia);
         ReturnStatementSyntax ReturnStatement = SyntaxFactory.ReturnStatement(ResultIdentifier);
 
@@ -511,20 +576,27 @@ public partial class ContractGenerator
         Debug.Assert(arguments[0].Name == string.Empty);
         string ParameterName = arguments[0].Value;
 
-        bool IsParameterTypeValid = GetParameterType(ParameterName, methodDeclaration, out TypeSyntax AliasType);
+        bool IsParameterTypeValid = GetParameterType(ParameterName, methodDeclaration, out TypeSyntax Type);
         Debug.Assert(IsParameterTypeValid);
 
-        string AliasName = ToIdentifierLocalName(ParameterName);
+        GetModifiedIdentifiers(arguments, ref ParameterName, out string AliasName);
 
-        foreach (AttributeArgumentModel argument in arguments)
-            if (argument.Name == nameof(RequireNotNullAttribute.AliasType))
-                AliasType = SyntaxFactory.IdentifierName(SyntaxFactory.Identifier(argument.Value));
-            else if (argument.Name == nameof(RequireNotNullAttribute.AliasName))
-                AliasName = argument.Value;
-
-        ExpressionStatementSyntax ExpressionStatement = GenerateOneRequireNotNullStatement(ParameterName, AliasType, AliasName);
+        ExpressionStatementSyntax ExpressionStatement = GenerateOneRequireNotNullStatement(ParameterName, Type, AliasName);
 
         return new List<StatementSyntax>() { ExpressionStatement };
+    }
+
+    private static void GetModifiedIdentifiers(List<AttributeArgumentModel> arguments, ref string parameterName, out string aliasName)
+    {
+        foreach (AttributeArgumentModel argument in arguments)
+            if (argument.Name == nameof(RequireNotNullAttribute.Name))
+                parameterName = argument.Value;
+
+        aliasName = ToIdentifierLocalName(parameterName);
+
+        foreach (AttributeArgumentModel argument in arguments)
+            if (argument.Name == nameof(RequireNotNullAttribute.AliasName))
+                aliasName = argument.Value;
     }
 
     private static List<StatementSyntax> GenerateMultipleRequireNotNullStatement(List<AttributeArgumentModel> arguments, MethodDeclarationSyntax methodDeclaration)
@@ -534,18 +606,19 @@ public partial class ContractGenerator
         foreach (AttributeArgumentModel argument in arguments)
         {
             string ParameterName = argument.Value;
-            bool IsParameterTypeValid = GetParameterType(ParameterName, methodDeclaration, out TypeSyntax AliasType);
-            Debug.Assert(IsParameterTypeValid);
             string AliasName = ToIdentifierLocalName(ParameterName);
 
-            ExpressionStatementSyntax ExpressionStatement = GenerateOneRequireNotNullStatement(ParameterName, AliasType, AliasName);
+            bool IsParameterTypeValid = GetParameterType(ParameterName, methodDeclaration, out TypeSyntax Type);
+            Debug.Assert(IsParameterTypeValid);
+
+            ExpressionStatementSyntax ExpressionStatement = GenerateOneRequireNotNullStatement(ParameterName, Type, AliasName);
             Statements.Add(ExpressionStatement);
         }
 
         return Statements;
     }
 
-    private static ExpressionStatementSyntax GenerateOneRequireNotNullStatement(string parameterName, TypeSyntax aliasType, string aliasName)
+    private static ExpressionStatementSyntax GenerateOneRequireNotNullStatement(string parameterName, TypeSyntax type, string aliasName)
     {
         ExpressionSyntax ContractName = SyntaxFactory.IdentifierName(ContractClassName);
         SimpleNameSyntax RequireNotNullName = SyntaxFactory.IdentifierName(ToNameWithoutAttribute<RequireNotNullAttribute>());
@@ -557,7 +630,7 @@ public partial class ContractGenerator
 
         SyntaxToken VariableName = SyntaxFactory.Identifier(aliasName);
         VariableDesignationSyntax VariableDesignation = SyntaxFactory.SingleVariableDesignation(VariableName);
-        DeclarationExpressionSyntax DeclarationExpression = SyntaxFactory.DeclarationExpression(aliasType, VariableDesignation.WithLeadingTrivia(WhitespaceTrivia));
+        DeclarationExpressionSyntax DeclarationExpression = SyntaxFactory.DeclarationExpression(type, VariableDesignation.WithLeadingTrivia(WhitespaceTrivia));
         ArgumentSyntax OutputArgument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), DeclarationExpression.WithLeadingTrivia(WhitespaceTrivia));
         OutputArgument = OutputArgument.WithLeadingTrivia(WhitespaceTrivia);
 
@@ -621,4 +694,6 @@ public partial class ContractGenerator
         else
             return $"_{text}";
     }
+
+    private static SyntaxTriviaList WhitespaceTrivia { get; } = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "));
 }
