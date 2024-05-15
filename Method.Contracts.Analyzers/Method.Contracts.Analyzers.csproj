@@ -7,14 +7,14 @@
         <Platforms>x64</Platforms>
 
         <RootNamespace>Contracts.Analyzers</RootNamespace>
-        <Version>1.4.1</Version>
+        <Version>1.4.2</Version>
         <Authors>David Le Bansais</Authors>
         <Company />
         <Product />
         <Description>A code generator companion for Method.Contracts</Description>
         <Copyright>Copyright © 2024 David Le Bansais</Copyright>
-        <AssemblyVersion>1.4.1.11</AssemblyVersion>
-        <FileVersion>1.4.1.11</FileVersion>
+        <AssemblyVersion>1.4.2.11</AssemblyVersion>
+        <FileVersion>1.4.2.11</FileVersion>
         <RepositoryUrl>https://github.com/dlebansais/Method.Contracts.Analyzers</RepositoryUrl>
         <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 
@@ -74,8 +74,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Method.Contracts-Debug" Version="1.4.0" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-        <PackageReference Include="Method.Contracts" Version="1.4.0" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
+        <PackageReference Include="Method.Contracts-Debug" Version="1.4.2" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+        <PackageReference Include="Method.Contracts" Version="1.4.2" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
     </ItemGroup>
 
     <ItemGroup>
