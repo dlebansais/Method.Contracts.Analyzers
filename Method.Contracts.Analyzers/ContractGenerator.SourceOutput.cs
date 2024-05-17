@@ -21,7 +21,7 @@ public partial class ContractGenerator
                 {{DisableWarnings}}{{Model.UsingsBeforeNamespace}}
                 namespace {{Model.Namespace}};
                 {{Model.UsingsAfterNamespace}}
-                partial class {{Model.ClassName}}
+                partial class {{Model.FullClassName}}
                 {
                 {{Model.Documentation}}{{Model.GeneratedMethodDeclaration}}
                 }

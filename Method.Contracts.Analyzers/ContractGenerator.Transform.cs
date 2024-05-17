@@ -41,8 +41,22 @@ public partial class ContractGenerator
 
         string Namespace = ContainingNamespace!.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
         string ClassName = ContainingClass!.Name;
-        string SymbolName = context.TargetSymbol.Name;
 
+        var ClassDeclaration = methodDeclaration.FirstAncestorOrSelf<ClassDeclarationSyntax>()!;
+        Debug.Assert(ClassDeclaration is not null);
+
+        string FullClassName = ClassName;
+
+        if (ClassDeclaration!.TypeParameterList is TypeParameterListSyntax TypeParameterList)
+        {
+            FullClassName += TypeParameterList.ToString();
+
+            string ConstraintClauses = ClassDeclaration!.ConstraintClauses.ToString();
+            if (ConstraintClauses != string.Empty)
+                FullClassName += " " + ConstraintClauses;
+        }
+
+        string SymbolName = context.TargetSymbol.Name;
         string VerifiedSuffix = Settings.VerifiedSuffix;
 
         Debug.Assert(GeneratorHelper.StringEndsWith(SymbolName, VerifiedSuffix));
@@ -54,6 +68,7 @@ public partial class ContractGenerator
             UsingsBeforeNamespace: string.Empty,
             UsingsAfterNamespace: string.Empty,
             ClassName: ClassName,
+            FullClassName: FullClassName,
             ShortMethodName: ShortMethodName,
             UniqueOverloadIdentifier: GetUniqueOverloadIdentifier(methodDeclaration),
             Documentation: string.Empty,

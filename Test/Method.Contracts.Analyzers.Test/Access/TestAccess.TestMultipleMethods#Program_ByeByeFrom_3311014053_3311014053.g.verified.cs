@@ -9,7 +9,7 @@ using Contracts;
 
 partial class Program
 {
-    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.4.2.11")]
+    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.4.3.12")]
     public static void ByeByeFrom(string text, out string textPlus)
     {
         ByeByeFromVerified(text, out textPlus);

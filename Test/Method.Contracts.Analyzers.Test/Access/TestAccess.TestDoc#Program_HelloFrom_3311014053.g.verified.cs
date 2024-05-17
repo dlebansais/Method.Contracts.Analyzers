@@ -14,7 +14,7 @@ partial class Program
     /// </summary>
     /// <param name="text">Test parameter.</param>
     /// <returns>Test value.</returns>
-    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.4.2.11")]
+    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.4.3.12")]
     public static string HelloFrom(string text)
     {
         var Result = HelloFromVerified(text);

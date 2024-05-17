@@ -10,10 +10,8 @@ using Contracts;
 partial class Program
 {
     [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.4.3.12")]
-    public static void HelloFrom(string text, out string textPlus)
+    public static void HelloFrom<T>(string text, out string textPlus)
     {
-        Contract.Require(text.Length > 0);
-
         HelloFromVerified(text, out textPlus);
     }
 }

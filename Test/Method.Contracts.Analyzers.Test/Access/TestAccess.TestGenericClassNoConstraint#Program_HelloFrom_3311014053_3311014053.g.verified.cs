@@ -7,13 +7,11 @@ using System;
 using System.CodeDom.Compiler;
 using Contracts;
 
-partial class Program
+partial class Program<T>
 {
     [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.4.3.12")]
     public static void HelloFrom(string text, out string textPlus)
     {
-        Contract.Require(text.Length > 0);
-
         HelloFromVerified(text, out textPlus);
     }
 }
