@@ -104,6 +104,22 @@ public partial class ContractGenerator
         {
             var LeadingTrivia = methodDeclaration.GetLeadingTrivia();
 
+            List<SyntaxTrivia> SupportedTrivias = new();
+            foreach (var trivia in LeadingTrivia)
+                if (trivia.IsKind(SyntaxKind.EndOfLineTrivia) ||
+                    trivia.IsKind(SyntaxKind.WhitespaceTrivia) ||
+                    trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
+                    trivia.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia))
+                    SupportedTrivias.Add(trivia);
+
+            // Trim consecutive end of lines until there is only at most one at the begining.
+            while (SupportedTrivias.Count > 2 &&
+                   SupportedTrivias[0].IsKind(SyntaxKind.EndOfLineTrivia) &&
+                   SupportedTrivias[1].IsKind(SyntaxKind.EndOfLineTrivia))
+                SupportedTrivias.RemoveAt(0);
+
+            LeadingTrivia = SyntaxFactory.TriviaList(SupportedTrivias);
+
             foreach (var Trivia in LeadingTrivia)
                 if (Trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia))
                 {
