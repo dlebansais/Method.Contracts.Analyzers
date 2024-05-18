@@ -106,17 +106,24 @@ public partial class ContractGenerator
 
             List<SyntaxTrivia> SupportedTrivias = new();
             foreach (var trivia in LeadingTrivia)
-                if (trivia.IsKind(SyntaxKind.EndOfLineTrivia) ||
-                    trivia.IsKind(SyntaxKind.WhitespaceTrivia) ||
-                    trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
-                    trivia.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia))
+                if (IsSupportedTrivia(trivia))
                     SupportedTrivias.Add(trivia);
 
-            // Trim consecutive end of lines until there is only at most one at the begining.
-            while (SupportedTrivias.Count > 2 &&
-                   SupportedTrivias[0].IsKind(SyntaxKind.EndOfLineTrivia) &&
-                   SupportedTrivias[1].IsKind(SyntaxKind.EndOfLineTrivia))
+            // Trim consecutive end of lines until there is only at most one at the beginning.
+            while (CountStartingEndOfLineTrivias(SupportedTrivias) > 1)
                 SupportedTrivias.RemoveAt(0);
+
+            // Trim whitespace trivias at start.
+            while (SupportedTrivias.Count > 0 && SupportedTrivias[0].IsKind(SyntaxKind.WhitespaceTrivia))
+                SupportedTrivias.RemoveAt(0);
+
+            // Remove successive whitespace trivias.
+            int i = 0;
+            while (i + 1 < SupportedTrivias.Count)
+                if (SupportedTrivias[i].IsKind(SyntaxKind.WhitespaceTrivia) && SupportedTrivias[i + 1].IsKind(SyntaxKind.WhitespaceTrivia))
+                    SupportedTrivias.RemoveAt(i);
+                else
+                    i++;
 
             LeadingTrivia = SyntaxFactory.TriviaList(SupportedTrivias);
 
@@ -141,6 +148,31 @@ public partial class ContractGenerator
         }
 
         return Documentation;
+    }
+
+    private static bool IsSupportedTrivia(SyntaxTrivia trivia)
+    {
+        return trivia.IsKind(SyntaxKind.EndOfLineTrivia) ||
+               trivia.IsKind(SyntaxKind.WhitespaceTrivia) ||
+               trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
+               trivia.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia);
+    }
+
+    private static int CountStartingEndOfLineTrivias(List<SyntaxTrivia> trivias)
+    {
+        int Count = 0;
+
+        for (int i = 0; i < trivias.Count; i++)
+        {
+            SyntaxTrivia Trivia = trivias[i];
+
+            if (Trivia.IsKind(SyntaxKind.EndOfLineTrivia))
+                Count++;
+            else if (!Trivia.IsKind(SyntaxKind.WhitespaceTrivia))
+                break;
+        }
+
+        return Count;
     }
 
     private static Dictionary<string, string> GetParameterNameReplacementTable(ContractModel model, MethodDeclarationSyntax methodDeclaration)

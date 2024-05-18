@@ -307,11 +307,12 @@ internal partial class Program
         Console.WriteLine(Text);
     }
 
+    #endregion
 
-#region Test
 #if DEBUG
 #endif
-#endregion
+
+    #region Test
     /// <summary>
     /// Test doc.
     /// </summary>
