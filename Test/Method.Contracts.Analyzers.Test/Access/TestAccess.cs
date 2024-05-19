@@ -309,8 +309,8 @@ internal partial class Program
 
     #endregion
 
-#if DEBUG
-#endif
+    #if DEBUG
+    #endif
 
     #region Test
     /// <summary>
