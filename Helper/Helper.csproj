@@ -13,8 +13,8 @@
         <Product />
         <Description>Code generation helper</Description>
         <Copyright>Copyright © 2024 David Le Bansais</Copyright>
-        <AssemblyVersion>1.4.4.12</AssemblyVersion>
-        <FileVersion>1.4.4.12</FileVersion>
+        <AssemblyVersion>1.4.4.13</AssemblyVersion>
+        <FileVersion>1.4.4.13</FileVersion>
         <RepositoryUrl>https://github.com/dlebansais/Method.Contracts.Analyzers</RepositoryUrl>
         <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 
