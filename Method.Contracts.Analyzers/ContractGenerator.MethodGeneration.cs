@@ -27,6 +27,7 @@ public partial class ContractGenerator
         SyntaxTriviaList LeadingTrivia = GetLeadingTriviaWithLineEnd(Tab);
         SyntaxTriviaList LeadingTriviaWithoutLineEnd = GetLeadingTriviaWithoutLineEnd(Tab);
         SyntaxTriviaList? TrailingTrivia = GetModifiersTrailingTrivia(MethodDeclaration);
+        bool SimplifyReturnTypeLeadingTrivia = MethodDeclaration.Modifiers.Count == 0 && MethodDeclaration.ReturnType.HasLeadingTrivia;
 
         SyntaxList<AttributeListSyntax> CodeAttributes = GenerateCodeAttributes();
         MethodDeclaration = MethodDeclaration.WithAttributeLists(CodeAttributes);
@@ -45,6 +46,8 @@ public partial class ContractGenerator
 
         if (isAsync && IsTaskType(MethodDeclaration.ReturnType))
             MethodDeclaration = MethodDeclaration.WithReturnType(SyntaxFactory.IdentifierName("Task").WithTrailingTrivia(SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "))));
+        else if (SimplifyReturnTypeLeadingTrivia) // This case apply to methods with zero modifier that become public.
+            MethodDeclaration = MethodDeclaration.WithReturnType(MethodDeclaration.ReturnType.WithLeadingTrivia(WhitespaceTrivia));
 
         MethodDeclaration = MethodDeclaration.WithLeadingTrivia(LeadingTriviaWithoutLineEnd);
 
@@ -113,10 +116,7 @@ public partial class ContractGenerator
                 ModifierToken = ModifierToken.WithLeadingTrivia(SyntaxFactory.Space);
 
             if (i + 1 == accessAttributeModel.Arguments.Count)
-            {
-                if (trailingTrivia is not null)
-                    ModifierToken = ModifierToken.WithTrailingTrivia(trailingTrivia);
-            }
+                ModifierToken = ModifierToken.WithTrailingTrivia(trailingTrivia);
 
             ModifierTokens.Add(ModifierToken);
 
@@ -152,11 +152,8 @@ public partial class ContractGenerator
             }
         }
 
-        if (trailingTrivia is not null)
-        {
-            int LastItemIndex = methodDeclaration.Modifiers.Count - 1;
-            ModifierTokens[LastItemIndex] = ModifierTokens[LastItemIndex].WithTrailingTrivia(trailingTrivia);
-        }
+        int LastItemIndex = methodDeclaration.Modifiers.Count - 1;
+        ModifierTokens[LastItemIndex] = ModifierTokens[LastItemIndex].WithTrailingTrivia(trailingTrivia);
 
         return ModifierTokens;
     }
@@ -184,7 +181,10 @@ public partial class ContractGenerator
 
     private static SyntaxTriviaList? GetModifiersTrailingTrivia(MethodDeclarationSyntax methodDeclaration)
     {
-        return methodDeclaration.Modifiers.Count > 0 ? methodDeclaration.Modifiers.Last().TrailingTrivia : null;
+        if (methodDeclaration.Modifiers.Count > 0)
+            return methodDeclaration.Modifiers.Last().TrailingTrivia;
+        else
+            return null;
     }
 
     private static bool HasUpdatedParameterList(ContractModel model, MethodDeclarationSyntax methodDeclaration, out ParameterListSyntax updatedParameterList)

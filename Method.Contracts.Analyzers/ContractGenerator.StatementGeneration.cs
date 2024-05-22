@@ -145,7 +145,13 @@ public partial class ContractGenerator
 
     private static bool IsVoidType(TypeSyntax returnType)
     {
-        return returnType is PredefinedTypeSyntax PredefinedType && PredefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword);
+        if (returnType is not PredefinedTypeSyntax PredefinedType)
+            return false;
+
+        if (!PredefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword))
+            return false;
+
+        return true;
     }
 
     private static void AddAttributeStatements(MethodDeclarationSyntax methodDeclaration,
@@ -186,39 +192,38 @@ public partial class ContractGenerator
         ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(methodName + VerifiedSuffix);
 
         List<ArgumentSyntax> Arguments = new();
-        foreach (var CallParameter in parameterList.Parameters)
-            if (CallParameter is ParameterSyntax Parameter)
+        foreach (ParameterSyntax Parameter in parameterList.Parameters)
+        {
+            bool IsRef = false;
+            bool IsOut = false;
+
+            foreach (var Modifier in Parameter.Modifiers)
             {
-                bool IsRef = false;
-                bool IsOut = false;
-
-                foreach (var Modifier in Parameter.Modifiers)
-                {
-                    if (Modifier.IsKind(SyntaxKind.RefKeyword))
-                        IsRef = true;
-                    if (Modifier.IsKind(SyntaxKind.OutKeyword))
-                        IsOut = true;
-                }
-
-                string ParameterName = Parameter.Identifier.Text;
-                if (aliasNameReplacementTable.TryGetValue(ParameterName, out string ReplacedParameterName))
-                    ParameterName = ReplacedParameterName;
-
-                IdentifierNameSyntax ParameterIdentifier = SyntaxFactory.IdentifierName(ParameterName);
-
-                ArgumentSyntax Argument;
-                if (IsRef)
-                    Argument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.RefKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia));
-                else if (IsOut)
-                    Argument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia));
-                else
-                    Argument = SyntaxFactory.Argument(ParameterIdentifier);
-
-                if (Arguments.Count > 0)
-                    Argument = Argument.WithLeadingTrivia(WhitespaceTrivia);
-
-                Arguments.Add(Argument);
+                if (Modifier.IsKind(SyntaxKind.RefKeyword))
+                    IsRef = true;
+                if (Modifier.IsKind(SyntaxKind.OutKeyword))
+                    IsOut = true;
             }
+
+            string ParameterName = Parameter.Identifier.Text;
+            if (aliasNameReplacementTable.TryGetValue(ParameterName, out string ReplacedParameterName))
+                ParameterName = ReplacedParameterName;
+
+            IdentifierNameSyntax ParameterIdentifier = SyntaxFactory.IdentifierName(ParameterName);
+
+            ArgumentSyntax Argument;
+            if (IsRef)
+                Argument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.RefKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia));
+            else if (IsOut)
+                Argument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia));
+            else
+                Argument = SyntaxFactory.Argument(ParameterIdentifier);
+
+            if (Arguments.Count > 0)
+                Argument = Argument.WithLeadingTrivia(WhitespaceTrivia);
+
+            Arguments.Add(Argument);
+        }
 
         ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(Arguments));
         ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(Invocation, ArgumentList);
@@ -240,39 +245,38 @@ public partial class ContractGenerator
         ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(methodName + VerifiedSuffix);
 
         List<ArgumentSyntax> Arguments = new();
-        foreach (var CallParameter in parameterList.Parameters)
-            if (CallParameter is ParameterSyntax Parameter)
+        foreach (ParameterSyntax Parameter in parameterList.Parameters)
+        {
+            bool IsRef = false;
+            bool IsOut = false;
+
+            foreach (var Modifier in Parameter.Modifiers)
             {
-                bool IsRef = false;
-                bool IsOut = false;
-
-                foreach (var Modifier in Parameter.Modifiers)
-                {
-                    if (Modifier.IsKind(SyntaxKind.RefKeyword))
-                        IsRef = true;
-                    if (Modifier.IsKind(SyntaxKind.OutKeyword))
-                        IsOut = true;
-                }
-
-                string ParameterName = Parameter.Identifier.Text;
-                if (aliasNameReplacementTable.TryGetValue(ParameterName, out string ReplacedParameterName))
-                    ParameterName = ReplacedParameterName;
-
-                IdentifierNameSyntax ParameterIdentifier = SyntaxFactory.IdentifierName(ParameterName);
-
-                ArgumentSyntax Argument;
-                if (IsRef)
-                    Argument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.RefKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia));
-                else if (IsOut)
-                    Argument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia));
-                else
-                    Argument = SyntaxFactory.Argument(ParameterIdentifier);
-
-                if (Arguments.Count > 0)
-                    Argument = Argument.WithLeadingTrivia(WhitespaceTrivia);
-
-                Arguments.Add(Argument);
+                if (Modifier.IsKind(SyntaxKind.RefKeyword))
+                    IsRef = true;
+                if (Modifier.IsKind(SyntaxKind.OutKeyword))
+                    IsOut = true;
             }
+
+            string ParameterName = Parameter.Identifier.Text;
+            if (aliasNameReplacementTable.TryGetValue(ParameterName, out string ReplacedParameterName))
+                ParameterName = ReplacedParameterName;
+
+            IdentifierNameSyntax ParameterIdentifier = SyntaxFactory.IdentifierName(ParameterName);
+
+            ArgumentSyntax Argument;
+            if (IsRef)
+                Argument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.RefKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia));
+            else if (IsOut)
+                Argument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia));
+            else
+                Argument = SyntaxFactory.Argument(ParameterIdentifier);
+
+            if (Arguments.Count > 0)
+                Argument = Argument.WithLeadingTrivia(WhitespaceTrivia);
+
+            Arguments.Add(Argument);
+        }
 
         ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(Arguments));
         ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(Invocation, ArgumentList).WithLeadingTrivia(WhitespaceTrivia);

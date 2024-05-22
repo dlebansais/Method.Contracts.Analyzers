@@ -182,7 +182,10 @@ public partial class ContractGenerator
         if (IsRequireOrEnsureAttributeWithDebugOnly(attributeArguments))
             return IsValidRequireOrEnsureAttributeWithDebugOnly(methodDeclaration, attributeArguments);
         else if (attributeArguments.Count > 0)
-            return IsValidStringOnlyAttribute(methodDeclaration, attributeArguments, out _) ? AttributeGeneration.Valid : AttributeGeneration.Invalid;
+            if (IsValidStringOnlyAttribute(methodDeclaration, attributeArguments, out _))
+                return AttributeGeneration.Valid;
+            else
+                return AttributeGeneration.Invalid;
         else
             return AttributeGeneration.Invalid;
     }
