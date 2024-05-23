@@ -79,7 +79,7 @@ public partial class ContractGenerator
     private static string GetToolName()
     {
         AssemblyName ExecutingAssemblyName = Assembly.GetExecutingAssembly().GetName();
-        return $"{ExecutingAssemblyName.Name}";
+        return ExecutingAssemblyName.Name.ToString();
     }
 
     private static string GetToolVersion()
