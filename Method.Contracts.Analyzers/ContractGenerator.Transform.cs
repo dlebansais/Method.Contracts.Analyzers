@@ -116,7 +116,7 @@ public partial class ContractGenerator
                 SupportedTrivias.RemoveAt(0);
 
             // Trim whitespace trivias at start.
-            while (SupportedTrivias.Count > 0 && SupportedTrivias[0].IsKind(SyntaxKind.WhitespaceTrivia))
+            while (IsFirstTriviaWhitespace(SupportedTrivias))
                 SupportedTrivias.RemoveAt(0);
 
             // Remove successive whitespace trivias.
@@ -158,6 +158,19 @@ public partial class ContractGenerator
                trivia.IsKind(SyntaxKind.WhitespaceTrivia) ||
                trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
                trivia.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia);
+    }
+
+    private static bool IsFirstTriviaWhitespace(IList<SyntaxTrivia> trivias)
+    {
+        if (trivias.Count == 0)
+            return false;
+
+        SyntaxTrivia FirstTrivia = trivias[0];
+
+        if (!FirstTrivia.IsKind(SyntaxKind.WhitespaceTrivia))
+            return false;
+
+        return true;
     }
 
     private static int CountStartingEndOfLineTrivias(List<SyntaxTrivia> trivias)

@@ -64,17 +64,16 @@ public partial class ContractGenerator : IIncrementalGenerator
         TypeSyntax? ResultType = null;
         ParameterListSyntax ParameterList = methodDeclaration.ParameterList;
 
-        foreach (var CallParameter in ParameterList.Parameters)
-            if (CallParameter is ParameterSyntax Parameter)
-            {
-                string ParameterName = Parameter.Identifier.Text;
+        foreach (ParameterSyntax Parameter in ParameterList.Parameters)
+        {
+            string ParameterName = Parameter.Identifier.Text;
 
-                if (ParameterName == argumentName)
-                {
-                    ResultType = Parameter.Type;
-                    break;
-                }
+            if (ParameterName == argumentName)
+            {
+                ResultType = Parameter.Type;
+                break;
             }
+        }
 
         if (ResultType is not null)
         {
