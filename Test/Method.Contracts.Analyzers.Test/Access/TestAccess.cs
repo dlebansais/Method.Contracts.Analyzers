@@ -362,11 +362,11 @@ internal partial class Program
 /// </summary>
 /// <param name=""text"">Test parameter.</param>
 /// <returns>Test value.</returns>
-[Access(""public"", ""static"")]
-private static string HelloFromVerified(string text)
-{
-    return text + ""!"";
-}
+    [Access(""public"", ""static"")]
+    private static string HelloFromVerified(string text)
+    {
+        return text + ""!"";
+    }
 }
 ";
 
