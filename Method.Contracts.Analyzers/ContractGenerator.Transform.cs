@@ -142,11 +142,19 @@ public partial class ContractGenerator
         {
             string OldParameterName = $"<param name=\"{Entry.Key}\">";
             string NewParameterName = $"<param name=\"{Entry.Value}\">";
+#if NETSTANDARD2_1_OR_GREATER
+            Documentation = Documentation.Replace(OldParameterName, NewParameterName, StringComparison.Ordinal);
+#else
             Documentation = Documentation.Replace(OldParameterName, NewParameterName);
+#endif
 
             string OldParameterRef = $"<paramref name=\"{Entry.Key}\"/>";
             string NewParameterRef = $"<paramref name=\"{Entry.Value}\"/>";
+#if NETSTANDARD2_1_OR_GREATER
+            Documentation = Documentation.Replace(OldParameterRef, NewParameterRef, StringComparison.Ordinal);
+#else
             Documentation = Documentation.Replace(OldParameterRef, NewParameterRef);
+#endif
         }
 
         return Documentation;
@@ -412,7 +420,18 @@ public partial class ContractGenerator
 
     private static (string BeforeNamespaceDeclaration, string AfterNamespaceDeclaration) AddMissingUsing(string beforeNamespaceDeclaration, string afterNamespaceDeclaration, string usingDirective)
     {
-        if (!beforeNamespaceDeclaration.Contains(usingDirective) && !afterNamespaceDeclaration.Contains(usingDirective))
+        bool IsDirectiveBeforeNamespace;
+        bool IsDirectiveAfterNamespace;
+
+#if NETSTANDARD2_1_OR_GREATER
+        IsDirectiveBeforeNamespace = beforeNamespaceDeclaration.Contains(usingDirective, StringComparison.Ordinal);
+        IsDirectiveAfterNamespace = afterNamespaceDeclaration.Contains(usingDirective, StringComparison.Ordinal);
+#else
+        IsDirectiveBeforeNamespace = beforeNamespaceDeclaration.Contains(usingDirective);
+        IsDirectiveAfterNamespace = afterNamespaceDeclaration.Contains(usingDirective);
+#endif
+
+        if (!IsDirectiveBeforeNamespace && !IsDirectiveAfterNamespace)
             afterNamespaceDeclaration += $"{usingDirective}\n";
 
         return (beforeNamespaceDeclaration, afterNamespaceDeclaration);

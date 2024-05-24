@@ -1,5 +1,6 @@
 ﻿namespace Contracts.Analyzers;
 
+using System;
 using System.Collections.Immutable;
 using System.Text;
 using Contracts.Analyzers.Helper;
@@ -26,7 +27,11 @@ public partial class ContractGenerator
                 {{Model.Documentation}}{{Model.GeneratedMethodDeclaration}}
                 }
                 """;
+#if NETSTANDARD2_1_OR_GREATER
+            SourceText = SourceText.Replace("\r\n", "\n", StringComparison.Ordinal);
+#else
             SourceText = SourceText.Replace("\r\n", "\n");
+#endif
 
             context.AddSource($"{Model.ClassName}_{Model.ShortMethodName}{Model.UniqueOverloadIdentifier}.g.cs", Microsoft.CodeAnalysis.Text.SourceText.From(SourceText, Encoding.UTF8));
         }

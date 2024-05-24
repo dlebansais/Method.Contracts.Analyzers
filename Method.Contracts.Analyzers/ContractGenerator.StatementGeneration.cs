@@ -56,7 +56,9 @@ public partial class ContractGenerator
 
             if (Item.Name == nameof(RequireNotNullAttribute))
             {
-                if (Arguments.Count > 0 && Arguments.Any(argument => argument.Name != string.Empty))
+                Debug.Assert(Arguments.Count > 0, "Valid RequireNotNull attribute always has arguments.");
+
+                if (Arguments.Any(argument => argument.Name != string.Empty))
                 {
                     Debug.Assert(Arguments[0].Name == string.Empty);
                     string ParameterName = Arguments[0].Value;
