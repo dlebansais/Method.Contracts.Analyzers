@@ -1,12 +1,11 @@
 ﻿//HintName: Program_HelloFrom_3311014053_3311014053.g.cs
 #nullable enable
 
+using global::System.CodeDom.Compiler;
 using global::System.Threading.Tasks;
 using Contracts;
 
 namespace Contracts.TestSuite;
-
-using System.CodeDom.Compiler;
 
 partial class Program
 {

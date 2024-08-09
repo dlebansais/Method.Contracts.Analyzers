@@ -80,6 +80,7 @@ internal partial class Program
         const string Source = @"
 namespace Contracts.TestSuite;
 
+using global::System.CodeDom.Compiler;
 using global::System.Threading.Tasks;
 using Contracts;
 
@@ -111,6 +112,7 @@ internal partial class Program
     {
         // The source code to test
         const string Source = @"
+using global::System.CodeDom.Compiler;
 using global::System.Threading.Tasks;
 using Contracts;
 
