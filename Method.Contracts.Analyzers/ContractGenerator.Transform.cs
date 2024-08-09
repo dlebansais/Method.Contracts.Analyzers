@@ -406,33 +406,36 @@ public partial class ContractGenerator
     {
         string BeforeNamespaceDeclaration = GeneratorHelper.SortUsings(rawBeforeNamespaceDeclaration);
         string AfterNamespaceDeclaration = GeneratorHelper.SortUsings(rawAfterNamespaceDeclaration);
+        bool UseGlobal = GeneratorHelper.HasGlobalSystem(AfterNamespaceDeclaration);
 
-        (BeforeNamespaceDeclaration, AfterNamespaceDeclaration) = AddMissingUsing(BeforeNamespaceDeclaration, AfterNamespaceDeclaration, "using Contracts;");
-        (BeforeNamespaceDeclaration, AfterNamespaceDeclaration) = AddMissingUsing(BeforeNamespaceDeclaration, AfterNamespaceDeclaration, "using System.CodeDom.Compiler;");
+        (BeforeNamespaceDeclaration, AfterNamespaceDeclaration) = AddMissingUsing(BeforeNamespaceDeclaration, AfterNamespaceDeclaration, "Contracts", isGlobal: false);
+        (BeforeNamespaceDeclaration, AfterNamespaceDeclaration) = AddMissingUsing(BeforeNamespaceDeclaration, AfterNamespaceDeclaration, "System.CodeDom.Compiler", isGlobal: UseGlobal);
 
         if (isAsync)
-            (BeforeNamespaceDeclaration, AfterNamespaceDeclaration) = AddMissingUsing(BeforeNamespaceDeclaration, AfterNamespaceDeclaration, "using System.Threading.Tasks;");
+            (BeforeNamespaceDeclaration, AfterNamespaceDeclaration) = AddMissingUsing(BeforeNamespaceDeclaration, AfterNamespaceDeclaration, "System.Threading.Tasks", isGlobal: UseGlobal);
 
         AfterNamespaceDeclaration = GeneratorHelper.SortUsings(AfterNamespaceDeclaration);
 
         return (BeforeNamespaceDeclaration, AfterNamespaceDeclaration);
     }
 
-    private static (string BeforeNamespaceDeclaration, string AfterNamespaceDeclaration) AddMissingUsing(string beforeNamespaceDeclaration, string afterNamespaceDeclaration, string usingDirective)
+    private static (string BeforeNamespaceDeclaration, string AfterNamespaceDeclaration) AddMissingUsing(string beforeNamespaceDeclaration, string afterNamespaceDeclaration, string usingDirective, bool isGlobal)
     {
+        string GlobalDirective = $"using global::{usingDirective};\n";
+        string NonGlobalDirective = $"using {usingDirective};\n";
         bool IsDirectiveBeforeNamespace;
         bool IsDirectiveAfterNamespace;
 
 #if NETSTANDARD2_1_OR_GREATER
-        IsDirectiveBeforeNamespace = beforeNamespaceDeclaration.Contains(usingDirective, StringComparison.Ordinal);
-        IsDirectiveAfterNamespace = afterNamespaceDeclaration.Contains(usingDirective, StringComparison.Ordinal);
+        IsDirectiveBeforeNamespace = beforeNamespaceDeclaration.Contains(GlobalDirective, StringComparison.Ordinal) || beforeNamespaceDeclaration.Contains(NonGlobalDirective, StringComparison.Ordinal);
+        IsDirectiveAfterNamespace = afterNamespaceDeclaration.Contains(GlobalDirective, StringComparison.Ordinal) || afterNamespaceDeclaration.Contains(NonGlobalDirective, StringComparison.Ordinal);
 #else
-        IsDirectiveBeforeNamespace = beforeNamespaceDeclaration.Contains(usingDirective);
-        IsDirectiveAfterNamespace = afterNamespaceDeclaration.Contains(usingDirective);
+        IsDirectiveBeforeNamespace = beforeNamespaceDeclaration.Contains(GlobalDirective) || beforeNamespaceDeclaration.Contains(NonGlobalDirective);
+        IsDirectiveAfterNamespace = afterNamespaceDeclaration.Contains(GlobalDirective) || afterNamespaceDeclaration.Contains(NonGlobalDirective);
 #endif
 
         if (!IsDirectiveBeforeNamespace && !IsDirectiveAfterNamespace)
-            afterNamespaceDeclaration += $"{usingDirective}\n";
+            afterNamespaceDeclaration += isGlobal ? GlobalDirective : NonGlobalDirective;
 
         return (beforeNamespaceDeclaration, afterNamespaceDeclaration);
     }

@@ -24,6 +24,25 @@ internal static class GeneratorHelper
     private const string UsingDirectivePrefix = "using ";
 
     /// <summary>
+    /// Checks whether using directives contain 'using global::System'.
+    /// </summary>
+    /// <param name="usings">The using directives to check.</param>
+    /// <returns><see langword="true"/> if using directives contain 'using global::System'; otherwise, <see langword="false"/>.</returns>
+    public static bool HasGlobalSystem(string usings)
+    {
+        if (usings == string.Empty)
+            return false;
+
+        string[] Lines = usings.Split('\n');
+
+        foreach (string Line in Lines)
+            if (Line == "using global::System;" || StringStartsWith(Line, "using global::System."))
+                return true;
+
+        return false;
+    }
+
+    /// <summary>
     /// Sorts using directives.
     /// </summary>
     /// <param name="usings">The using directives to sort.</param>
@@ -88,7 +107,7 @@ internal static class GeneratorHelper
 
     private static bool IsSystemUsing(string usingNamespace)
     {
-        return usingNamespace == "System" || StringStartsWith(usingNamespace, "System.");
+        return usingNamespace == "System" || StringStartsWith(usingNamespace, "System.") || usingNamespace == "global::System" || StringStartsWith(usingNamespace, "global::System.");
     }
 
     /// <summary>
