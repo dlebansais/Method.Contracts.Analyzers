@@ -223,4 +223,4 @@ To change a setting, modify the `.csproj` file of your project as follow (*Demo*
     </ItemGroup>
 ````
 
-You don't have to specify all values if you're changing just one setting. Note that empty strings for `SuffixVerifier` and `ReturnIdentifier` are ignored, as well `TabLength` if not a strictly positive integer value.
+You don't have to specify all values if you're changing just one setting. Note that empty strings for `SuffixVerifier` and `ReturnIdentifier` are ignored, as well as `TabLength` if it's not a strictly positive integer value.

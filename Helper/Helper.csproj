@@ -7,14 +7,14 @@
         <Platforms>x64</Platforms>
 
         <RootNamespace>Contracts.Analyzers.Helper</RootNamespace>
-        <Version>1.4.5</Version>
+        <Version>1.4.6</Version>
         <Authors>David Le Bansais</Authors>
         <Company />
         <Product />
         <Description>Code generation helper</Description>
         <Copyright>Copyright © 2024 David Le Bansais</Copyright>
-        <AssemblyVersion>1.4.5.14</AssemblyVersion>
-        <FileVersion>1.4.5.14</FileVersion>
+        <AssemblyVersion>1.4.6.15</AssemblyVersion>
+        <FileVersion>1.4.6.15</FileVersion>
         <RepositoryUrl>https://github.com/dlebansais/Method.Contracts.Analyzers</RepositoryUrl>
         <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 
@@ -42,7 +42,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="IDisposableAnalyzers" Version="4.0.7">
+        <PackageReference Include="IDisposableAnalyzers" Version="4.0.8">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -69,7 +69,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" />
     </ItemGroup>
 
 </Project>

@@ -5,16 +5,13 @@ namespace Contracts.TestSuite;
 
 using System;
 using System.CodeDom.Compiler;
-using System.Threading.Tasks;
 using Contracts;
 
-partial class Program
+partial record Program<T> where T : class, Exception
 {
     [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.4.6.15")]
-    public static async Task HelloFrom(string text, out string textPlus)
+    public static void HelloFrom(string text, out string textPlus)
     {
-        Contract.RequireNotNull(text, out string Text);
-
-        await HelloFromVerified(Text, out textPlus);
+        HelloFromVerified(text, out textPlus);
     }
 }

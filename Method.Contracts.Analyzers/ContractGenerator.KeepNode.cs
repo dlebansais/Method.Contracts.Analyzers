@@ -37,7 +37,9 @@ public partial class ContractGenerator
             return false;
 
         // Ignore methods that are not in a class and a namespace.
-        if (MethodDeclaration.FirstAncestorOrSelf<ClassDeclarationSyntax>() is null ||
+        if ((MethodDeclaration.FirstAncestorOrSelf<ClassDeclarationSyntax>() is null &&
+             MethodDeclaration.FirstAncestorOrSelf<StructDeclarationSyntax>() is null &&
+             MethodDeclaration.FirstAncestorOrSelf<RecordDeclarationSyntax>() is null) ||
             MethodDeclaration.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>() is null)
             return false;
 

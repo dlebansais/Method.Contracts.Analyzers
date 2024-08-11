@@ -41,20 +41,59 @@ public partial class ContractGenerator
 
         string Namespace = ContainingNamespace!.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
         string ClassName = ContainingClass!.Name;
+        string? DeclarationTokens = null;
+        string? FullClassName = null;
 
-        var ClassDeclaration = methodDeclaration.FirstAncestorOrSelf<ClassDeclarationSyntax>()!;
-        Debug.Assert(ClassDeclaration is not null);
-
-        string FullClassName = ClassName;
-
-        if (ClassDeclaration!.TypeParameterList is TypeParameterListSyntax TypeParameterList)
+        if (methodDeclaration.FirstAncestorOrSelf<ClassDeclarationSyntax>() is ClassDeclarationSyntax ClassDeclaration)
         {
-            FullClassName += TypeParameterList.ToString();
+            DeclarationTokens = "class";
+            FullClassName = ClassName;
+            TypeParameterListSyntax? TypeParameterList = ClassDeclaration.TypeParameterList;
 
-            string ConstraintClauses = ClassDeclaration!.ConstraintClauses.ToString();
-            if (ConstraintClauses != string.Empty)
-                FullClassName += " " + ConstraintClauses;
+            if (TypeParameterList is not null)
+            {
+                FullClassName += TypeParameterList.ToString();
+
+                string ConstraintClauses = ClassDeclaration!.ConstraintClauses.ToString();
+                if (ConstraintClauses != string.Empty)
+                    FullClassName += " " + ConstraintClauses;
+            }
         }
+
+        if (methodDeclaration.FirstAncestorOrSelf<StructDeclarationSyntax>() is StructDeclarationSyntax StructDeclaration)
+        {
+            DeclarationTokens = "struct";
+            FullClassName = ClassName;
+            TypeParameterListSyntax? TypeParameterList = StructDeclaration.TypeParameterList;
+
+            if (TypeParameterList is not null)
+            {
+                FullClassName += TypeParameterList.ToString();
+
+                string ConstraintClauses = StructDeclaration!.ConstraintClauses.ToString();
+                if (ConstraintClauses != string.Empty)
+                    FullClassName += " " + ConstraintClauses;
+            }
+        }
+
+        if (methodDeclaration.FirstAncestorOrSelf<RecordDeclarationSyntax>() is RecordDeclarationSyntax RecordDeclaration)
+        {
+            DeclarationTokens = RecordDeclaration.ClassOrStructKeyword.IsKind(SyntaxKind.StructKeyword) ? "record struct" : "record";
+            FullClassName = ClassName;
+            TypeParameterListSyntax? TypeParameterList = RecordDeclaration.TypeParameterList;
+
+            if (TypeParameterList is not null)
+            {
+                FullClassName += TypeParameterList.ToString();
+
+                string ConstraintClauses = RecordDeclaration!.ConstraintClauses.ToString();
+                if (ConstraintClauses != string.Empty)
+                    FullClassName += " " + ConstraintClauses;
+            }
+        }
+
+        Debug.Assert(DeclarationTokens is not null);
+        Debug.Assert(FullClassName is not null);
 
         string SymbolName = context.TargetSymbol.Name;
         string VerifiedSuffix = Settings.VerifiedSuffix;
@@ -68,7 +107,8 @@ public partial class ContractGenerator
             UsingsBeforeNamespace: string.Empty,
             UsingsAfterNamespace: string.Empty,
             ClassName: ClassName,
-            FullClassName: FullClassName,
+            DeclarationTokens: DeclarationTokens!,
+            FullClassName: FullClassName!,
             ShortMethodName: ShortMethodName,
             UniqueOverloadIdentifier: GetUniqueOverloadIdentifier(methodDeclaration),
             Documentation: string.Empty,
