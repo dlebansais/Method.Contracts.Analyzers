@@ -48,34 +48,42 @@ public partial class ContractGenerator
         List<string> AttributeNames = new();
         bool IsDebugGeneration = MethodDeclaration.SyntaxTree.Options.PreprocessorSymbolNames.Contains("DEBUG");
 
-        Dictionary<string, Func<MethodDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, AttributeGeneration>> ValidityVerifierTable = new()
-        {
-            { nameof(AccessAttribute), IsValidAccessAttribute },
-            { nameof(RequireNotNullAttribute), IsValidRequireNotNullAttribute },
-            { nameof(RequireAttribute), IsValidRequireAttribute },
-            { nameof(EnsureAttribute), IsValidEnsureAttribute },
-        };
-
         foreach (AttributeSyntax Attribute in MethodAttributes)
-            if (Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
-            {
-                string AttributeName = GeneratorHelper.ToAttributeName(Attribute);
-                IReadOnlyList<AttributeArgumentSyntax> AttributeArguments = AttributeArgumentList.Arguments;
-
-                Debug.Assert(ValidityVerifierTable.ContainsKey(AttributeName));
-                var ValidityVerifier = ValidityVerifierTable[AttributeName];
-                AttributeGeneration AttributeGeneration = ValidityVerifier(MethodDeclaration, AttributeArguments);
-
-                if (AttributeGeneration == AttributeGeneration.Invalid)
-                    return false;
-                else if (AttributeGeneration == AttributeGeneration.Valid || (AttributeGeneration == AttributeGeneration.DebugOnly && IsDebugGeneration))
-                    AttributeNames.Add(AttributeName);
-            }
+            if (!IsValidAttribute(Attribute, MethodDeclaration, IsDebugGeneration, AttributeNames))
+                return false;
 
         // One of these attributes has to be the first, and we only return true for this one.
         // This way, multiple calls with different T return true exactly once.
         if (AttributeNames.Count == 0 || AttributeNames[0] != typeof(T).Name)
             return false;
+
+        return true;
+    }
+
+    private static bool IsValidAttribute(AttributeSyntax attribute, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration, List<string> attributeNames)
+    {
+        if (attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
+        {
+            string AttributeName = GeneratorHelper.ToAttributeName(attribute);
+            IReadOnlyList<AttributeArgumentSyntax> AttributeArguments = AttributeArgumentList.Arguments;
+
+            Dictionary<string, Func<MethodDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, AttributeGeneration>> ValidityVerifierTable = new()
+            {
+                { nameof(AccessAttribute), IsValidAccessAttribute },
+                { nameof(RequireNotNullAttribute), IsValidRequireNotNullAttribute },
+                { nameof(RequireAttribute), IsValidRequireAttribute },
+                { nameof(EnsureAttribute), IsValidEnsureAttribute },
+            };
+
+            Debug.Assert(ValidityVerifierTable.ContainsKey(AttributeName));
+            var ValidityVerifier = ValidityVerifierTable[AttributeName];
+            AttributeGeneration AttributeGeneration = ValidityVerifier(methodDeclaration, AttributeArguments);
+
+            if (AttributeGeneration == AttributeGeneration.Invalid)
+                return false;
+            else if (AttributeGeneration == AttributeGeneration.Valid || (AttributeGeneration == AttributeGeneration.DebugOnly && isDebugGeneration))
+                attributeNames.Add(AttributeName);
+        }
 
         return true;
     }
