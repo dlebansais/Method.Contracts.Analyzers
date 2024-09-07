@@ -43,6 +43,26 @@ public partial class ContractGenerator
             MethodDeclaration.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>() is null)
             return false;
 
+        string? FirstAttributeName = GetFirstSupportedAttribute(MethodDeclaration);
+
+        // One of these attributes has to be the first, and we only return true for this one.
+        // This way, multiple calls with different T return true exactly once.
+        if (FirstAttributeName is null || FirstAttributeName != typeof(T).Name)
+            return false;
+
+        return true;
+    }
+
+    /// <summary>
+    /// Checks whether a method contains at least one attribute we support and returns its name.
+    /// All attributes we support must be valid.
+    /// </summary>
+    /// <param name="methodDeclaration">The method declaration.</param>
+    /// <returns><see langword="null"/> if any of the attributes we support is invalid, or none was found; Otherwise, the name of the first attribute.</returns>
+    public static string? GetFirstSupportedAttribute(MethodDeclarationSyntax methodDeclaration)
+    {
+        Contract.RequireNotNull(methodDeclaration, out MethodDeclarationSyntax MethodDeclaration);
+
         // Get a list of all supported attributes for this method.
         List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMethodSupportedAttributes(MethodDeclaration, SupportedAttributeNames);
         List<string> AttributeNames = new();
@@ -50,14 +70,9 @@ public partial class ContractGenerator
 
         foreach (AttributeSyntax Attribute in MethodAttributes)
             if (!IsValidAttribute(Attribute, MethodDeclaration, IsDebugGeneration, AttributeNames))
-                return false;
+                return null;
 
-        // One of these attributes has to be the first, and we only return true for this one.
-        // This way, multiple calls with different T return true exactly once.
-        if (AttributeNames.Count == 0 || AttributeNames[0] != typeof(T).Name)
-            return false;
-
-        return true;
+        return AttributeNames.Count > 0 ? AttributeNames[0] : null;
     }
 
     private static bool IsValidAttribute(AttributeSyntax attribute, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration, List<string> attributeNames)
