@@ -25,7 +25,7 @@ public partial class ContractGenerator
 
         // The suffix can't be empty: if invalid in user settings, it's the default suffix.
         string VerifiedSuffix = Settings.VerifiedSuffix;
-        Debug.Assert(VerifiedSuffix != string.Empty);
+        Contract.Assert(VerifiedSuffix != string.Empty);
 
         // Only accept methods with the 'Verified' suffix in their name.
         string MethodName = MethodDeclaration.Identifier.Text;
@@ -90,7 +90,7 @@ public partial class ContractGenerator
                 { nameof(EnsureAttribute), IsValidEnsureAttribute },
             };
 
-            Debug.Assert(ValidityVerifierTable.ContainsKey(AttributeName));
+            Contract.Assert(ValidityVerifierTable.ContainsKey(AttributeName));
             var ValidityVerifier = ValidityVerifierTable[AttributeName];
             AttributeGeneration AttributeGeneration = ValidityVerifier(methodDeclaration, AttributeArguments);
 
@@ -125,7 +125,8 @@ public partial class ContractGenerator
 
     private static AttributeGeneration IsValidRequireNotNullAttributeWithAlias(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        Debug.Assert(attributeArguments.Count > 0, "We reach this step only if IsRequireNotNullAttributeWithAlias() returned true.");
+        // We reach this step only if IsRequireNotNullAttributeWithAlias() returned true.
+        Contract.Assert(attributeArguments.Count > 0);
         AttributeArgumentSyntax FirstAttributeArgument = attributeArguments[0];
 
         if (FirstAttributeArgument.NameEquals is not null)
@@ -141,13 +142,15 @@ public partial class ContractGenerator
         string Name = string.Empty;
         string AliasName = string.Empty;
 
-        Debug.Assert(attributeArguments.Count > 1, "The first argument has no name, there has to be a second argument because IsRequireNotNullAttributeWithAlias() returned true.");
+        // The first argument has no name, there has to be a second argument because IsRequireNotNullAttributeWithAlias() returned true.
+        Contract.Assert(attributeArguments.Count > 1);
 
         for (int i = 1; i < attributeArguments.Count; i++)
             if (!IsValidArgumentWithAlias(methodDeclaration, attributeArguments[i], ref Type, ref Name, ref AliasName))
                 return AttributeGeneration.Invalid;
 
-        Debug.Assert(Type != string.Empty || Name != string.Empty || AliasName != string.Empty, "At this step there is at least one valid argument that is either Type, Name or AliasName.");
+        // At this step there is at least one valid argument that is either Type, Name or AliasName.
+        Contract.Assert(Type != string.Empty || Name != string.Empty || AliasName != string.Empty);
 
         return AttributeGeneration.Valid;
     }
@@ -162,7 +165,8 @@ public partial class ContractGenerator
         if (!IsStringOrNameofAttributeArgument(attributeArgument, out string ArgumentValue))
             return false;
 
-        Debug.Assert(ArgumentValue != string.Empty, "Valid string or nameof attribute arguments are never empty.");
+        // Valid string or nameof attribute arguments are never empty.
+        Contract.Assert(ArgumentValue != string.Empty);
 
         if (ArgumentName == nameof(RequireNotNullAttribute.Type))
             type = ArgumentValue;
@@ -180,7 +184,8 @@ public partial class ContractGenerator
     {
         foreach (var AttributeArgument in attributeArguments)
         {
-            Debug.Assert(AttributeArgument.NameEquals is null, "If not null, we would be running IsValidRequireNotNullAttributeWithAlias().");
+            // If not null, we would be running IsValidRequireNotNullAttributeWithAlias().
+            Contract.Assert(AttributeArgument.NameEquals is null);
 
             if (!IsStringOrNameofAttributeArgument(AttributeArgument, out string ArgumentValue))
                 return AttributeGeneration.Invalid;
@@ -222,7 +227,8 @@ public partial class ContractGenerator
 
     private static AttributeGeneration IsValidRequireOrEnsureAttributeWithDebugOnly(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        Debug.Assert(attributeArguments.Count > 0, "We reach this step only if IsRequireOrEnsureAttributeWithDebugOnly() returned true.");
+        // We reach this step only if IsRequireOrEnsureAttributeWithDebugOnly() returned true.
+        Contract.Assert(attributeArguments.Count > 0);
         AttributeArgumentSyntax FirstAttributeArgument = attributeArguments[0];
 
         if (FirstAttributeArgument.NameEquals is not null)
@@ -233,13 +239,15 @@ public partial class ContractGenerator
 
         bool? IsDebugOnly = null;
 
-        Debug.Assert(attributeArguments.Count > 1, "The first argument has no name, there has to be a second argument because IsRequireOrEnsureAttributeWithDebugOnly() returned true.");
+        // The first argument has no name, there has to be a second argument because IsRequireOrEnsureAttributeWithDebugOnly() returned true.
+        Contract.Assert(attributeArguments.Count > 1);
 
         for (int i = 1; i < attributeArguments.Count; i++)
             if (!IsValidDebugOnlyArgument(methodDeclaration, attributeArguments[i], ref IsDebugOnly))
                 return AttributeGeneration.Invalid;
 
-        Debug.Assert(IsDebugOnly.HasValue, "At this step the DebugOnly argument must have been processed.");
+        // At this step the DebugOnly argument must have been processed.
+        Contract.Assert(IsDebugOnly.HasValue);
 
         return IsDebugOnly == false ? AttributeGeneration.Valid : AttributeGeneration.DebugOnly;
     }
@@ -319,7 +327,9 @@ public partial class ContractGenerator
             InvocationExpression.ArgumentList.Arguments[0].Expression is IdentifierNameSyntax ExpressionIdentifierName)
         {
             string ArgumentText = ExpressionIdentifierName.Identifier.Text;
-            Debug.Assert(ArgumentText != string.Empty, "If there is exactly one argument, it cannot be empty, otherwise there would be no argument.");
+
+            // If there is exactly one argument, it cannot be empty, otherwise there would be no argument.
+            Contract.Assert(ArgumentText != string.Empty);
 
             argumentValue = ArgumentText;
             return true;

@@ -18,7 +18,7 @@ public partial class ContractGenerator
     {
         SyntaxNode TargetNode = context.TargetNode;
 
-        Debug.Assert(TargetNode is MethodDeclarationSyntax, $"Expected MethodDeclarationSyntax, but got instead: '{TargetNode}'.");
+        Contract.Assert(TargetNode is MethodDeclarationSyntax);
         MethodDeclarationSyntax MethodDeclaration = (MethodDeclarationSyntax)TargetNode;
 
         ContractModel Model = GetModelWithoutContract(context, MethodDeclaration);
@@ -33,14 +33,11 @@ public partial class ContractGenerator
 
     private static ContractModel GetModelWithoutContract(GeneratorAttributeSyntaxContext context, MethodDeclarationSyntax methodDeclaration)
     {
-        var ContainingClass = context.TargetSymbol.ContainingType;
-        Debug.Assert(ContainingClass is not null);
+        INamedTypeSymbol ContainingClass = Contract.AssertNotNull(context.TargetSymbol.ContainingType);
+        INamespaceSymbol ContainingNamespace = Contract.AssertNotNull(ContainingClass.ContainingNamespace);
 
-        var ContainingNamespace = ContainingClass!.ContainingNamespace;
-        Debug.Assert(ContainingNamespace is not null);
-
-        string Namespace = ContainingNamespace!.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
-        string ClassName = ContainingClass!.Name;
+        string Namespace = ContainingNamespace.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted));
+        string ClassName = ContainingClass.Name;
         string? DeclarationTokens = null;
         string? FullClassName = null;
 
@@ -54,7 +51,7 @@ public partial class ContractGenerator
             {
                 FullClassName += TypeParameterList.ToString();
 
-                string ConstraintClauses = ClassDeclaration!.ConstraintClauses.ToString();
+                string ConstraintClauses = ClassDeclaration.ConstraintClauses.ToString();
                 if (ConstraintClauses != string.Empty)
                     FullClassName += " " + ConstraintClauses;
             }
@@ -70,7 +67,7 @@ public partial class ContractGenerator
             {
                 FullClassName += TypeParameterList.ToString();
 
-                string ConstraintClauses = StructDeclaration!.ConstraintClauses.ToString();
+                string ConstraintClauses = StructDeclaration.ConstraintClauses.ToString();
                 if (ConstraintClauses != string.Empty)
                     FullClassName += " " + ConstraintClauses;
             }
@@ -86,20 +83,17 @@ public partial class ContractGenerator
             {
                 FullClassName += TypeParameterList.ToString();
 
-                string ConstraintClauses = RecordDeclaration!.ConstraintClauses.ToString();
+                string ConstraintClauses = RecordDeclaration.ConstraintClauses.ToString();
                 if (ConstraintClauses != string.Empty)
                     FullClassName += " " + ConstraintClauses;
             }
         }
 
-        Debug.Assert(DeclarationTokens is not null);
-        Debug.Assert(FullClassName is not null);
-
         string SymbolName = context.TargetSymbol.Name;
         string VerifiedSuffix = Settings.VerifiedSuffix;
 
-        Debug.Assert(GeneratorHelper.StringEndsWith(SymbolName, VerifiedSuffix));
-        Debug.Assert(SymbolName.Length > VerifiedSuffix.Length);
+        Contract.Assert(GeneratorHelper.StringEndsWith(SymbolName, VerifiedSuffix));
+        Contract.Assert(SymbolName.Length > VerifiedSuffix.Length);
         string ShortMethodName = SymbolName.Substring(0, SymbolName.Length - VerifiedSuffix.Length);
 
         return new ContractModel(
@@ -107,8 +101,8 @@ public partial class ContractGenerator
             UsingsBeforeNamespace: string.Empty,
             UsingsAfterNamespace: string.Empty,
             ClassName: ClassName,
-            DeclarationTokens: DeclarationTokens!,
-            FullClassName: FullClassName!,
+            DeclarationTokens: Contract.AssertNotNull(DeclarationTokens),
+            FullClassName: Contract.AssertNotNull(FullClassName),
             ShortMethodName: ShortMethodName,
             UniqueOverloadIdentifier: GetUniqueOverloadIdentifier(methodDeclaration),
             Documentation: string.Empty,
@@ -127,7 +121,7 @@ public partial class ContractGenerator
             ParameterSyntax Parameter = ParameterList.Parameters[i];
 
             // Empirically, there is always a type even if the parameter is empty.
-            Debug.Assert(Parameter.Type is TypeSyntax);
+            Contract.Assert(Parameter.Type is TypeSyntax);
             TypeSyntax Type = Parameter.Type!;
 
             string TypeAsString = Type.ToString();
@@ -283,7 +277,7 @@ public partial class ContractGenerator
                 string AttributeName = GeneratorHelper.ToAttributeName(Attribute);
                 IReadOnlyList<AttributeArgumentSyntax> AttributeArguments = AttributeArgumentList.Arguments;
 
-                Debug.Assert(AttributeTransformTable.ContainsKey(AttributeName));
+                Contract.Assert(AttributeTransformTable.ContainsKey(AttributeName));
                 var AttributeTransform = AttributeTransformTable[AttributeName];
                 List<AttributeArgumentModel> Arguments = AttributeTransform(methodDeclaration, AttributeArguments);
 
@@ -310,16 +304,22 @@ public partial class ContractGenerator
 
     private static List<AttributeArgumentModel> TransformRequireNotNullAttributeWithAlias(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        Debug.Assert(attributeArguments.Count > 0, "This was verified in IsRequireNotNullAttributeWithAlias().");
+        // This was verified in IsRequireNotNullAttributeWithAlias().
+        Contract.Assert(attributeArguments.Count > 0);
         AttributeArgumentSyntax FirstAttributeArgument = attributeArguments[0];
 
-        Debug.Assert(FirstAttributeArgument.NameEquals is null, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+        // This was verified in IsValidRequireNotNullAttributeWithAlias().
+        Contract.Assert(FirstAttributeArgument.NameEquals is null);
 
         bool IsValidParameterName = IsStringOrNameofAttributeArgument(FirstAttributeArgument, out string ParameterName);
-        Debug.Assert(IsValidParameterName, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+
+        // This was verified in IsValidRequireNotNullAttributeWithAlias().
+        Contract.Assert(IsValidParameterName);
 
         bool IsValidParameterType = GetParameterType(ParameterName, methodDeclaration, out _);
-        Debug.Assert(IsValidParameterType, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+
+        // This was verified in IsValidRequireNotNullAttributeWithAlias().
+        Contract.Assert(IsValidParameterType);
 
         string Type = string.Empty;
         string Name = string.Empty;
@@ -328,10 +328,13 @@ public partial class ContractGenerator
         for (int i = 1; i < attributeArguments.Count; i++)
         {
             bool IsValidAttributeArgument = IsValidArgumentWithAlias(methodDeclaration, attributeArguments[i], ref Type, ref Name, ref AliasName);
-            Debug.Assert(IsValidAttributeArgument, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+
+            // This was verified in IsValidRequireNotNullAttributeWithAlias().
+            Contract.Assert(IsValidAttributeArgument);
         }
 
-        Debug.Assert(Type != string.Empty || Name != string.Empty || AliasName != string.Empty, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+        // This was verified in IsValidRequireNotNullAttributeWithAlias().
+        Contract.Assert(Type != string.Empty || Name != string.Empty || AliasName != string.Empty);
 
         List<AttributeArgumentModel> Result = new() { new AttributeArgumentModel(Name: string.Empty, Value: ParameterName) };
 
@@ -344,7 +347,7 @@ public partial class ContractGenerator
         if (AliasName != string.Empty)
             Result.Add(new AttributeArgumentModel(Name: nameof(RequireNotNullAttribute.AliasName), Value: AliasName));
 
-        Debug.Assert(Result.Count > 1);
+        Contract.Assert(Result.Count > 1);
 
         return Result;
     }
@@ -355,10 +358,13 @@ public partial class ContractGenerator
 
         foreach (var AttributeArgument in attributeArguments)
         {
-            Debug.Assert(AttributeArgument.NameEquals is null, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+            // This was verified in IsValidRequireNotNullAttributeWithAlias().
+            Contract.Assert(AttributeArgument.NameEquals is null);
 
             bool IsValidParameterName = IsStringOrNameofAttributeArgument(AttributeArgument, out string ParameterName);
-            Debug.Assert(IsValidParameterName, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+
+            // This was verified in IsValidRequireNotNullAttributeWithAlias().
+            Contract.Assert(IsValidParameterName);
 
             Result.Add(new AttributeArgumentModel(Name: string.Empty, Value: ParameterName));
         }
@@ -386,23 +392,30 @@ public partial class ContractGenerator
 
     private static List<AttributeArgumentModel> TransformRequireOrEnsureAttributeWithDebugOnly(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        Debug.Assert(attributeArguments.Count > 0, "This was verified in IsRequireOrEnsureAttributeWithDebugOnly().");
+        // This was verified in IsRequireOrEnsureAttributeWithDebugOnly().
+        Contract.Assert(attributeArguments.Count > 0);
         AttributeArgumentSyntax FirstAttributeArgument = attributeArguments[0];
 
-        Debug.Assert(FirstAttributeArgument.NameEquals is null, "This was verified in IsValidRequireOrEnsureAttributeWithDebugOnly().");
+        // This was verified in IsValidRequireOrEnsureAttributeWithDebugOnly().
+        Contract.Assert(FirstAttributeArgument.NameEquals is null);
 
         bool IsValidParameterName = IsStringAttributeArgument(FirstAttributeArgument, out string Expression);
-        Debug.Assert(IsValidParameterName, "This was verified in IsValidRequireOrEnsureAttributeWithDebugOnly().");
+
+        // This was verified in IsValidRequireOrEnsureAttributeWithDebugOnly().
+        Contract.Assert(IsValidParameterName);
 
         bool? IsDebugOnly = null;
 
         for (int i = 1; i < attributeArguments.Count; i++)
         {
             bool IsValidAttributeArgument = IsValidDebugOnlyArgument(methodDeclaration, attributeArguments[i], ref IsDebugOnly);
-            Debug.Assert(IsValidAttributeArgument, "This was verified in IsValidRequireOrEnsureAttributeWithDebugOnly().");
+
+            // This was verified in IsValidRequireOrEnsureAttributeWithDebugOnly().
+            Contract.Assert(IsValidAttributeArgument);
         }
 
-        Debug.Assert(IsDebugOnly.HasValue, "This was verified in IsValidRequireNotNullAttributeWithAlias().");
+        // This was verified in IsValidRequireNotNullAttributeWithAlias().
+        Contract.Assert(IsDebugOnly.HasValue);
 
         List<AttributeArgumentModel> Result = new()
         {
@@ -416,7 +429,7 @@ public partial class ContractGenerator
     private static List<AttributeArgumentModel> TransformStringOnlyAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
         bool IsValid = IsValidStringOnlyAttribute(methodDeclaration, attributeArguments, out List<string> ArgumentValues);
-        Debug.Assert(IsValid);
+        Contract.Assert(IsValid);
 
         List<AttributeArgumentModel> Result = new();
         foreach (string ArgumentValue in ArgumentValues)
@@ -430,11 +443,10 @@ public partial class ContractGenerator
         string RawBeforeNamespaceDeclaration = string.Empty;
         string RawAfterNamespaceDeclaration = string.Empty;
 
-        SyntaxNode TargetNode = context.TargetNode;
-        BaseNamespaceDeclarationSyntax? BaseNamespaceDeclaration = TargetNode.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
+        // We know it's not null from KeepNodeForPipeline().
+        BaseNamespaceDeclarationSyntax BaseNamespaceDeclaration = Contract.AssertNotNull(context.TargetNode.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>());
 
-        Debug.Assert(BaseNamespaceDeclaration is not null, "We know it's not null from KeepNodeForPipeline().");
-        RawAfterNamespaceDeclaration = BaseNamespaceDeclaration!.Usings.ToFullString();
+        RawAfterNamespaceDeclaration = BaseNamespaceDeclaration.Usings.ToFullString();
 
         if (BaseNamespaceDeclaration.Parent is CompilationUnitSyntax CompilationUnit)
             RawBeforeNamespaceDeclaration = CompilationUnit.Usings.ToFullString();

@@ -19,8 +19,9 @@ public partial class ContractGenerator
     {
         SyntaxNode TargetNode = context.TargetNode;
 
-        Debug.Assert(TargetNode is MethodDeclarationSyntax);
+        Contract.Assert(TargetNode is MethodDeclarationSyntax);
         MethodDeclarationSyntax MethodDeclaration = (MethodDeclarationSyntax)TargetNode;
+
         bool IsDebugGeneration = MethodDeclaration.SyntaxTree.Options.PreprocessorSymbolNames.Contains("DEBUG");
 
         string Tab = new(' ', Math.Max(Settings.TabLength, 1));
@@ -244,7 +245,8 @@ public partial class ContractGenerator
                 name = AttributeArgument.Value;
         }
 
-        Debug.Assert(parameterName != string.Empty, "Valid attribute for RequireNotNull always have a parameter name.");
+        // Valid attribute for RequireNotNull always have a parameter name.
+        Contract.Assert(parameterName != string.Empty);
 
         return type != string.Empty || name != string.Empty;
     }

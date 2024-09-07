@@ -56,11 +56,12 @@ public partial class ContractGenerator
 
             if (Item.Name == nameof(RequireNotNullAttribute))
             {
-                Debug.Assert(Arguments.Count > 0, "Valid RequireNotNull attribute always has arguments.");
+                // Valid RequireNotNull attribute always has arguments.
+                Contract.Assert(Arguments.Count > 0);
 
                 if (Arguments.Any(argument => argument.Name != string.Empty))
                 {
-                    Debug.Assert(Arguments[0].Name == string.Empty);
+                    Contract.Assert(Arguments[0].Name == string.Empty);
                     string ParameterName = Arguments[0].Value;
                     string OriginalParameterName = ParameterName;
 
@@ -313,7 +314,7 @@ public partial class ContractGenerator
             { nameof(EnsureAttribute), GenerateEnsureStatement },
         };
 
-        Debug.Assert(GeneratorTable.ContainsKey(attributeModel.Name));
+        Contract.Assert(GeneratorTable.ContainsKey(attributeModel.Name));
         return GeneratorTable[attributeModel.Name](attributeModel.Arguments, methodDeclaration, isDebugGeneration);
     }
 
@@ -327,12 +328,12 @@ public partial class ContractGenerator
 
     private static List<StatementSyntax> GenerateRequireNotNullStatementWithAlias(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration)
     {
-        Debug.Assert(attributeArguments.Count > 0);
-        Debug.Assert(attributeArguments[0].Name == string.Empty);
+        Contract.Assert(attributeArguments.Count > 0);
+        Contract.Assert(attributeArguments[0].Name == string.Empty);
         string ParameterName = attributeArguments[0].Value;
 
         bool IsParameterTypeValid = GetParameterType(ParameterName, methodDeclaration, out TypeSyntax Type);
-        Debug.Assert(IsParameterTypeValid);
+        Contract.Assert(IsParameterTypeValid);
 
         GetModifiedIdentifiers(attributeArguments, ref ParameterName, out string AliasName);
 
@@ -364,7 +365,7 @@ public partial class ContractGenerator
             string AliasName = ToIdentifierLocalName(ParameterName);
 
             bool IsParameterTypeValid = GetParameterType(ParameterName, methodDeclaration, out TypeSyntax Type);
-            Debug.Assert(IsParameterTypeValid);
+            Contract.Assert(IsParameterTypeValid);
 
             ExpressionStatementSyntax ExpressionStatement = GenerateOneRequireNotNullStatement(ParameterName, Type, AliasName);
             Statements.Add(ExpressionStatement);
@@ -418,7 +419,8 @@ public partial class ContractGenerator
 
     private static List<StatementSyntax> GenerateRequireOrEnsureStatementWithDebugOnly(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration, string contractMethodName)
     {
-        Debug.Assert(attributeArguments.Count == 2, "This is the result of TransformRequireOrEnsureAttributeWithDebugOnly().");
+        // This is the result of TransformRequireOrEnsureAttributeWithDebugOnly().
+        Contract.Assert(attributeArguments.Count == 2);
 
         if (attributeArguments[1].Value == "false" || isDebugGeneration)
         {
@@ -460,7 +462,7 @@ public partial class ContractGenerator
 
     private static string ToIdentifierLocalName(string text)
     {
-        Debug.Assert(text.Length > 0);
+        Contract.Assert(text.Length > 0);
 
         char FirstLetter = text[0];
         string OtherLetters = text.Substring(1);

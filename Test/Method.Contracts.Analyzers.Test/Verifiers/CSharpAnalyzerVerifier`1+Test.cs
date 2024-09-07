@@ -89,7 +89,7 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
             string FolderName = System.IO.Path.GetFileName(folderPath);
             const string Prefix = "v";
 
-            Debug.Assert(FolderName.StartsWith(Prefix, StringComparison.Ordinal));
+            Contract.Assert(FolderName.StartsWith(Prefix, StringComparison.Ordinal));
 
             string[] Parts = FolderName.Substring(Prefix.Length).Split('.');
             foreach (string Part in Parts)
