@@ -53,4 +53,34 @@ internal partial class Program
 }
 ").ConfigureAwait(false);
     }
+
+    [TestMethod]
+    public async Task Public_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    [|[Access(""public"", ""static"")]
+    public static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }|]
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task Internal_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    [|[Access(""public"", ""static"")]
+    internal static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }|]
+}
+").ConfigureAwait(false);
+    }
 }

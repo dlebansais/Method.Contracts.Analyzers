@@ -66,8 +66,7 @@ public class MCA1001VerifiedMethodMustBePrivate : DiagnosticAnalyzer
     {
         return methodDeclaration.Modifiers.All(modifier => !modifier.IsKind(SyntaxKind.ProtectedKeyword) &&
                                                            !modifier.IsKind(SyntaxKind.PublicKeyword) &&
-                                                           !modifier.IsKind(SyntaxKind.InternalKeyword) &&
-                                                           !modifier.IsKind(SyntaxKind.FileKeyword));
+                                                           !modifier.IsKind(SyntaxKind.InternalKeyword));
     }
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, IAnalysisAssertion[] analysisAssertions)
