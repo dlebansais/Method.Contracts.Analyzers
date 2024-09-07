@@ -46,7 +46,7 @@ rem Execute tests within OpenCover.
 
 if not exist %RESULTFILEPATH% goto end
 %CODECOV_UPLOADER_EXE% -f %RESULTFILEPATH% -t %TOKEN%
-%REPORTGENERATOR_EXE% -reports:%RESULTFILEPATH% -targetdir:.\CoverageReports "-assemblyfilters:+%PROJECTNAME%;+%TESTPROJECTNAME%" "-filefilters:-*.g.cs;-*Microsoft.NET.Test.Sdk.Program.cs"
+%REPORTGENERATOR_EXE% -reports:%RESULTFILEPATH% -targetdir:.\CoverageReports "-assemblyfilters:+%PROJECTNAME%;+%TESTPROJECTNAME%" "-filefilters:-*.g.cs;-*.Designer.cs;-*Microsoft.NET.Test.Sdk.Program.cs"
 goto end
 
 :error_console1

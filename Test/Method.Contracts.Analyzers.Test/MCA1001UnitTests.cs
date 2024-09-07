@@ -12,7 +12,7 @@ public partial class MCA1001UnitTests
     [TestMethod]
     public async Task Protected_Diagnostic()
     {
-        await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
+        await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
 {
     [|[Access(""public"", ""static"")]
@@ -35,6 +35,21 @@ internal partial class Program
     {
         textPlus = text + ""!"";
     }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task ProtectedNullable_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
+internal partial class Program
+{
+    [|[Access(""public"", ""static"")]
+    protected static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }|]
 }
 ").ConfigureAwait(false);
     }
