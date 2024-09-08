@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading;
 using Contracts.Analyzers.Helper;
@@ -427,7 +428,7 @@ public partial class ContractGenerator
 
     private static List<AttributeArgumentModel> TransformStringOnlyAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        bool IsValid = IsValidStringOnlyAttribute(methodDeclaration, attributeArguments, out List<string> ArgumentValues);
+        bool IsValid = IsValidStringOnlyAttribute(attributeArguments, out Collection<string> ArgumentValues, out _);
         Contract.Assert(IsValid);
 
         List<AttributeArgumentModel> Result = new();

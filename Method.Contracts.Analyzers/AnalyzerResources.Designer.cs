@@ -86,5 +86,113 @@ namespace Contracts.Analyzers {
                 return ResourceManager.GetString("MCA1001AnalyzerTitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Verified method must be within a class, struct or record, and within a namespace..
+        /// </summary>
+        internal static string MCA1002AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1002AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; must be within type.
+        /// </summary>
+        internal static string MCA1002AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1002AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Verified method must be within type.
+        /// </summary>
+        internal static string MCA1002AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1002AnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Verified method is missing the &apos;verified&apos; suffix..
+        /// </summary>
+        internal static string MCA1003AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1003AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; is missing the &apos;{1}&apos; suffix.
+        /// </summary>
+        internal static string MCA1003AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1003AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Verified method is missing verified suffix.
+        /// </summary>
+        internal static string MCA1003AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1003AnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Access attribute is missing argument..
+        /// </summary>
+        internal static string MCA1004AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1004AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Access attribute is missing argument.
+        /// </summary>
+        internal static string MCA1004AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1004AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Access attribute is missing argument.
+        /// </summary>
+        internal static string MCA1004AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1004AnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Access attribute argument must be a valid modifier..
+        /// </summary>
+        internal static string MCA1005AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1005AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Argument at position {0} in Access attribute must be a valid modifier.
+        /// </summary>
+        internal static string MCA1005AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1005AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Access attribute argument must be a valid modifier.
+        /// </summary>
+        internal static string MCA1005AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1005AnalyzerTitle", resourceCulture);
+            }
+        }
     }
 }

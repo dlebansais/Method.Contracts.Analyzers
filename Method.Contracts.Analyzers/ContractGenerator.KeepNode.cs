@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using Contracts.Analyzers.Helper;
@@ -105,7 +105,14 @@ public partial class ContractGenerator
 
     private static AttributeGeneration IsValidAccessAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        return IsValidStringOnlyAttribute(methodDeclaration, attributeArguments, out _) ? AttributeGeneration.Valid : AttributeGeneration.Invalid;
+        if (!IsValidStringOnlyAttribute(attributeArguments, out Collection<string> ArgumentValues, out _))
+            return AttributeGeneration.Invalid;
+
+        foreach (string ArgumentValue in ArgumentValues)
+            if (!IsValidModifier(ArgumentValue))
+                return AttributeGeneration.Invalid;
+
+        return AttributeGeneration.Valid;
     }
 
     private static AttributeGeneration IsValidRequireNotNullAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
@@ -212,7 +219,7 @@ public partial class ContractGenerator
         if (IsRequireOrEnsureAttributeWithDebugOnly(attributeArguments))
             return IsValidRequireOrEnsureAttributeWithDebugOnly(methodDeclaration, attributeArguments);
         else if (attributeArguments.Count > 0)
-            if (IsValidStringOnlyAttribute(methodDeclaration, attributeArguments, out _))
+            if (IsValidStringOnlyAttribute(attributeArguments, out _, out _))
                 return AttributeGeneration.Valid;
             else
                 return AttributeGeneration.Invalid;
@@ -270,17 +277,31 @@ public partial class ContractGenerator
         return true;
     }
 
-    private static bool IsValidStringOnlyAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments, out List<string> argumentValues)
+    /// <summary>
+    /// Checks whether arguments of an attribute are all strings.
+    /// </summary>
+    /// <param name="attributeArguments">The attribute arguments.</param>
+    /// <param name="argumentValues">Argument values as strings if the method returns <see langword="true"/>.</param>
+    /// <param name="positionOfFirstInvalidArgument">The 0-based position of the first invalid argument if the method returns <see langword="false"/>.</param>
+    public static bool IsValidStringOnlyAttribute(IReadOnlyList<AttributeArgumentSyntax> attributeArguments, out Collection<string> argumentValues, out int positionOfFirstInvalidArgument)
     {
-        argumentValues = new();
+        Contract.RequireNotNull(attributeArguments, out IReadOnlyList<AttributeArgumentSyntax> AttributeArguments);
 
-        if (attributeArguments.Count == 0)
+        argumentValues = new();
+        positionOfFirstInvalidArgument = -1;
+
+        if (AttributeArguments.Count == 0)
             return false;
 
-        foreach (var AttributeArgument in attributeArguments)
+        for (int i = 0; i < AttributeArguments.Count; i++)
         {
+            var AttributeArgument = AttributeArguments[i];
+
             if (!IsStringAttributeArgument(AttributeArgument, out string ArgumentValue))
+            {
+                positionOfFirstInvalidArgument = i;
                 return false;
+            }
 
             argumentValues.Add(ArgumentValue);
         }
@@ -300,9 +321,16 @@ public partial class ContractGenerator
         return false;
     }
 
-    private static bool IsStringAttributeArgument(AttributeArgumentSyntax attributeArgument, out string argumentValue)
+    /// <summary>
+    /// Checks whether the value of an attribute argument is a string.
+    /// </summary>
+    /// <param name="attributeArgument">The attribute argument.</param>
+    /// <param name="argumentValue">The string value upon return.</param>
+    public static bool IsStringAttributeArgument(AttributeArgumentSyntax attributeArgument, out string argumentValue)
     {
-        if (attributeArgument.Expression is LiteralExpressionSyntax LiteralExpression &&
+        Contract.RequireNotNull(attributeArgument, out AttributeArgumentSyntax AttributeArgument);
+
+        if (AttributeArgument.Expression is LiteralExpressionSyntax LiteralExpression &&
             LiteralExpression.Kind() == SyntaxKind.StringLiteralExpression)
         {
             string ArgumentText = LiteralExpression.Token.Text;
@@ -360,5 +388,34 @@ public partial class ContractGenerator
 
         argumentValue = false;
         return false;
+    }
+
+    /// <summary>
+    /// Checks whether a modifier is valid.
+    /// </summary>
+    /// <param name="modifier">The modifier.</param>
+    public static bool IsValidModifier(string modifier)
+    {
+        return modifier switch
+        {
+            "public" or
+            "private" or
+            "protected" or
+            "internal" or
+            "file" or
+            "static" or
+            "extern" or
+            "new" or
+            "virtual" or
+            "abstract" or
+            "sealed" or
+            "override" or
+            "readonly" or
+            "unsafe" or
+            "required" or
+            "volatile" or
+            "async" => true,
+            _ => false,
+        };
     }
 }

@@ -129,4 +129,52 @@
     <value>Verified method must be private</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="MCA1002AnalyzerDescription" xml:space="preserve">
+    <value>Verified method must be within a class, struct or record, and within a namespace.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1002AnalyzerMessageFormat" xml:space="preserve">
+    <value>'{0}' must be within type</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1002AnalyzerTitle" xml:space="preserve">
+    <value>Verified method must be within type</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
+  <data name="MCA1003AnalyzerDescription" xml:space="preserve">
+    <value>Verified method is missing the 'verified' suffix.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1003AnalyzerMessageFormat" xml:space="preserve">
+    <value>'{0}' is missing the '{1}' suffix</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1003AnalyzerTitle" xml:space="preserve">
+    <value>Verified method is missing verified suffix</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
+  <data name="MCA1004AnalyzerDescription" xml:space="preserve">
+    <value>Access attribute is missing argument.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1004AnalyzerMessageFormat" xml:space="preserve">
+    <value>Access attribute is missing argument</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1004AnalyzerTitle" xml:space="preserve">
+    <value>Access attribute is missing argument</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
+  <data name="MCA1005AnalyzerDescription" xml:space="preserve">
+    <value>Access attribute argument must be a valid modifier.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1005AnalyzerMessageFormat" xml:space="preserve">
+    <value>Argument at position {0} in Access attribute must be a valid modifier</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1005AnalyzerTitle" xml:space="preserve">
+    <value>Access attribute argument must be a valid modifier</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
 </root>

@@ -52,7 +52,12 @@ public partial class ContractGenerator
     private static readonly GeneratorSettingsEntry DisabledWarningsSetting = new(BuildKey: DisabledWarningsKey, DefaultValue: string.Empty);
     private static GeneratorSettings Settings = new(VerifiedSuffix: DefaultVerifiedSuffix, TabLength: DefaultTabLength, ResultIdentifier: DefaultResultIdentifier, DisabledWarnings: string.Empty);
 
-    private static IEnumerable<GeneratorSettings> ReadSettings(AnalyzerConfigOptionsProvider options, CancellationToken cancellationToken)
+    /// <summary>
+    /// Reads settings.
+    /// </summary>
+    /// <param name="options">Configuration options.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    internal static IEnumerable<GeneratorSettings> ReadSettings(AnalyzerConfigOptionsProvider options, CancellationToken cancellationToken)
     {
         string VerifiedSuffix = VerifiedSuffixSetting.ReadAsString(options, out _);
         int TabLength = TabLengthSetting.ReadAsInt(options, out _);
