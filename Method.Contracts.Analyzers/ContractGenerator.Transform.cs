@@ -121,8 +121,7 @@ public partial class ContractGenerator
             ParameterSyntax Parameter = ParameterList.Parameters[i];
 
             // Empirically, there is always a type even if the parameter is empty.
-            Contract.Assert(Parameter.Type is TypeSyntax);
-            TypeSyntax Type = Parameter.Type!;
+            TypeSyntax Type = Contract.AssertNotNull(Parameter.Type);
 
             string TypeAsString = Type.ToString();
             uint HashCode = unchecked((uint)GeneratorHelper.GetStableHashCode(TypeAsString));

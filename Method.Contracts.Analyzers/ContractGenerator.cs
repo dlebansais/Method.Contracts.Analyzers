@@ -81,7 +81,7 @@ public partial class ContractGenerator : IIncrementalGenerator
             return true;
         }
 
-        parameterType = null!;
+        Contract.Unused(out parameterType);
         return false;
     }
 }
