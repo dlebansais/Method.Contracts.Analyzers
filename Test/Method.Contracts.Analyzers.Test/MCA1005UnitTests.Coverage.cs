@@ -16,7 +16,7 @@ public partial class MCA1005UnitTests
 " + Prologs.Nullable, @"
 internal partial class Program
 {
-    [Access(""Foo"")]
+    [Access(nameof(System.String))]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";
@@ -31,7 +31,7 @@ internal partial class Program
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Default, @"
 internal partial class Program
 {
-    [Access(""Foo"")]
+    [Access(nameof(System.String))]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";

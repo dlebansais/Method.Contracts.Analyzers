@@ -396,26 +396,27 @@ public partial class ContractGenerator
     /// <param name="modifier">The modifier.</param>
     public static bool IsValidModifier(string modifier)
     {
-        return modifier switch
+        List<string> ValidModifiers = new()
         {
-            "public" or
-            "private" or
-            "protected" or
-            "internal" or
-            "file" or
-            "static" or
-            "extern" or
-            "new" or
-            "virtual" or
-            "abstract" or
-            "sealed" or
-            "override" or
-            "readonly" or
-            "unsafe" or
-            "required" or
-            "volatile" or
-            "async" => true,
-            _ => false,
+            "public",
+            "private",
+            "protected",
+            "internal",
+            "file",
+            "static",
+            "extern",
+            "new",
+            "virtual",
+            "abstract",
+            "sealed",
+            "override",
+            "readonly",
+            "unsafe",
+            "required",
+            "volatile",
+            "async",
         };
+
+        return ValidModifiers.Contains(modifier);
     }
 }

@@ -68,4 +68,19 @@ internal partial class Program
 }
 ").ConfigureAwait(false);
     }
+
+    [TestMethod]
+    public async Task AllValidModifiers_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
+internal partial class Program
+{
+    [Access(""public"", ""private"", ""protected"", ""internal"", ""file"", ""static"", ""extern"", ""new"", ""virtual"", ""abstract"", ""sealed"", ""override"", ""readonly"", ""unsafe"", ""required"", ""volatile"", ""async"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+").ConfigureAwait(false);
+    }
 }
