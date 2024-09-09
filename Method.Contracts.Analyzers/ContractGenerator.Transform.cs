@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Threading;
 using Contracts.Analyzers.Helper;
 using Microsoft.CodeAnalysis;

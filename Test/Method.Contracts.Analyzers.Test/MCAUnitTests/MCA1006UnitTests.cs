@@ -4,18 +4,19 @@ extern alias Analyzers;
 
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1005AccessAttributeArgumentMustBeValidModifier>;
+using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1006RequireNotNullAttributeArgumentMustBeValidParameterName>;
 
 [TestClass]
-public partial class MCA1005UnitTests
+public partial class MCA1006UnitTests
 {
     [TestMethod]
-    public async Task InvalidModifier_Diagnostic()
+    public async Task InvalidParameterName_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
 {
-    [Access([|""Foo""|])]
+    [Access(""public"", ""static"")]
+    [RequireNotNull([|""foo""|])]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";
@@ -30,7 +31,8 @@ internal partial class Program
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
 internal partial class Program
 {
-    [Access(""public"")]
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";
@@ -45,7 +47,8 @@ internal partial class Program
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
 internal partial class Program
 {
-    [Access(""public"")]
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";
@@ -60,7 +63,8 @@ internal partial class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
 {
-    [Access([|nameof(System.String)|])]
+    [Access(""public"", ""static"")]
+    [RequireNotNull([|""""|])]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";
@@ -70,15 +74,16 @@ internal partial class Program
     }
 
     [TestMethod]
-    public async Task AllValidModifiers_NoDiagnostic()
+    public async Task MultipleArguments_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
 internal partial class Program
 {
-    [Access(""public"", ""private"", ""protected"", ""internal"", ""file"", ""static"", ""extern"", ""new"", ""virtual"", ""abstract"", ""sealed"", ""override"", ""readonly"", ""unsafe"", ""required"", ""volatile"", ""async"")]
-    private static void HelloFromVerified(string text, out string textPlus)
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text1"", ""text2"")]
+    private static void HelloFromVerified(string text1, string text2, out string textPlus)
     {
-        textPlus = text + ""!"";
+        textPlus = text1 + text2 + ""!"";
     }
 }
 ").ConfigureAwait(false);

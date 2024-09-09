@@ -194,5 +194,32 @@ namespace Contracts.Analyzers {
                 return ResourceManager.GetString("MCA1005AnalyzerTitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RequireNotNull attribute argument must be a valid parameter name..
+        /// </summary>
+        internal static string MCA1006AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1006AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Argument at position {0} in Access attribute must be a valid parameter name.
+        /// </summary>
+        internal static string MCA1006AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1006AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RequireNotNull attribute argument must be a valid parameter name.
+        /// </summary>
+        internal static string MCA1006AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1006AnalyzerTitle", resourceCulture);
+            }
+        }
     }
 }

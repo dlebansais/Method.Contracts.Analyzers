@@ -177,4 +177,16 @@
     <value>Access attribute argument must be a valid modifier</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="MCA1006AnalyzerDescription" xml:space="preserve">
+    <value>RequireNotNull attribute argument must be a valid parameter name.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1006AnalyzerMessageFormat" xml:space="preserve">
+    <value>Argument at position {0} in Access attribute must be a valid parameter name</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1006AnalyzerTitle" xml:space="preserve">
+    <value>RequireNotNull attribute argument must be a valid parameter name</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
 </root>
