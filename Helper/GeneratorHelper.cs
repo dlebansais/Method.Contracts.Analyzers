@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -158,7 +159,7 @@ internal static class GeneratorHelper
     /// </summary>
     /// <param name="methodDeclaration">The method.</param>
     /// <param name="supportedAttributeNames">The list of supported attributes.</param>
-    public static List<AttributeSyntax> GetMethodSupportedAttributes(MethodDeclarationSyntax methodDeclaration, List<string> supportedAttributeNames)
+    public static List<AttributeSyntax> GetMethodSupportedAttributes(MethodDeclarationSyntax methodDeclaration, Collection<string> supportedAttributeNames)
     {
         List<AttributeSyntax> Result = new();
 

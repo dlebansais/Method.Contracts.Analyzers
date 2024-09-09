@@ -8,10 +8,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
-/// Analyzer for rule MCA1004: Access attribute is missing argument.
+/// Analyzer for rule MCA1004: Attribute is missing argument.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MCA1004AccessAttributeIsMissingArgument : DiagnosticAnalyzer
+public class MCA1004AttributeIsMissingArgument : DiagnosticAnalyzer
 {
     /// <summary>
     /// Diagnostic ID for this rule.
@@ -62,7 +62,11 @@ public class MCA1004AccessAttributeIsMissingArgument : DiagnosticAnalyzer
 
     private static bool IsAccessAttribute(AttributeSyntax attribute)
     {
-        return GeneratorHelper.ToAttributeName(attribute) == nameof(AccessAttribute);
+        foreach (string AttributeName in ContractGenerator.SupportedAttributeNames)
+            if (GeneratorHelper.ToAttributeName(attribute) == AttributeName)
+                return true;
+
+        return false;
     }
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeSyntax attribute, IAnalysisAssertion[] analysisAssertions)
@@ -71,6 +75,6 @@ public class MCA1004AccessAttributeIsMissingArgument : DiagnosticAnalyzer
         if (attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList && AttributeArgumentList.Arguments.Count > 0)
             return;
 
-        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation()));
+        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), GeneratorHelper.ToAttributeName(attribute)));
     }
 }

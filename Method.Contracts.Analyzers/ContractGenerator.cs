@@ -1,7 +1,7 @@
 ﻿namespace Contracts.Analyzers;
 
 using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Contracts.Analyzers.Helper;
 using Microsoft.CodeAnalysis;
@@ -13,8 +13,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 [Generator]
 public partial class ContractGenerator : IIncrementalGenerator
 {
-    // List of supported attributes by their name.
-    private static readonly List<string> SupportedAttributeNames = new()
+    /// <summary>
+    /// Gets the list of supported attributes by their name.
+    /// </summary>
+    public static Collection<string> SupportedAttributeNames { get; } = new()
     {
         nameof(AccessAttribute),
         nameof(RequireNotNullAttribute),

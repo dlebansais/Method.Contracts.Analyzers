@@ -142,7 +142,7 @@ namespace Contracts.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Access attribute is missing argument..
+        ///   Looks up a localized string similar to Attribute is missing argument..
         /// </summary>
         internal static string MCA1004AnalyzerDescription {
             get {
@@ -151,7 +151,7 @@ namespace Contracts.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Access attribute is missing argument.
+        ///   Looks up a localized string similar to Attribute &apos;{0}&apos; is missing argument.
         /// </summary>
         internal static string MCA1004AnalyzerMessageFormat {
             get {
@@ -160,7 +160,7 @@ namespace Contracts.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Access attribute is missing argument.
+        ///   Looks up a localized string similar to Attribute is missing argument.
         /// </summary>
         internal static string MCA1004AnalyzerTitle {
             get {

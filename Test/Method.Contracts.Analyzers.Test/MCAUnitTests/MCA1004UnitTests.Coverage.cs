@@ -4,7 +4,7 @@ extern alias Analyzers;
 
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1004AccessAttributeIsMissingArgument>;
+using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1004AttributeIsMissingArgument>;
 
 public partial class MCA1004UnitTests
 {

@@ -154,15 +154,15 @@
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="MCA1004AnalyzerDescription" xml:space="preserve">
-    <value>Access attribute is missing argument.</value>
+    <value>Attribute is missing argument.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="MCA1004AnalyzerMessageFormat" xml:space="preserve">
-    <value>Access attribute is missing argument</value>
+    <value>Attribute '{0}' is missing argument</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
   <data name="MCA1004AnalyzerTitle" xml:space="preserve">
-    <value>Access attribute is missing argument</value>
+    <value>Attribute is missing argument</value>
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="MCA1005AnalyzerDescription" xml:space="preserve">
