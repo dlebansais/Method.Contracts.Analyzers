@@ -205,6 +205,9 @@ public partial class ContractGenerator
         // Valid string or nameof attribute arguments are never empty.
         Contract.Assert(ArgumentValue != string.Empty);
 
+        if (!SyntaxFacts.IsValidIdentifier(ArgumentValue))
+            return false;
+
         if (ArgumentName == nameof(RequireNotNullAttribute.Type))
             type = ArgumentValue;
         else if (ArgumentName == nameof(RequireNotNullAttribute.Name))
