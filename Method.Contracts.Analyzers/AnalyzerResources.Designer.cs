@@ -248,5 +248,32 @@ namespace Contracts.Analyzers {
                 return ResourceManager.GetString("MCA1007AnalyzerTitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RequireNotNull attribute uses invalid alias..
+        /// </summary>
+        internal static string MCA1008AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1008AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alias &apos;{0}&apos; in RequireNotNull attribute is invalid.
+        /// </summary>
+        internal static string MCA1008AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1008AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RequireNotNull attribute uses invalid alias.
+        /// </summary>
+        internal static string MCA1008AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1008AnalyzerTitle", resourceCulture);
+            }
+        }
     }
 }

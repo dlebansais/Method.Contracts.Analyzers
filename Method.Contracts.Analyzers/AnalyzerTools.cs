@@ -1,7 +1,9 @@
 ﻿namespace Contracts.Analyzers;
 
 using System;
+using Contracts.Analyzers.Helper;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
@@ -70,5 +72,16 @@ internal static class AnalyzerTools
     private static bool IsTrue(this IAnalysisAssertion analysisAssertion, SyntaxNodeAnalysisContext context)
     {
         return analysisAssertion.IsTrue(context);
+    }
+
+    /// <summary>
+    /// Checks whether an attribute is <see cref="RequireNotNullAttribute"/>.
+    /// </summary>
+    /// <param name="attribute">The attribute.</param>
+    public static bool IsRequireNotNullAttribute(AttributeSyntax? attribute)
+    {
+        // There must be a parent attribute to any argument except in the most pathological cases.
+        Contract.RequireNotNull(attribute, out AttributeSyntax Attribute);
+        return GeneratorHelper.ToAttributeName(Attribute) == nameof(RequireNotNullAttribute);
     }
 }

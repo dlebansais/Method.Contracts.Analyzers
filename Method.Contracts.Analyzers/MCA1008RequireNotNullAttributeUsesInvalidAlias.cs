@@ -1,26 +1,25 @@
 ﻿namespace Contracts.Analyzers;
 
 using System.Collections.Immutable;
-using Contracts.Analyzers.Helper;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
-/// Analyzer for rule MCA1007: RequireNotNull attribute has too many arguments.
+/// Analyzer for rule MCA1008: RequireNotNull attribute uses invalid alias.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MCA1007RequireNotNullAttributeHasTooManyArguments : DiagnosticAnalyzer
+public class MCA1008RequireNotNullAttributeUsesInvalidAlias : DiagnosticAnalyzer
 {
     /// <summary>
     /// Diagnostic ID for this rule.
     /// </summary>
-    public const string DiagnosticId = "MCA1007";
+    public const string DiagnosticId = "MCA1008";
 
-    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(AnalyzerResources.MCA1007AnalyzerTitle), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
-    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(AnalyzerResources.MCA1007AnalyzerMessageFormat), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
-    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(AnalyzerResources.MCA1007AnalyzerDescription), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(AnalyzerResources.MCA1008AnalyzerTitle), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(AnalyzerResources.MCA1008AnalyzerMessageFormat), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(AnalyzerResources.MCA1008AnalyzerDescription), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
     private const string Category = "Usage";
 
     private static readonly DiagnosticDescriptor Rule = new(DiagnosticId,
@@ -68,16 +67,31 @@ public class MCA1007RequireNotNullAttributeHasTooManyArguments : DiagnosticAnaly
         AttributeSyntax Attribute = Contract.AssertNotNull(attributeArgument.FirstAncestorOrSelf<AttributeSyntax>());
         AttributeArgumentListSyntax ArgumentList = Contract.AssertNotNull(Attribute.ArgumentList);
         var AttributeArguments = ArgumentList.Arguments;
-        int ArgumentIndex = AttributeArguments.IndexOf(attributeArgument);
 
-        // No diagnostic if the attribute has no alias, type or name, or if this is the first argument.
-        if (!ContractGenerator.IsRequireNotNullAttributeWithAliasTypeOrName(AttributeArguments) || ArgumentIndex == 0)
+        // No diagnostic if the attribute has no alias.
+        if (!ContractGenerator.IsRequireNotNullAttributeWithAliasTypeOrName(AttributeArguments))
             return;
 
-        // No diagnostic if the argument is not a parameter name.
-        if (!ContractGenerator.IsParameterName(attributeArgument))
+        // No diagnostic if the argument is a parameter name.
+        if (attributeArgument.NameEquals is not NameEqualsSyntax NameEquals)
             return;
 
-        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), ArgumentIndex));
+        string ArgumentName = NameEquals.Name.Identifier.Text;
+
+        // No diagnostic if the argument is not the alias.
+        if (ArgumentName != nameof(RequireNotNullAttribute.AliasName))
+            return;
+
+        // No diagnostic if the argument is not a valid string or nameof.
+        if (!ContractGenerator.IsStringOrNameofAttributeArgument(attributeArgument, out string ArgumentValue))
+            return;
+
+        string AliasName = ArgumentValue;
+
+        // No diagnostic if the alias is a valid identifier.
+        if (SyntaxFacts.IsValidIdentifier(AliasName))
+            return;
+
+        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), AliasName));
     }
 }

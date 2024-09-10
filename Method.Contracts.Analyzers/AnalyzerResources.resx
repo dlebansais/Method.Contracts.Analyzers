@@ -201,4 +201,16 @@
     <value>RequireNotNull attribute has too many arguments</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="MCA1008AnalyzerDescription" xml:space="preserve">
+    <value>RequireNotNull attribute uses invalid alias.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1008AnalyzerMessageFormat" xml:space="preserve">
+    <value>Alias '{0}' in RequireNotNull attribute is invalid</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1008AnalyzerTitle" xml:space="preserve">
+    <value>RequireNotNull attribute uses invalid alias</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
 </root>

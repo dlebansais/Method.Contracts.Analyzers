@@ -57,15 +57,8 @@ public class MCA1006RequireNotNullAttributeArgumentMustBeValidParameterName : Di
             context,
             LanguageVersion.CSharp7,
             AnalyzeVerifiedNode,
-            new SimpleAnalysisAssertion(context => IsRequireNotNullAttribute(((AttributeArgumentSyntax)context.Node).FirstAncestorOrSelf<AttributeSyntax>())),
+            new SimpleAnalysisAssertion(context => AnalyzerTools.IsRequireNotNullAttribute(((AttributeArgumentSyntax)context.Node).FirstAncestorOrSelf<AttributeSyntax>())),
             new SimpleAnalysisAssertion(context => ((AttributeArgumentSyntax)context.Node).FirstAncestorOrSelf<MethodDeclarationSyntax>() is not null));
-    }
-
-    private static bool IsRequireNotNullAttribute(AttributeSyntax? attribute)
-    {
-        // There must be a parent attribute to any argument except in the most pathological cases.
-        Contract.RequireNotNull(attribute, out AttributeSyntax Attribute);
-        return GeneratorHelper.ToAttributeName(Attribute) == nameof(RequireNotNullAttribute);
     }
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeArgumentSyntax attributeArgument, IAnalysisAssertion[] analysisAssertions)
