@@ -295,7 +295,7 @@ public partial class ContractGenerator
 
     private static List<AttributeArgumentModel> TransformRequireNotNullAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        if (IsRequireNotNullAttributeWithAlias(attributeArguments))
+        if (IsRequireNotNullAttributeWithAliasTypeOrName(attributeArguments))
             return TransformRequireNotNullAttributeWithAlias(methodDeclaration, attributeArguments);
         else
             return TransformRequireNotNullAttributeNoAlias(methodDeclaration, attributeArguments);

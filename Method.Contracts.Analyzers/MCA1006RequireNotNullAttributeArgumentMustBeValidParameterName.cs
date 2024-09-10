@@ -70,10 +70,21 @@ public class MCA1006RequireNotNullAttributeArgumentMustBeValidParameterName : Di
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeArgumentSyntax attributeArgument, IAnalysisAssertion[] analysisAssertions)
     {
-        // If we reached this step, there is a method declaration.
+        // If we reached this step, there is a method declaration and an attribute.
         MethodDeclarationSyntax MethodDeclaration = Contract.AssertNotNull(attributeArgument.FirstAncestorOrSelf<MethodDeclarationSyntax>());
+        AttributeSyntax Attribute = Contract.AssertNotNull(attributeArgument.FirstAncestorOrSelf<AttributeSyntax>());
+        AttributeArgumentListSyntax ArgumentList = Contract.AssertNotNull(Attribute.ArgumentList);
+        var AttributeArguments = ArgumentList.Arguments;
 
-        // No diagnostic if the argument is a valid modifier.
+        // No diagnostic if the attribute has an alias, type or name, and this is not the first argument.
+        if (ContractGenerator.IsRequireNotNullAttributeWithAliasTypeOrName(AttributeArguments))
+        {
+            int ArgumentIndex = AttributeArguments.IndexOf(attributeArgument);
+            if (ArgumentIndex > 0)
+                return;
+        }
+
+        // No diagnostic if the argument is a valid parameter name.
         AttributeValidityCheckResult CheckResult = ContractGenerator.IsValidRequireNotNullAttribute(MethodDeclaration, [attributeArgument]);
         if (CheckResult.Result == AttributeGeneration.Valid)
             return;

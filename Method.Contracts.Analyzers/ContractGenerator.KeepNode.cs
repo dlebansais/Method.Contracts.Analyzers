@@ -130,20 +130,26 @@ public partial class ContractGenerator
     {
         Contract.RequireNotNull(attributeArguments, out IReadOnlyList<AttributeArgumentSyntax> AttributeArguments);
 
-        if (IsRequireNotNullAttributeWithAlias(AttributeArguments))
-            return IsValidRequireNotNullAttributeWithAlias(methodDeclaration, AttributeArguments);
+        if (IsRequireNotNullAttributeWithAliasTypeOrName(AttributeArguments))
+            return IsValidRequireNotNullAttributeWithAliasTypeOrName(methodDeclaration, AttributeArguments);
         else if (AttributeArguments.Count > 0)
             return IsValidRequireNotNullAttributeNoAlias(methodDeclaration, AttributeArguments);
         else
             return AttributeValidityCheckResult.Invalid(-1);
     }
 
-    private static bool IsRequireNotNullAttributeWithAlias(IReadOnlyList<AttributeArgumentSyntax> arguments)
+    /// <summary>
+    /// Checks whether arguments of an attribute include an alias.
+    /// </summary>
+    /// <param name="attributeArguments">The attribute arguments.</param>
+    public static bool IsRequireNotNullAttributeWithAliasTypeOrName(IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        return arguments.Count > 0 && arguments.Any(argument => argument.NameEquals is not null);
+        Contract.RequireNotNull(attributeArguments, out IReadOnlyList<AttributeArgumentSyntax> AttributeArguments);
+
+        return AttributeArguments.Count > 0 && AttributeArguments.Any(argument => argument.NameEquals is not null);
     }
 
-    private static AttributeValidityCheckResult IsValidRequireNotNullAttributeWithAlias(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static AttributeValidityCheckResult IsValidRequireNotNullAttributeWithAliasTypeOrName(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
         // We reach this step only if IsRequireNotNullAttributeWithAlias() returned true.
         Contract.Assert(attributeArguments.Count > 0);
