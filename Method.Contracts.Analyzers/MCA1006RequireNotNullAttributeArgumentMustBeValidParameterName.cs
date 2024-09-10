@@ -86,6 +86,6 @@ public class MCA1006RequireNotNullAttributeArgumentMustBeValidParameterName : Di
         if (CheckResult.Result == AttributeGeneration.Valid)
             return;
 
-        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), CheckResult.PositionOfFirstInvalidArgument));
+        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), ArgumentIndex));
     }
 }

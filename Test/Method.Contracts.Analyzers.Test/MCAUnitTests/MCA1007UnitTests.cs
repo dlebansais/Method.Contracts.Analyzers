@@ -28,6 +28,22 @@ internal partial class Program
     }
 
     [TestMethod]
+    public async Task NoAlias_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text1"", ""foo"")]
+    private static void HelloFromVerified(string text1, string text2, out string textPlus)
+    {
+        textPlus = text1 + text2 + ""!"";
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
     public async Task InvalidParameterNameWithType_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

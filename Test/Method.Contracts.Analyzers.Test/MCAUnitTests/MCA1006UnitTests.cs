@@ -90,6 +90,22 @@ internal partial class Program
     }
 
     [TestMethod]
+    public async Task MultipleArgumentsOneBad_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
+internal partial class Program
+{
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text1"", [|""foo""|], ""text3"")]
+    private static void HelloFromVerified(string text1, string text2, string text3, out string textPlus)
+    {
+        textPlus = text1 + text2 + text3 + ""!"";
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
     public async Task OneNameofArgument_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
