@@ -81,8 +81,8 @@ The default strategy for naming the parameter alias is as follow:
 You can specify your own aliasing with the `AliasName` attribute option:
 
 ````csharp
-[RequireNotNull(nameof(text), AliasName = "Text")] // This is the same as using the default alias.
-[RequireNotNull(nameof(text), AliasName = "_textFoo")]
+[RequireNotNull(nameof(text1), AliasName = "Text1")] // This is the same as using the default alias.
+[RequireNotNull(nameof(text2), AliasName = "_textFoo")]
 ````
 
 Note that in this case only one parameter name is allowed. To alias multiple parameters, use multiple `RequireNotNull` attributes.
@@ -227,6 +227,12 @@ You don't have to specify all values if you're changing just one setting. Note t
  
 ## List of diagnostics
 
-| Code                      | Diagnostic                                                |
-| ------------------------- | --------------------------------------------------------- |
-| [MCA1001](doc/MCA1001.md) | Verified method must be private.                          |
+| Code                      | Diagnostic                                                        |
+| ------------------------- | ----------------------------------------------------------------- |
+| [MCA1001](doc/MCA1001.md) | Verified method must be private.                                  |
+| [MCA1002](doc/MCA1002.md) | Verified method must be within type.                              |
+| [MCA1003](doc/MCA1003.md) | Verified method is missing suffix.                                |
+| [MCA1004](doc/MCA1004.md) | Attribute is missing argument.                                    |
+| [MCA1005](doc/MCA1005.md) | Access attribute argument must be a valid modifier.               |
+| [MCA1006](doc/MCA1006.md) | RequireNotNull attribute argument must be a valid parameter name. |
+| [MCA1007](doc/MCA1007.md) | RequireNotNull attribute has too many arguments.                  |

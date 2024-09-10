@@ -81,9 +81,14 @@ public class MCA1006RequireNotNullAttributeArgumentMustBeValidParameterName : Di
         if (ContractGenerator.IsRequireNotNullAttributeWithAliasTypeOrName(AttributeArguments) && ArgumentIndex > 0)
             return;
 
+        AttributeValidityCheckResult CheckResult = ContractGenerator.IsValidRequireNotNullAttribute(MethodDeclaration, AttributeArguments);
+
         // No diagnostic if the argument is a valid parameter name.
-        AttributeValidityCheckResult CheckResult = ContractGenerator.IsValidRequireNotNullAttribute(MethodDeclaration, [attributeArgument]);
         if (CheckResult.Result == AttributeGeneration.Valid)
+            return;
+
+        // No diagnostic if the error is on another argument.
+        if (CheckResult.PositionOfFirstInvalidArgument != ArgumentIndex)
             return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), ArgumentIndex));
