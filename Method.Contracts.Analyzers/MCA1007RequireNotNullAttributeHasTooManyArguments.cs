@@ -8,19 +8,19 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
-/// Analyzer for rule MCA1006: RequireNotNull attribute argument must be a valid parameter name.
+/// Analyzer for rule MCA1007: RequireNotNull attribute has too many arguments.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MCA1006RequireNotNullAttributeArgumentMustBeValidParameterName : DiagnosticAnalyzer
+public class MCA1007RequireNotNullAttributeHasTooManyArguments : DiagnosticAnalyzer
 {
     /// <summary>
     /// Diagnostic ID for this rule.
     /// </summary>
-    public const string DiagnosticId = "MCA1006";
+    public const string DiagnosticId = "MCA1007";
 
-    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(AnalyzerResources.MCA1006AnalyzerTitle), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
-    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(AnalyzerResources.MCA1006AnalyzerMessageFormat), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
-    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(AnalyzerResources.MCA1006AnalyzerDescription), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(AnalyzerResources.MCA1007AnalyzerTitle), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(AnalyzerResources.MCA1007AnalyzerMessageFormat), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(AnalyzerResources.MCA1007AnalyzerDescription), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
     private const string Category = "Usage";
 
     private static readonly DiagnosticDescriptor Rule = new(DiagnosticId,
@@ -77,15 +77,14 @@ public class MCA1006RequireNotNullAttributeArgumentMustBeValidParameterName : Di
         var AttributeArguments = ArgumentList.Arguments;
         int ArgumentIndex = AttributeArguments.IndexOf(attributeArgument);
 
-        // No diagnostic if the attribute has an alias, type or name, and this is not the first argument.
-        if (ContractGenerator.IsRequireNotNullAttributeWithAliasTypeOrName(AttributeArguments) && ArgumentIndex > 0)
+        // No diagnostic if the attribute has no alias, type or name, or if this is the first argument.
+        if (!ContractGenerator.IsRequireNotNullAttributeWithAliasTypeOrName(AttributeArguments) || ArgumentIndex == 0)
             return;
 
-        // No diagnostic if the argument is a valid parameter name.
-        AttributeValidityCheckResult CheckResult = ContractGenerator.IsValidRequireNotNullAttribute(MethodDeclaration, [attributeArgument]);
-        if (CheckResult.Result == AttributeGeneration.Valid)
+        // No diagnostic if the argument is not a parameter name.
+        if (!ContractGenerator.IsParameterName(attributeArgument))
             return;
 
-        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), CheckResult.PositionOfFirstInvalidArgument));
+        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), ArgumentIndex));
     }
 }

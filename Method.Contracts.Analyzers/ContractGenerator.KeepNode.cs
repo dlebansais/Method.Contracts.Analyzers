@@ -146,7 +146,18 @@ public partial class ContractGenerator
     {
         Contract.RequireNotNull(attributeArguments, out IReadOnlyList<AttributeArgumentSyntax> AttributeArguments);
 
-        return AttributeArguments.Count > 0 && AttributeArguments.Any(argument => argument.NameEquals is not null);
+        return AttributeArguments.Count > 0 && AttributeArguments.Any(argument => !IsParameterName(argument));
+    }
+
+    /// <summary>
+    /// Checks whether an argument is a parameter name.
+    /// </summary>
+    /// <param name="attributeArgument">The attribute argument.</param>
+    public static bool IsParameterName(AttributeArgumentSyntax attributeArgument)
+    {
+        Contract.RequireNotNull(attributeArgument, out AttributeArgumentSyntax AttributeArguments);
+
+        return AttributeArguments.NameEquals is null;
     }
 
     private static AttributeValidityCheckResult IsValidRequireNotNullAttributeWithAliasTypeOrName(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)

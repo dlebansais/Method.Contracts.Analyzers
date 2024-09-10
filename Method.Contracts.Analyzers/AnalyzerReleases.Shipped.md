@@ -10,3 +10,4 @@ MCA1003 |  Usage   |  Warning | MCA1003VerifiedMethodIsMissingSuffix, [Documenta
 MCA1004 |  Usage   |  Warning | MCA1004AttributeIsMissingArgument, [Documentation](doc/MCA1004.md)
 MCA1005 |  Usage   |  Warning | MCA1005AccessAttributeArgumentMustBeValidModifier, [Documentation](doc/MCA1005.md)
 MCA1006 |  Usage   |  Warning | MCA1006RequireNotNullAttributeArgumentMustBeValidParameterName, [Documentation](doc/MCA1006.md)
+MCA1007 |  Usage   |  Warning | MCA1007RequireNotNullAttributeHasTooManyArguments, [Documentation](doc/MCA1007.md)

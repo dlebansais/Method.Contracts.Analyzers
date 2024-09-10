@@ -113,14 +113,14 @@ internal partial class Program
             true
             );
 
-        var expected1 = new DiagnosticResult(DescriptorCS0116);
-        expected1 = expected1.WithLocation("/0/Test0.cs", 8, 13);
+        var Expected1 = new DiagnosticResult(DescriptorCS0116);
+        Expected1 = Expected1.WithLocation("/0/Test0.cs", 8, 13);
 
-        var expected2 = new DiagnosticResult(DescriptorMCA1002);
-        expected2 = expected2.WithLocation("/0/Test0.cs", 12, 1);
+        var Expected2 = new DiagnosticResult(DescriptorMCA1002);
+        Expected2 = Expected2.WithLocation("/0/Test0.cs", 12, 1);
 
-        var expected3 = new DiagnosticResult(DescriptorCS0116);
-        expected3 = expected3.WithLocation("/0/Test0.cs", 13, 6);
+        var Expected3 = new DiagnosticResult(DescriptorCS0116);
+        Expected3 = Expected3.WithLocation("/0/Test0.cs", 13, 6);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 namespace Contracts.TestSuite;
@@ -133,6 +133,6 @@ static void Main()
 void FooVerified()
 {
 }
-", expected1, expected2, expected3).ConfigureAwait(false);
+", Expected1, Expected2, Expected3).ConfigureAwait(false);
     }
 }

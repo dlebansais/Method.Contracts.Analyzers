@@ -182,11 +182,23 @@
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="MCA1006AnalyzerMessageFormat" xml:space="preserve">
-    <value>Argument at position {0} in Access attribute must be a valid parameter name</value>
+    <value>Argument at position {0} in RequireNotNull attribute must be a valid parameter name</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
   <data name="MCA1006AnalyzerTitle" xml:space="preserve">
     <value>RequireNotNull attribute argument must be a valid parameter name</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
+  <data name="MCA1007AnalyzerDescription" xml:space="preserve">
+    <value>RequireNotNull attribute with Alias, Type or Name can specify only one parameter name.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1007AnalyzerMessageFormat" xml:space="preserve">
+    <value>Argument at position {0} in RequireNotNull attribute cannot be a parameter name</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1007AnalyzerTitle" xml:space="preserve">
+    <value>RequireNotNull attribute has too many arguments</value>
     <comment>The title of the diagnostic.</comment>
   </data>
 </root>
