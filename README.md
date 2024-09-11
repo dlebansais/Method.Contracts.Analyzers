@@ -204,7 +204,7 @@ If there is no `Access` attribute and the method is `static` or `async`, the gen
 
 You can configure the generator with the following settings:
 
-+ `SuffixVerifier`: specifies which suffix a method should have to support contract attributes. The default value is `Verified` (see `TryParseFooVerified` above in sample code).
++ `VerifierSuffix`: specifies which suffix a method should have to support contract attributes. The default value is `Verified` (see `TryParseFooVerified` above in sample code).
 + `TabLength`: the number of whitespace for a tab in generated code. The default value is 4.
 + `ReturnIdentifier`: the name of the identifier that can be used in `Ensure` expressions to indicate the value returned by the method. The default is `Result`.
 + `DisabledWarnings`: a comma-separated list of warnings to disable in the generated code with `#pragma warning disable`.
@@ -213,17 +213,17 @@ To change a setting, modify the `.csproj` file of your project as follow (*Demo*
 
 ````xml
     <PropertyGroup>
-        <ContractSourceGenerator_VerifiedSuffix>DemoVerified</ContractSourceGenerator_VerifiedSuffix>
+        <ContractSourceGenerator_VerifierSuffix>DemoVerified</ContractSourceGenerator_VerifierSuffix>
         <ContractSourceGenerator_TabLength>8</ContractSourceGenerator_TabLength>
         <ContractSourceGenerator_ResultIdentifier>DemoResult</ContractSourceGenerator_ResultIdentifier>
     </PropertyGroup>
 
     <ItemGroup>
-        <CompilerVisibleProperty Include="ContractSourceGenerator_VerifiedSuffix;ContractSourceGenerator_TabLength;ContractSourceGenerator_ResultIdentifier" />
+        <CompilerVisibleProperty Include="ContractSourceGenerator_VerifierSuffix;ContractSourceGenerator_TabLength;ContractSourceGenerator_ResultIdentifier" />
     </ItemGroup>
 ````
 
-You don't have to specify all values if you're changing just one setting. Note that empty strings for `SuffixVerifier` and `ReturnIdentifier` are ignored, as well as `TabLength` if it's not a strictly positive integer value.
+You don't have to specify all values if you're changing just one setting. Note that empty strings for `VerifierSuffix` and `ReturnIdentifier` are ignored, as well as `TabLength` if it's not a strictly positive integer value.
  
 ## List of diagnostics
 

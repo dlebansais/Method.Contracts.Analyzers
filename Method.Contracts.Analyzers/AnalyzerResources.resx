@@ -249,4 +249,16 @@
     <value>Require attribute argument must be valid</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="MCA1012AnalyzerDescription" xml:space="preserve">
+    <value>Ensure attribute argument must be valid.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1012AnalyzerMessageFormat" xml:space="preserve">
+    <value>Argument at position {0} in Ensure attribute must be valid</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1012AnalyzerTitle" xml:space="preserve">
+    <value>Ensure attribute argument must be valid</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
 </root>
