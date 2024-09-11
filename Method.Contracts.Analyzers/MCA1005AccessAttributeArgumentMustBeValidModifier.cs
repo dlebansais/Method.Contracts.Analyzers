@@ -1,8 +1,6 @@
 ﻿namespace Contracts.Analyzers;
 
 using System.Collections.Immutable;
-using System.Collections.ObjectModel;
-using System.Linq;
 using Contracts.Analyzers.Helper;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

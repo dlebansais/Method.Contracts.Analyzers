@@ -139,7 +139,7 @@ public partial class ContractGenerator
     }
 
     /// <summary>
-    /// Checks whether arguments of an attribute include an alias.
+    /// Checks whether arguments of an attribute include an alias, type or name.
     /// </summary>
     /// <param name="attributeArguments">The attribute arguments.</param>
     public static bool IsRequireNotNullAttributeWithAliasTypeOrName(IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
@@ -280,9 +280,26 @@ public partial class ContractGenerator
             return AttributeValidityCheckResult.Invalid(-1);
     }
 
-    private static bool IsRequireOrEnsureAttributeWithDebugOnly(IReadOnlyList<AttributeArgumentSyntax> arguments)
+    /// <summary>
+    /// Checks whether arguments of an attribute include DebugOnly.
+    /// </summary>
+    /// <param name="attributeArguments">The attribute arguments.</param>
+    public static bool IsRequireOrEnsureAttributeWithDebugOnly(IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        return arguments.Count > 0 && arguments.Any(argument => argument.NameEquals is not null);
+        Contract.RequireNotNull(attributeArguments, out IReadOnlyList<AttributeArgumentSyntax> AttributeArguments);
+
+        return AttributeArguments.Count > 0 && AttributeArguments.Any(argument => !IsStringExpression(argument));
+    }
+
+    /// <summary>
+    /// Checks whether an argument is an expression in a string.
+    /// </summary>
+    /// <param name="attributeArgument">The attribute argument.</param>
+    public static bool IsStringExpression(AttributeArgumentSyntax attributeArgument)
+    {
+        Contract.RequireNotNull(attributeArgument, out AttributeArgumentSyntax AttributeArguments);
+
+        return AttributeArguments.NameEquals is null;
     }
 
     private static AttributeValidityCheckResult IsValidRequireOrEnsureAttributeWithDebugOnly(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)

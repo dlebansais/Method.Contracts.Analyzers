@@ -237,4 +237,16 @@
     <value>RequireNotNull attribute uses invalid name</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="MCA1011AnalyzerDescription" xml:space="preserve">
+    <value>Require attribute argument must be valid.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1011AnalyzerMessageFormat" xml:space="preserve">
+    <value>Argument at position {0} in Require attribute must be valid</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1011AnalyzerTitle" xml:space="preserve">
+    <value>Require attribute argument must be valid</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
 </root>

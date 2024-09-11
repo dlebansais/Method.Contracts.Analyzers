@@ -329,5 +329,32 @@ namespace Contracts.Analyzers {
                 return ResourceManager.GetString("MCA1010AnalyzerTitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Require attribute argument must be valid..
+        /// </summary>
+        internal static string MCA1011AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1011AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Argument at position {0} in Require attribute must be valid.
+        /// </summary>
+        internal static string MCA1011AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1011AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Require attribute argument must be valid.
+        /// </summary>
+        internal static string MCA1011AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1011AnalyzerTitle", resourceCulture);
+            }
+        }
     }
 }

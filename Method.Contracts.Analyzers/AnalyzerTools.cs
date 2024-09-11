@@ -75,13 +75,15 @@ internal static class AnalyzerTools
     }
 
     /// <summary>
-    /// Checks whether an attribute is <see cref="RequireNotNullAttribute"/>.
+    /// Checks whether an attribute is of the expected type.
     /// </summary>
+    /// <typeparam name="T">The expected attribute type.</typeparam>
     /// <param name="attribute">The attribute.</param>
-    public static bool IsRequireNotNullAttribute(AttributeSyntax? attribute)
+    public static bool IsExpectedAttribute<T>(AttributeSyntax? attribute)
+        where T : Attribute
     {
         // There must be a parent attribute to any argument except in the most pathological cases.
         Contract.RequireNotNull(attribute, out AttributeSyntax Attribute);
-        return GeneratorHelper.ToAttributeName(Attribute) == nameof(RequireNotNullAttribute);
+        return GeneratorHelper.ToAttributeName(Attribute) == typeof(T).Name;
     }
 }

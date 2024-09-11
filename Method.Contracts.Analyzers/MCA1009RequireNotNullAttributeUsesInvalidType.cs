@@ -56,7 +56,7 @@ public class MCA1009RequireNotNullAttributeUsesInvalidType : DiagnosticAnalyzer
             context,
             LanguageVersion.CSharp7,
             AnalyzeVerifiedNode,
-            new SimpleAnalysisAssertion(context => AnalyzerTools.IsRequireNotNullAttribute(((AttributeArgumentSyntax)context.Node).FirstAncestorOrSelf<AttributeSyntax>())),
+            new SimpleAnalysisAssertion(context => AnalyzerTools.IsExpectedAttribute<RequireNotNullAttribute>(((AttributeArgumentSyntax)context.Node).FirstAncestorOrSelf<AttributeSyntax>())),
             new SimpleAnalysisAssertion(context => ((AttributeArgumentSyntax)context.Node).FirstAncestorOrSelf<MethodDeclarationSyntax>() is not null));
     }
 
