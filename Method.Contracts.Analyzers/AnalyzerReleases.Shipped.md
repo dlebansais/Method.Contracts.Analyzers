@@ -15,4 +15,6 @@ MCA1008 |  Usage   |  Warning | MCA1008RequireNotNullAttributeUsesInvalidAlias, 
 MCA1009 |  Usage   |  Warning | MCA1009RequireNotNullAttributeUsesInvalidType, [Documentation](doc/MCA1009.md)
 MCA1010 |  Usage   |  Warning | MCA1010RequireNotNullAttributeUsesInvalidName, [Documentation](doc/MCA1010.md)
 MCA1011 |  Usage   |  Warning | MCA1011RequireAttributeArgumentMustBeValid, [Documentation](doc/MCA1011.md)
-MCA1012 |  Usage   |  Warning | MCA1012EnsureAttributeArgumentMustBeValid, [Documentation](doc/MCA1012.md)
+MCA1012 |  Usage   |  Warning | MCA1012RequireAttributeHasTooManyArguments, [Documentation](doc/MCA1012.md)
+MCA1013 |  Usage   |  Warning | MCA1013EnsureAttributeArgumentMustBeValid, [Documentation](doc/MCA1013.md)
+MCA1014 |  Usage   |  Warning | MCA1014EnsureAttributeHasTooManyArguments, [Documentation](doc/MCA1014.md)

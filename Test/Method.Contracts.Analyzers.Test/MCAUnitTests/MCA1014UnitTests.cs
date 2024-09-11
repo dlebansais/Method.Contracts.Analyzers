@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1012RequireAttributeHasTooManyArguments>;
+using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1014EnsureAttributeHasTooManyArguments>;
 
 [TestClass]
-public partial class MCA1012UnitTests
+public partial class MCA1014UnitTests
 {
     [TestMethod]
     public async Task InvalidParameterNameWithDebugOnly_Diagnostic()
@@ -18,7 +18,7 @@ public partial class MCA1012UnitTests
 internal partial class Program
 {
     [Access(""public"", ""static"")]
-    [Require(""text.Length > 0"", [|""text.Length > 0""|], DebugOnly = true)]
+    [Ensure(""text.Length > 0"", [|""text.Length > 0""|], DebugOnly = true)]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";
@@ -34,7 +34,7 @@ internal partial class Program
 internal partial class Program
 {
     [Access(""public"", ""static"")]
-    [Require(""text.Length > 0"", """")]
+    [Ensure(""text.Length > 0"", """")]
     private static void HelloFromVerified(string text1, string text2, out string textPlus)
     {
         textPlus = text1 + text2 + ""!"";
@@ -56,13 +56,13 @@ internal partial class Program
             );
 
         var Expected = new DiagnosticResult(DescriptorCS1016);
-        Expected = Expected.WithLocation("/0/Test0.cs", 9, 52);
+        Expected = Expected.WithLocation("/0/Test0.cs", 9, 51);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
 {
     [Access(""public"", ""static"")]
-    [Require(""text.Length > 0"", DebugOnly = false, [|""text.Length > 0""|])]
+    [Ensure(""text.Length > 0"", DebugOnly = false, [|""text.Length > 0""|])]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";

@@ -4,9 +4,9 @@ extern alias Analyzers;
 
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1012RequireAttributeHasTooManyArguments>;
+using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1013EnsureAttributeArgumentMustBeValid>;
 
-public partial class MCA1012UnitTests
+public partial class MCA1013UnitTests
 {
     [TestMethod]
     public async Task CoverageDirective_NoDiagnostic()
@@ -17,7 +17,7 @@ public partial class MCA1012UnitTests
 internal partial class Program
 {
     [Access(""public"", ""static"")]
-    [Require(""text.Length > 0"", ""text.Length > 0"", DebugOnly = true)]
+    [Ensure("""")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";
@@ -33,7 +33,7 @@ internal partial class Program
 internal partial class Program
 {
     [Access(""public"", ""static"")]
-    [Require(""text.Length > 0"", ""text.Length > 0"", DebugOnly = true)]
+    [Ensure("""")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";

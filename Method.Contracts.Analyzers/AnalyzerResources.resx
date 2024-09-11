@@ -249,16 +249,40 @@
     <value>Require attribute argument must be valid</value>
     <comment>The title of the diagnostic.</comment>
   </data>
-  <data name="MCA1012AnalyzerDescription" xml:space="preserve">
+  <data name="MCA1013AnalyzerDescription" xml:space="preserve">
     <value>Ensure attribute argument must be valid.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
-  <data name="MCA1012AnalyzerMessageFormat" xml:space="preserve">
+  <data name="MCA1013AnalyzerMessageFormat" xml:space="preserve">
     <value>Argument at position {0} in Ensure attribute must be valid</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
-  <data name="MCA1012AnalyzerTitle" xml:space="preserve">
+  <data name="MCA1013AnalyzerTitle" xml:space="preserve">
     <value>Ensure attribute argument must be valid</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
+  <data name="MCA1012AnalyzerDescription" xml:space="preserve">
+    <value>Require attribute with DebugOnly can specify only one expression.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1012AnalyzerMessageFormat" xml:space="preserve">
+    <value>Argument at position {0} in Require attribute cannot be an expression</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1012AnalyzerTitle" xml:space="preserve">
+    <value>Require attribute has too many arguments</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
+  <data name="MCA1014AnalyzerDescription" xml:space="preserve">
+    <value>Ensure attribute with DebugOnly can specify only one expression.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1014AnalyzerMessageFormat" xml:space="preserve">
+    <value>Argument at position {0} in Ensure attribute cannot be an expression</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1014AnalyzerTitle" xml:space="preserve">
+    <value>Ensure attribute has too many arguments</value>
     <comment>The title of the diagnostic.</comment>
   </data>
 </root>

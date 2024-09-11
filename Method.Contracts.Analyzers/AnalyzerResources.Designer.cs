@@ -358,7 +358,7 @@ namespace Contracts.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ensure attribute argument must be valid..
+        ///   Looks up a localized string similar to Require attribute with DebugOnly can specify only one expression..
         /// </summary>
         internal static string MCA1012AnalyzerDescription {
             get {
@@ -367,7 +367,7 @@ namespace Contracts.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Argument at position {0} in Ensure attribute must be valid.
+        ///   Looks up a localized string similar to Argument at position {0} in Require attribute cannot be an expression.
         /// </summary>
         internal static string MCA1012AnalyzerMessageFormat {
             get {
@@ -376,11 +376,65 @@ namespace Contracts.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ensure attribute argument must be valid.
+        ///   Looks up a localized string similar to Require attribute has too many arguments.
         /// </summary>
         internal static string MCA1012AnalyzerTitle {
             get {
                 return ResourceManager.GetString("MCA1012AnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ensure attribute argument must be valid..
+        /// </summary>
+        internal static string MCA1013AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1013AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Argument at position {0} in Ensure attribute must be valid.
+        /// </summary>
+        internal static string MCA1013AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1013AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ensure attribute argument must be valid.
+        /// </summary>
+        internal static string MCA1013AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1013AnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ensure attribute with DebugOnly can specify only one expression..
+        /// </summary>
+        internal static string MCA1014AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1014AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Argument at position {0} in Ensure attribute cannot be an expression.
+        /// </summary>
+        internal static string MCA1014AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1014AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ensure attribute has too many arguments.
+        /// </summary>
+        internal static string MCA1014AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1014AnalyzerTitle", resourceCulture);
             }
         }
     }

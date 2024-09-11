@@ -90,6 +90,7 @@ internal partial class Program
 }
 ").ConfigureAwait(false);
     }
+
     [TestMethod]
     public async Task InvalidLastParameterNameWithAlias_Diagnostic()
     {
