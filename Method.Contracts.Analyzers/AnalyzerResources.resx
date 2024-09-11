@@ -213,4 +213,28 @@
     <value>RequireNotNull attribute uses invalid alias</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="MCA1009AnalyzerDescription" xml:space="preserve">
+    <value>RequireNotNull attribute uses invalid type.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1009AnalyzerMessageFormat" xml:space="preserve">
+    <value>Type '{0}' in RequireNotNull attribute is invalid</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1009AnalyzerTitle" xml:space="preserve">
+    <value>RequireNotNull attribute uses invalid type</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
+  <data name="MCA1010AnalyzerDescription" xml:space="preserve">
+    <value>RequireNotNull attribute uses invalid name.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1010AnalyzerMessageFormat" xml:space="preserve">
+    <value>Name '{0}' in RequireNotNull attribute is invalid</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1010AnalyzerTitle" xml:space="preserve">
+    <value>RequireNotNull attribute uses invalid name</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
 </root>

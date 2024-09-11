@@ -4,19 +4,19 @@ extern alias Analyzers;
 
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1008RequireNotNullAttributeUsesInvalidAlias>;
+using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1009RequireNotNullAttributeUsesInvalidType>;
 
 [TestClass]
-public partial class MCA1008UnitTests
+public partial class MCA1009UnitTests
 {
     [TestMethod]
-    public async Task InvalidAlias_Diagnostic()
+    public async Task InvalidType_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
 {
     [Access(""public"", ""static"")]
-    [RequireNotNull(""text"", [|AliasName = ""@@""|])]
+    [RequireNotNull(""text"", [|Type = ""@@""|])]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";
@@ -26,13 +26,13 @@ internal partial class Program
     }
 
     [TestMethod]
-    public async Task ValidAlias_NoDiagnostic()
+    public async Task ValidType_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
 {
     [Access(""public"", ""static"")]
-    [RequireNotNull(""text"", AliasName = ""foo"")]
+    [RequireNotNull(""text"", Type = ""foo"")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";
@@ -58,13 +58,13 @@ internal partial class Program
     }
 
     [TestMethod]
-    public async Task WithTypeOnly_NoDiagnostic()
+    public async Task WithAliasOnly_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
 {
     [Access(""public"", ""static"")]
-    [RequireNotNull(""text"", Type = ""string"")]
+    [RequireNotNull(""text"", AliasName = ""Text"")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";
@@ -96,7 +96,7 @@ internal partial class Program
 internal partial class Program
 {
     [Access(""public"", ""static"")]
-    [RequireNotNull(""text"", AliasName = """")]
+    [RequireNotNull(""text"", Type = """")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";
@@ -112,7 +112,7 @@ internal partial class Program
 internal partial class Program
 {
     [Access(""public"", ""static"")]
-    [RequireNotNull(""text"", [|AliasName = ""@@""|], Type = ""string"")]
+    [RequireNotNull(""text"", [|Type = ""@@""|], AliasName = ""Text"")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";
@@ -122,13 +122,13 @@ internal partial class Program
     }
 
     [TestMethod]
-    public async Task InvalidAliasWithName_Diagnostic()
+    public async Task InvalidTypeWithName_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
 {
     [Access(""public"", ""static"")]
-    [RequireNotNull(""text"", [|AliasName = ""@@""|], Name = ""newText"")]
+    [RequireNotNull(""text"", [|Type = ""@@""|], Name = ""newText"")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";
@@ -138,13 +138,13 @@ internal partial class Program
     }
 
     [TestMethod]
-    public async Task InvalidAliasWithTypeAndName_Diagnostic()
+    public async Task InvalidTypeWithAliadAndName_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
 {
     [Access(""public"", ""static"")]
-    [RequireNotNull(""text"", [|AliasName = ""@@""|], Type = ""string"", Name = ""newText"")]
+    [RequireNotNull(""text"", [|Type = ""@@""|], AliasName = ""Text"", Name = ""newText"")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";

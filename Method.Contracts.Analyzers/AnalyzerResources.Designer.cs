@@ -275,5 +275,59 @@ namespace Contracts.Analyzers {
                 return ResourceManager.GetString("MCA1008AnalyzerTitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RequireNotNull attribute uses invalid type..
+        /// </summary>
+        internal static string MCA1009AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1009AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type &apos;{0}&apos; in RequireNotNull attribute is invalid.
+        /// </summary>
+        internal static string MCA1009AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1009AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RequireNotNull attribute uses invalid type.
+        /// </summary>
+        internal static string MCA1009AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1009AnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RequireNotNull attribute uses invalid name..
+        /// </summary>
+        internal static string MCA1010AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1010AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name &apos;{0}&apos; in RequireNotNull attribute is invalid.
+        /// </summary>
+        internal static string MCA1010AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1010AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RequireNotNull attribute uses invalid name.
+        /// </summary>
+        internal static string MCA1010AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1010AnalyzerTitle", resourceCulture);
+            }
+        }
     }
 }
