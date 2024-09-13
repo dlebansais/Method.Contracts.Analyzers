@@ -10,7 +10,7 @@ using Contracts;
 
 partial class Program
 {
-    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.4.8.16")]
+    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.4.9.16")]
     public static async Task<string> HelloFrom(string text)
     {
         Contract.RequireNotNull(text, out string Text);
