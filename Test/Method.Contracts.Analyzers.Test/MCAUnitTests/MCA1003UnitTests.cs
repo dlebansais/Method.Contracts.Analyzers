@@ -15,11 +15,11 @@ public partial class MCA1003UnitTests
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
 {
-    [|[Access(""public"", ""static"")]
-    private static void HelloFromFoo(string text, out string textPlus)
+    [Access(""public"", ""static"")]
+    private static void [|HelloFromFoo|](string text, out string textPlus)
     {
         textPlus = text + ""!"";
-    }|]
+    }
 }
 ").ConfigureAwait(false);
     }
@@ -45,11 +45,11 @@ internal partial class Program
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
 internal partial class Program
 {
-    [|[Access(""public"", ""static"")]
-    private static void HelloFromFoo(string text, out string textPlus)
+    [Access(""public"", ""static"")]
+    private static void [|HelloFromFoo|](string text, out string textPlus)
     {
         textPlus = text + ""!"";
-    }|]
+    }
 }
 ").ConfigureAwait(false);
     }
@@ -60,11 +60,11 @@ internal partial class Program
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
 {
-    [|[Access(""public"", ""static"")]
-    private static void Verified(string text, out string textPlus)
+    [Access(""public"", ""static"")]
+    private static void [|Verified|](string text, out string textPlus)
     {
         textPlus = text + ""!"";
-    }|]
+    }
 }
 ").ConfigureAwait(false);
     }

@@ -81,6 +81,6 @@ public class MCA1003VerifiedMethodIsMissingSuffix : DiagnosticAnalyzer
 
         var Text = methodDeclaration.Identifier.ValueText;
 
-        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), Text, VerifiedSuffix));
+        context.ReportDiagnostic(Diagnostic.Create(Rule, methodDeclaration.Identifier.GetLocation(), Text, VerifiedSuffix));
     }
 }
