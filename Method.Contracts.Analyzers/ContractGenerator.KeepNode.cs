@@ -183,7 +183,7 @@ public partial class ContractGenerator
         Contract.Assert(attributeArguments.Count > 1);
 
         for (int i = 1; i < attributeArguments.Count; i++)
-            if (!IsValidArgumentWithAlias(methodDeclaration, attributeArguments[i], ref Type, ref Name, ref AliasName))
+            if (!IsValidArgumentWithAliasTypeOrName(methodDeclaration, attributeArguments[i], ref Type, ref Name, ref AliasName))
                 return AttributeValidityCheckResult.Invalid(0);
 
         // At this step there is at least one valid argument that is either Type, Name or AliasName.
@@ -192,7 +192,7 @@ public partial class ContractGenerator
         return new AttributeValidityCheckResult(AttributeGeneration.Valid, [ParameterName], -1);
     }
 
-    private static bool IsValidArgumentWithAlias(MethodDeclarationSyntax methodDeclaration, AttributeArgumentSyntax attributeArgument, ref string type, ref string name, ref string aliasName)
+    private static bool IsValidArgumentWithAliasTypeOrName(MethodDeclarationSyntax methodDeclaration, AttributeArgumentSyntax attributeArgument, ref string type, ref string name, ref string aliasName)
     {
         if (attributeArgument.NameEquals is not NameEqualsSyntax NameEquals)
             return false;

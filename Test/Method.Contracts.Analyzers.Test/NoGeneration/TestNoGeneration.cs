@@ -1022,6 +1022,414 @@ internal partial class Program
     }
 
     [Test]
+    public async Task TestInvalidType1()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(Type = ""string"", ""text"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidType2()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(nameof(), Type = ""string"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidType3()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""foo"", Type = ""string"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidType4()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"", Type = ""string"", ""foo"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidType5()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"", Type = nameof())]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidType6()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"", Type = ""@@"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidName1()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(Name = ""foo"", ""text"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidName2()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(nameof(), Name = ""foo"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidName3()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""foo"", Name = ""foo"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidName4()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"", Name = ""foo"", ""foo"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidName5()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"", Name = nameof())]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidName6()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"", Name = ""@@"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        var Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
     public async Task TestEnsureReleaseModeDebugOnlyTrue()
     {
         // The source code to test

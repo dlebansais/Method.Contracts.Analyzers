@@ -200,8 +200,8 @@ public partial class ContractGenerator
 
     private static bool IsFirstTriviaWhitespace(IList<SyntaxTrivia> trivias)
     {
-        if (trivias.Count == 0)
-            return false;
+        // If we reach this method there is at least one end of line, therefore at least one trivia.
+        Contract.Assert(trivias.Count > 0);
 
         SyntaxTrivia FirstTrivia = trivias[0];
 
@@ -323,7 +323,7 @@ public partial class ContractGenerator
 
         for (int i = 1; i < attributeArguments.Count; i++)
         {
-            bool IsValidAttributeArgument = IsValidArgumentWithAlias(methodDeclaration, attributeArguments[i], ref Type, ref Name, ref AliasName);
+            bool IsValidAttributeArgument = IsValidArgumentWithAliasTypeOrName(methodDeclaration, attributeArguments[i], ref Type, ref Name, ref AliasName);
 
             // This was verified in IsValidRequireNotNullAttributeWithAlias().
             Contract.Assert(IsValidAttributeArgument);
