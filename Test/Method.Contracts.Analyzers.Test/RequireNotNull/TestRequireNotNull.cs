@@ -575,12 +575,6 @@ using Contracts;
 
 internal partial class Program
 {
-    public static void Main(string[] args)
-    {
-        HelloFrom(""Hello, World"", out string Text);
-        Console.WriteLine(Text);
-    }
-
     /// <summary>
     /// Test doc.
     /// </summary>
@@ -590,6 +584,12 @@ internal partial class Program
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";
+    }
+
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
     }
 }
 ";

@@ -152,4 +152,100 @@ internal partial class Program
 }
 ").ConfigureAwait(false);
     }
+
+    [TestMethod]
+    public async Task ValidNullableType_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"", Type = ""foo?"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task ValidArrayType_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"", Type = ""foo[]"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task ValidGenericType_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"", Type = ""foo<string>"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task ValidTypeWithNamespace_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"", Type = ""foo.foo"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task ValidTypeWithGlobalNamespace_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"", Type = ""global::foo.foo"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task ValidTypeCombinations_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"", Type = ""global::foo.foo<bar<string?>[]>?[]"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+").ConfigureAwait(false);
+    }
 }

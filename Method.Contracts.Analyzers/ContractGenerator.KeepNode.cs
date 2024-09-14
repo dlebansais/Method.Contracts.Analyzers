@@ -205,15 +205,27 @@ public partial class ContractGenerator
         // Valid string or nameof attribute arguments are never empty.
         Contract.Assert(ArgumentValue != string.Empty);
 
-        if (!SyntaxFacts.IsValidIdentifier(ArgumentValue))
-            return false;
-
         if (ArgumentName == nameof(RequireNotNullAttribute.Type))
+        {
             type = ArgumentValue;
+
+            if (!IsValidTypeName(ArgumentValue))
+                return false;
+        }
         else if (ArgumentName == nameof(RequireNotNullAttribute.Name))
+        {
             name = ArgumentValue;
+
+            if (!SyntaxFacts.IsValidIdentifier(ArgumentValue))
+                return false;
+        }
         else if (ArgumentName == nameof(RequireNotNullAttribute.AliasName))
+        {
             aliasName = ArgumentValue;
+
+            if (!SyntaxFacts.IsValidIdentifier(ArgumentValue))
+                return false;
+        }
         else
             return false;
 
@@ -495,5 +507,26 @@ public partial class ContractGenerator
         };
 
         return ValidModifiers.Contains(modifier);
+    }
+
+    /// <summary>
+    /// Checks whether a type name is valid.
+    /// </summary>
+    /// <param name="typeName">The type name.</param>
+    public static bool IsValidTypeName(string typeName)
+    {
+        Contract.RequireNotNull(typeName, out string TypeName);
+
+        TypeName = AnalyzerTools.Replace(TypeName, "?", ";");
+        TypeName = AnalyzerTools.Replace(TypeName, "[]", ";");
+        TypeName = AnalyzerTools.Replace(TypeName, "<", ";");
+        TypeName = AnalyzerTools.Replace(TypeName, ">", ";");
+        TypeName = AnalyzerTools.Replace(TypeName, ".", ";");
+        TypeName = AnalyzerTools.Replace(TypeName, "::", ";");
+        TypeName = TypeName.Trim(';');
+
+        string[] Identifiers = TypeName.Split(';');
+
+        return Identifiers.ToList().TrueForAll(identifier => SyntaxFacts.IsValidIdentifier(identifier));
     }
 }

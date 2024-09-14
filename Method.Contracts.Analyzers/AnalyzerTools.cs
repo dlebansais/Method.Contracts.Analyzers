@@ -86,4 +86,19 @@ internal static class AnalyzerTools
         Contract.RequireNotNull(attribute, out AttributeSyntax Attribute);
         return GeneratorHelper.ToAttributeName(Attribute) == typeof(T).Name;
     }
+
+    /// <summary>
+    /// Returns a string with <paramref name="oldString"/> replaced with <paramref name="newString"/>.
+    /// </summary>
+    /// <param name="s">The string with substrings to replace.</param>
+    /// <param name="oldString">The string to replace.</param>
+    /// <param name="newString">The new string.</param>
+    public static string Replace(string s, string oldString, string newString)
+    {
+#if NETSTANDARD2_1_OR_GREATER
+        return s.Replace(oldString, newString, StringComparison.Ordinal);
+#else
+        return s.Replace(oldString, newString);
+#endif
+    }
 }

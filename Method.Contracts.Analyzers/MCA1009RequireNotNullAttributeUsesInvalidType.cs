@@ -86,12 +86,12 @@ public class MCA1009RequireNotNullAttributeUsesInvalidType : DiagnosticAnalyzer
         if (!ContractGenerator.IsStringOrNameofAttributeArgument(attributeArgument, out string ArgumentValue))
             return;
 
-        string AliasName = ArgumentValue;
+        string TypeName = ArgumentValue;
 
         // No diagnostic if the type is a valid identifier.
-        if (SyntaxFacts.IsValidIdentifier(AliasName))
+        if (ContractGenerator.IsValidTypeName(TypeName))
             return;
 
-        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), AliasName));
+        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), TypeName));
     }
 }

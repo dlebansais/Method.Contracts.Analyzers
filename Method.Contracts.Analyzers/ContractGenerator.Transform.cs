@@ -143,12 +143,19 @@ public partial class ContractGenerator
                     SupportedTrivias.Add(trivia);
 
             // Trim consecutive end of lines until there is only at most one at the beginning.
+            bool HadEndOfLine = false;
             while (CountStartingEndOfLineTrivias(SupportedTrivias) > 1)
+            {
+                HadEndOfLine = true;
                 SupportedTrivias.RemoveAt(0);
+            }
 
-            // Trim whitespace trivias at start.
-            while (IsFirstTriviaWhitespace(SupportedTrivias))
-                SupportedTrivias.RemoveAt(0);
+            if (HadEndOfLine)
+            {
+                // Trim whitespace trivias at start.
+                while (IsFirstTriviaWhitespace(SupportedTrivias))
+                    SupportedTrivias.RemoveAt(0);
+            }
 
             // Remove successive whitespace trivias.
             int i = 0;
@@ -173,19 +180,11 @@ public partial class ContractGenerator
         {
             string OldParameterName = $"<param name=\"{Entry.Key}\">";
             string NewParameterName = $"<param name=\"{Entry.Value}\">";
-#if NETSTANDARD2_1_OR_GREATER
-            Documentation = Documentation.Replace(OldParameterName, NewParameterName, StringComparison.Ordinal);
-#else
-            Documentation = Documentation.Replace(OldParameterName, NewParameterName);
-#endif
+            Documentation = AnalyzerTools.Replace(Documentation, OldParameterName, NewParameterName);
 
             string OldParameterRef = $"<paramref name=\"{Entry.Key}\"/>";
             string NewParameterRef = $"<paramref name=\"{Entry.Value}\"/>";
-#if NETSTANDARD2_1_OR_GREATER
-            Documentation = Documentation.Replace(OldParameterRef, NewParameterRef, StringComparison.Ordinal);
-#else
-            Documentation = Documentation.Replace(OldParameterRef, NewParameterRef);
-#endif
+            Documentation = AnalyzerTools.Replace(Documentation, OldParameterRef, NewParameterRef);
         }
 
         return Documentation;
