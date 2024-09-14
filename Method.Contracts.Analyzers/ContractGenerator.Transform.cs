@@ -17,9 +17,7 @@ public partial class ContractGenerator
     private static ContractModel TransformContractAttributes(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
     {
         SyntaxNode TargetNode = context.TargetNode;
-
-        Contract.Assert(TargetNode is MethodDeclarationSyntax);
-        MethodDeclarationSyntax MethodDeclaration = (MethodDeclarationSyntax)TargetNode;
+        MethodDeclarationSyntax MethodDeclaration = Contract.AssertOfType<MethodDeclarationSyntax>(TargetNode);
 
         ContractModel Model = GetModelWithoutContract(context, MethodDeclaration);
         Model = Model with { Attributes = GetModelContract(MethodDeclaration) };

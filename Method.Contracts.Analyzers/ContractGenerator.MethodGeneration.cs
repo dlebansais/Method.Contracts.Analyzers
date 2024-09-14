@@ -17,9 +17,7 @@ public partial class ContractGenerator
     private static string GetGeneratedMethodDeclaration(ContractModel model, GeneratorAttributeSyntaxContext context, out bool isAsync)
     {
         SyntaxNode TargetNode = context.TargetNode;
-
-        Contract.Assert(TargetNode is MethodDeclarationSyntax);
-        MethodDeclarationSyntax MethodDeclaration = (MethodDeclarationSyntax)TargetNode;
+        MethodDeclarationSyntax MethodDeclaration = Contract.AssertOfType<MethodDeclarationSyntax>(TargetNode);
 
         bool IsDebugGeneration = MethodDeclaration.SyntaxTree.Options.PreprocessorSymbolNames.Contains("DEBUG");
 
