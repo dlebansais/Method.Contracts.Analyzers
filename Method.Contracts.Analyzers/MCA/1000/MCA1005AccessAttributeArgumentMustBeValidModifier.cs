@@ -58,7 +58,7 @@ public class MCA1005AccessAttributeArgumentMustBeValidModifier : DiagnosticAnaly
             LanguageVersion.CSharp7,
             AnalyzeVerifiedNode,
             new SimpleAnalysisAssertion(context => IsAccessAttribute(((AttributeArgumentSyntax)context.Node).FirstAncestorOrSelf<AttributeSyntax>())),
-            new SimpleAnalysisAssertion(context => ((AttributeArgumentSyntax)context.Node).FirstAncestorOrSelf<MethodDeclarationSyntax>() is not null));
+            new WithinMethodAnalysisAssertion());
     }
 
     private static bool IsAccessAttribute(AttributeSyntax? attribute)
@@ -71,7 +71,9 @@ public class MCA1005AccessAttributeArgumentMustBeValidModifier : DiagnosticAnaly
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeArgumentSyntax attributeArgument, IAnalysisAssertion[] analysisAssertions)
     {
         // If we reached this step, there is a method declaration.
-        MethodDeclarationSyntax MethodDeclaration = Contract.AssertNotNull(attributeArgument.FirstAncestorOrSelf<MethodDeclarationSyntax>());
+        Contract.Assert(analysisAssertions.Length == 2);
+        WithinMethodAnalysisAssertion SecondAssertion = Contract.AssertNotNull(analysisAssertions[1] as WithinMethodAnalysisAssertion);
+        MethodDeclarationSyntax MethodDeclaration = Contract.AssertNotNull(SecondAssertion.AncestorMethodDeclaration);
 
         // No diagnostic if the argument is a valid modifier.
         AttributeValidityCheckResult CheckResult = ContractGenerator.IsValidAccessAttribute(MethodDeclaration, [attributeArgument]);

@@ -1,4 +1,4 @@
-﻿## Release 1.5.1
+﻿## Release 1.6.0
 
 ### New Rules
 
@@ -18,3 +18,4 @@ MCA1011 |  Usage   |  Warning | MCA1011RequireAttributeArgumentMustBeValid, [Doc
 MCA1012 |  Usage   |  Warning | MCA1012RequireAttributeHasTooManyArguments, [Documentation](doc/MCA1012.md)
 MCA1013 |  Usage   |  Warning | MCA1013EnsureAttributeArgumentMustBeValid, [Documentation](doc/MCA1013.md)
 MCA1014 |  Usage   |  Warning | MCA1014EnsureAttributeHasTooManyArguments, [Documentation](doc/MCA1014.md)
+MCA2001 |  Usage   |  Warning | MCA2001ObjectMustBeInitialized, [Documentation](doc/MCA2001.md)

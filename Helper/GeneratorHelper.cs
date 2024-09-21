@@ -4,7 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
 /// Helper class for the code generator.
@@ -157,9 +159,10 @@ internal static class GeneratorHelper
     /// <summary>
     /// Gets all supported attributes of a method.
     /// </summary>
+    /// <param name="context">The analysis context. Can be <see langword="null"/> if no context is available.</param>
     /// <param name="methodDeclaration">The method.</param>
     /// <param name="supportedAttributeNames">The list of supported attributes.</param>
-    public static List<AttributeSyntax> GetMethodSupportedAttributes(MethodDeclarationSyntax methodDeclaration, Collection<string> supportedAttributeNames)
+    public static List<AttributeSyntax> GetMethodSupportedAttributes(SyntaxNodeAnalysisContext? context, MethodDeclarationSyntax methodDeclaration, Collection<string> supportedAttributeNames)
     {
         List<AttributeSyntax> Result = new();
 
@@ -170,11 +173,32 @@ internal static class GeneratorHelper
             for (int Index = 0; Index < AttributeList.Attributes.Count; Index++)
             {
                 AttributeSyntax Attribute = AttributeList.Attributes[Index];
-                string AttributeName = ToAttributeName(Attribute);
+                bool IsSameNamespaceAssembly = true;
 
-                if (supportedAttributeNames.Contains(AttributeName))
+                if (context is SyntaxNodeAnalysisContext AvailableContext)
                 {
-                    Result.Add(Attribute);
+                    var SymbolInfo = AvailableContext.SemanticModel.GetSymbolInfo(Attribute);
+                    if (SymbolInfo.Symbol is ISymbol AttributeSymbol)
+                    {
+                        ITypeSymbol AccessTypeSymbol = Contract.AssertNotNull(AvailableContext.Compilation.GetTypeByMetadataName(typeof(AccessAttribute).FullName));
+                        INamespaceSymbol ContainingNamespace = Contract.AssertNotNull(AccessTypeSymbol.ContainingNamespace);
+                        IAssemblySymbol ContainingAssembly = Contract.AssertNotNull(AccessTypeSymbol.ContainingAssembly);
+
+                        IsSameNamespaceAssembly &= SymbolEqualityComparer.Default.Equals(ContainingNamespace, AttributeSymbol.ContainingNamespace);
+                        IsSameNamespaceAssembly &= SymbolEqualityComparer.Default.Equals(ContainingAssembly, AttributeSymbol.ContainingAssembly);
+                    }
+                    else
+                        IsSameNamespaceAssembly = false;
+                }
+
+                if (IsSameNamespaceAssembly)
+                {
+                    string AttributeName = ToAttributeName(Attribute);
+
+                    if (supportedAttributeNames.Contains(AttributeName))
+                    {
+                        Result.Add(Attribute);
+                    }
                 }
             }
         }

@@ -7,19 +7,19 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
-/// Analyzer for rule MCA1013: Ensure attribute argument must be valid.
+/// Analyzer for rule MCA1006: RequireNotNull attribute argument must be a valid parameter name.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MCA1013EnsureAttributeArgumentMustBeValid : DiagnosticAnalyzer
+public class MCA1006RequireNotNullAttributeArgumentMustBeValidParameterName : DiagnosticAnalyzer
 {
     /// <summary>
     /// Diagnostic ID for this rule.
     /// </summary>
-    public const string DiagnosticId = "MCA1013";
+    public const string DiagnosticId = "MCA1006";
 
-    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(AnalyzerResources.MCA1013AnalyzerTitle), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
-    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(AnalyzerResources.MCA1013AnalyzerMessageFormat), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
-    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(AnalyzerResources.MCA1013AnalyzerDescription), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(AnalyzerResources.MCA1006AnalyzerTitle), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(AnalyzerResources.MCA1006AnalyzerMessageFormat), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(AnalyzerResources.MCA1006AnalyzerDescription), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
     private const string Category = "Usage";
 
     private static readonly DiagnosticDescriptor Rule = new(DiagnosticId,
@@ -56,26 +56,30 @@ public class MCA1013EnsureAttributeArgumentMustBeValid : DiagnosticAnalyzer
             context,
             LanguageVersion.CSharp7,
             AnalyzeVerifiedNode,
-            new SimpleAnalysisAssertion(context => AnalyzerTools.IsExpectedAttribute<EnsureAttribute>(((AttributeArgumentSyntax)context.Node).FirstAncestorOrSelf<AttributeSyntax>())),
-            new SimpleAnalysisAssertion(context => ((AttributeArgumentSyntax)context.Node).FirstAncestorOrSelf<MethodDeclarationSyntax>() is not null));
+            new WithinAttributeAnalysisAssertion<RequireNotNullAttribute>(),
+            new WithinMethodAnalysisAssertion());
     }
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeArgumentSyntax attributeArgument, IAnalysisAssertion[] analysisAssertions)
     {
         // If we reached this step, there is a method declaration and an attribute.
-        MethodDeclarationSyntax MethodDeclaration = Contract.AssertNotNull(attributeArgument.FirstAncestorOrSelf<MethodDeclarationSyntax>());
-        AttributeSyntax Attribute = Contract.AssertNotNull(attributeArgument.FirstAncestorOrSelf<AttributeSyntax>());
+        Contract.Assert(analysisAssertions.Length == 2);
+        WithinAttributeAnalysisAssertion<RequireNotNullAttribute> FirstAssertion = Contract.AssertNotNull(analysisAssertions[0] as WithinAttributeAnalysisAssertion<RequireNotNullAttribute>);
+        AttributeSyntax Attribute = Contract.AssertNotNull(FirstAssertion.AncestorAttribute);
+        WithinMethodAnalysisAssertion SecondAssertion = Contract.AssertNotNull(analysisAssertions[1] as WithinMethodAnalysisAssertion);
+        MethodDeclarationSyntax MethodDeclaration = Contract.AssertNotNull(SecondAssertion.AncestorMethodDeclaration);
+
         AttributeArgumentListSyntax ArgumentList = Contract.AssertNotNull(Attribute.ArgumentList);
         var AttributeArguments = ArgumentList.Arguments;
         int ArgumentIndex = AttributeArguments.IndexOf(attributeArgument);
 
-        // No diagnostic if the attribute has DebugOnly, and this is not the first argument.
-        if (ContractGenerator.IsRequireOrEnsureAttributeWithDebugOnly(AttributeArguments) && ArgumentIndex > 0)
+        // No diagnostic if the attribute has an alias, type or name, and this is not the first argument.
+        if (ContractGenerator.IsRequireNotNullAttributeWithAliasTypeOrName(AttributeArguments) && ArgumentIndex > 0)
             return;
 
-        AttributeValidityCheckResult CheckResult = ContractGenerator.IsValidEnsureAttribute(MethodDeclaration, AttributeArguments);
+        AttributeValidityCheckResult CheckResult = ContractGenerator.IsValidRequireNotNullAttribute(MethodDeclaration, AttributeArguments);
 
-        // No diagnostic if the argument is a valid expression.
+        // No diagnostic if the argument is a valid parameter name.
         if (CheckResult.Result == AttributeGeneration.Valid)
             return;
 

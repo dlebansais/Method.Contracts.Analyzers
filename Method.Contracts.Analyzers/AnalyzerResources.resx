@@ -285,4 +285,16 @@
     <value>Ensure attribute has too many arguments</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="MCA2001AnalyzerDescription" xml:space="preserve">
+    <value>Object must be initialized with a call to the specified method.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA2001AnalyzerMessageFormat" xml:space="preserve">
+    <value>Object must be initialized with a call to the '{0}' method</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA2001AnalyzerTitle" xml:space="preserve">
+    <value>Object must be initialized</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
 </root>

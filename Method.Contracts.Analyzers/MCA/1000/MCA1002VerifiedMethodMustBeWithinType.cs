@@ -1,27 +1,25 @@
 ﻿namespace Contracts.Analyzers;
 
 using System.Collections.Immutable;
-using System.Linq;
-using Contracts.Analyzers.Helper;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
-/// Analyzer for rule MCA1003: Verified method is missing suffix.
+/// Analyzer for rule MCA1002: Verified method must be within type.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MCA1003VerifiedMethodIsMissingSuffix : DiagnosticAnalyzer
+public class MCA1002VerifiedMethodMustBeWithinType : DiagnosticAnalyzer
 {
     /// <summary>
     /// Diagnostic ID for this rule.
     /// </summary>
-    public const string DiagnosticId = "MCA1003";
+    public const string DiagnosticId = "MCA1002";
 
-    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(AnalyzerResources.MCA1003AnalyzerTitle), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
-    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(AnalyzerResources.MCA1003AnalyzerMessageFormat), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
-    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(AnalyzerResources.MCA1003AnalyzerDescription), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(AnalyzerResources.MCA1002AnalyzerTitle), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(AnalyzerResources.MCA1002AnalyzerMessageFormat), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(AnalyzerResources.MCA1002AnalyzerDescription), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
     private const string Category = "Usage";
 
     private static readonly DiagnosticDescriptor Rule = new(DiagnosticId,
@@ -59,28 +57,27 @@ public class MCA1003VerifiedMethodIsMissingSuffix : DiagnosticAnalyzer
             LanguageVersion.CSharp7,
             AnalyzeVerifiedNode,
             new SimpleAnalysisAssertion(context => ((MethodDeclarationSyntax)context.Node).Identifier.ValueText != string.Empty),
-            new SimpleAnalysisAssertion(context => ContractGenerator.GetFirstSupportedAttribute((MethodDeclarationSyntax)context.Node) is not null));
+            new SimpleAnalysisAssertion(context => !IsMethodWithinType((MethodDeclarationSyntax)context.Node)),
+            new SimpleAnalysisAssertion(context => ContractGenerator.GetFirstSupportedAttribute(context, (MethodDeclarationSyntax)context.Node) is not null));
+    }
+
+    private static bool IsMethodWithinType(MethodDeclarationSyntax methodDeclaration)
+    {
+        if (methodDeclaration.FirstAncestorOrSelf<ClassDeclarationSyntax>() is null &&
+            methodDeclaration.FirstAncestorOrSelf<StructDeclarationSyntax>() is null &&
+            methodDeclaration.FirstAncestorOrSelf<RecordDeclarationSyntax>() is null)
+            return false;
+
+        if (methodDeclaration.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>() is null)
+            return false;
+
+        return true;
     }
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, IAnalysisAssertion[] analysisAssertions)
     {
-        GeneratorSettings Settings = ContractGenerator.ReadSettings(context.Options.AnalyzerConfigOptionsProvider, context.CancellationToken).First();
-
-        // The suffix can't be empty: if invalid in user settings, it's the default suffix.
-        string VerifiedSuffix = Settings.VerifiedSuffix;
-        Contract.Assert(VerifiedSuffix != string.Empty);
-
-        // Only accept methods with the 'Verified' suffix in their name.
-        string MethodName = methodDeclaration.Identifier.Text;
-        if (GeneratorHelper.StringEndsWith(MethodName, VerifiedSuffix))
-        {
-            // Do not accept methods that are the suffix and nothing else.
-            if (MethodName != VerifiedSuffix)
-                return;
-        }
-
         var Text = methodDeclaration.Identifier.ValueText;
 
-        context.ReportDiagnostic(Diagnostic.Create(Rule, methodDeclaration.Identifier.GetLocation(), Text, VerifiedSuffix));
+        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), Text));
     }
 }

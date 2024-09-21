@@ -7,19 +7,19 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
-/// Analyzer for rule MCA1008: RequireNotNull attribute uses invalid alias.
+/// Analyzer for rule MCA1010: RequireNotNull attribute uses invalid name.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MCA1008RequireNotNullAttributeUsesInvalidAlias : DiagnosticAnalyzer
+public class MCA1010RequireNotNullAttributeUsesInvalidName : DiagnosticAnalyzer
 {
     /// <summary>
     /// Diagnostic ID for this rule.
     /// </summary>
-    public const string DiagnosticId = "MCA1008";
+    public const string DiagnosticId = "MCA1010";
 
-    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(AnalyzerResources.MCA1008AnalyzerTitle), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
-    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(AnalyzerResources.MCA1008AnalyzerMessageFormat), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
-    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(AnalyzerResources.MCA1008AnalyzerDescription), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(AnalyzerResources.MCA1010AnalyzerTitle), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(AnalyzerResources.MCA1010AnalyzerMessageFormat), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(AnalyzerResources.MCA1010AnalyzerDescription), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
     private const string Category = "Usage";
 
     private static readonly DiagnosticDescriptor Rule = new(DiagnosticId,
@@ -56,15 +56,16 @@ public class MCA1008RequireNotNullAttributeUsesInvalidAlias : DiagnosticAnalyzer
             context,
             LanguageVersion.CSharp7,
             AnalyzeVerifiedNode,
-            new SimpleAnalysisAssertion(context => AnalyzerTools.IsExpectedAttribute<RequireNotNullAttribute>(((AttributeArgumentSyntax)context.Node).FirstAncestorOrSelf<AttributeSyntax>())),
-            new SimpleAnalysisAssertion(context => ((AttributeArgumentSyntax)context.Node).FirstAncestorOrSelf<MethodDeclarationSyntax>() is not null));
+            new WithinAttributeAnalysisAssertion<RequireNotNullAttribute>());
     }
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeArgumentSyntax attributeArgument, IAnalysisAssertion[] analysisAssertions)
     {
-        // If we reached this step, there is a method declaration and an attribute.
-        MethodDeclarationSyntax MethodDeclaration = Contract.AssertNotNull(attributeArgument.FirstAncestorOrSelf<MethodDeclarationSyntax>());
-        AttributeSyntax Attribute = Contract.AssertNotNull(attributeArgument.FirstAncestorOrSelf<AttributeSyntax>());
+        // If we reached this step, there is an attribute.
+        Contract.Assert(analysisAssertions.Length == 1);
+        WithinAttributeAnalysisAssertion<RequireNotNullAttribute> FirstAssertion = Contract.AssertNotNull(analysisAssertions[0] as WithinAttributeAnalysisAssertion<RequireNotNullAttribute>);
+        AttributeSyntax Attribute = Contract.AssertNotNull(FirstAssertion.AncestorAttribute);
+
         AttributeArgumentListSyntax ArgumentList = Contract.AssertNotNull(Attribute.ArgumentList);
         var AttributeArguments = ArgumentList.Arguments;
 
@@ -78,8 +79,8 @@ public class MCA1008RequireNotNullAttributeUsesInvalidAlias : DiagnosticAnalyzer
 
         string ArgumentName = NameEquals.Name.Identifier.Text;
 
-        // No diagnostic if the argument is not the alias.
-        if (ArgumentName != nameof(RequireNotNullAttribute.AliasName))
+        // No diagnostic if the argument is not the type.
+        if (ArgumentName != nameof(RequireNotNullAttribute.Name))
             return;
 
         // No diagnostic if the argument is not a valid string or nameof.
@@ -88,7 +89,7 @@ public class MCA1008RequireNotNullAttributeUsesInvalidAlias : DiagnosticAnalyzer
 
         string AliasName = ArgumentValue;
 
-        // No diagnostic if the alias is a valid identifier.
+        // No diagnostic if the type is a valid identifier.
         if (SyntaxFacts.IsValidIdentifier(AliasName))
             return;
 

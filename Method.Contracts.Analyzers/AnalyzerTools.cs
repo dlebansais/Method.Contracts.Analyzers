@@ -1,7 +1,9 @@
 ﻿namespace Contracts.Analyzers;
 
 using System;
+using System.Linq;
 using Contracts.Analyzers.Helper;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -78,13 +80,32 @@ internal static class AnalyzerTools
     /// Checks whether an attribute is of the expected type.
     /// </summary>
     /// <typeparam name="T">The expected attribute type.</typeparam>
+    /// <param name="context">The context.</param>
     /// <param name="attribute">The attribute.</param>
-    public static bool IsExpectedAttribute<T>(AttributeSyntax? attribute)
+    public static bool IsExpectedAttribute<T>(SyntaxNodeAnalysisContext context, AttributeSyntax? attribute)
         where T : Attribute
     {
         // There must be a parent attribute to any argument except in the most pathological cases.
         Contract.RequireNotNull(attribute, out AttributeSyntax Attribute);
-        return GeneratorHelper.ToAttributeName(Attribute) == typeof(T).Name;
+
+        var TypeInfo = context.SemanticModel.GetTypeInfo(Attribute);
+        ITypeSymbol? TypeSymbol = TypeInfo.Type;
+
+        return IsExpectedAttribute<T>(context, TypeSymbol);
+    }
+
+    /// <summary>
+    /// Checks whether a type symbol is the expected type.
+    /// </summary>
+    /// <typeparam name="T">The expected attribute type.</typeparam>
+    /// <param name="context">The context.</param>
+    /// <param name="typeSymbol">The attribute.</param>
+    public static bool IsExpectedAttribute<T>(SyntaxNodeAnalysisContext context, ITypeSymbol? typeSymbol)
+        where T : Attribute
+    {
+        ITypeSymbol? ExpectedTypeSymbol = context.Compilation.GetTypeByMetadataName(typeof(T).FullName);
+
+        return SymbolEqualityComparer.Default.Equals(typeSymbol, ExpectedTypeSymbol);
     }
 
     /// <summary>

@@ -29,4 +29,9 @@ namespace System.Runtime.CompilerServices
 }
 
 ";
+
+    public const string NoContract = @"
+using System;
+
+";
 }

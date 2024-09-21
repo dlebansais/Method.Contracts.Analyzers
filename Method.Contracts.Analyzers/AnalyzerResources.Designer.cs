@@ -437,5 +437,32 @@ namespace Contracts.Analyzers {
                 return ResourceManager.GetString("MCA1014AnalyzerTitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Object must be initialized with a call to the specified method..
+        /// </summary>
+        internal static string MCA2001AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA2001AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Object must be initialized with a call to the &apos;{0}&apos; method.
+        /// </summary>
+        internal static string MCA2001AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA2001AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Object must be initialized.
+        /// </summary>
+        internal static string MCA2001AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA2001AnalyzerTitle", resourceCulture);
+            }
+        }
     }
 }

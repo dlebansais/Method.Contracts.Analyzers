@@ -10,6 +10,7 @@ using Contracts.Analyzers.Helper;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
 /// Represents a code generator.
@@ -43,7 +44,9 @@ public partial class ContractGenerator
             MethodDeclaration.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>() is null)
             return false;
 
-        string? FirstAttributeName = GetFirstSupportedAttribute(MethodDeclaration);
+        // Because we set context to null, this check let pass attributes with the same name but from another assembly or namespace.
+        // That's ok, we'll catch them later.
+        string? FirstAttributeName = GetFirstSupportedAttribute(context: null, MethodDeclaration);
 
         // One of these attributes has to be the first, and we only return true for this one.
         // This way, multiple calls with different T return true exactly once.
@@ -57,14 +60,15 @@ public partial class ContractGenerator
     /// Checks whether a method contains at least one attribute we support and returns its name.
     /// All attributes we support must be valid.
     /// </summary>
+    /// <param name="context">The analysis context. Can be <see langword="null"/> if no context is available.</param>
     /// <param name="methodDeclaration">The method declaration.</param>
     /// <returns><see langword="null"/> if any of the attributes we support is invalid, or none was found; Otherwise, the name of the first attribute.</returns>
-    public static string? GetFirstSupportedAttribute(MethodDeclarationSyntax methodDeclaration)
+    public static string? GetFirstSupportedAttribute(SyntaxNodeAnalysisContext? context, MethodDeclarationSyntax methodDeclaration)
     {
         Contract.RequireNotNull(methodDeclaration, out MethodDeclarationSyntax MethodDeclaration);
 
         // Get a list of all supported attributes for this method.
-        List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMethodSupportedAttributes(MethodDeclaration, SupportedAttributeNames);
+        List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMethodSupportedAttributes(context, MethodDeclaration, SupportedAttributeNames);
         List<string> AttributeNames = new();
         bool IsDebugGeneration = MethodDeclaration.SyntaxTree.Options.PreprocessorSymbolNames.Contains("DEBUG");
 
