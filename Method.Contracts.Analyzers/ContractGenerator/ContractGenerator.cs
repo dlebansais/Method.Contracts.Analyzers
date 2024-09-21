@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 /// <summary>
-/// Represents a code generator.
+/// Represents a code generator that handles attributes of the Contract namespace to generate contract validation code.
 /// </summary>
 [Generator]
 public partial class ContractGenerator : IIncrementalGenerator
