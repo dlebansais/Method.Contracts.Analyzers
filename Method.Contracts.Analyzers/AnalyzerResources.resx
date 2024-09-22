@@ -309,4 +309,16 @@
     <value>InitializeWith attribute argument must be a valid method name</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="MCA2003AnalyzerDescription" xml:space="preserve">
+    <value>InitializeWith attribute not allowed in class with explicit constructors.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA2003AnalyzerMessageFormat" xml:space="preserve">
+    <value>InitializeWith attribute not allowed in class '{0}' with explicit constructors</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA2003AnalyzerTitle" xml:space="preserve">
+    <value>InitializeWith attribute not allowed in class with explicit constructors</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
 </root>

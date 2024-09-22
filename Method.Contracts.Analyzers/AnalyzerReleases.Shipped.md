@@ -20,3 +20,4 @@ MCA1013 |  Usage   |  Warning | MCA1013EnsureAttributeArgumentMustBeValid, [Docu
 MCA1014 |  Usage   |  Warning | MCA1014EnsureAttributeHasTooManyArguments, [Documentation](doc/MCA1014.md)
 MCA2001 |  Usage   |  Warning | MCA2001ObjectMustBeInitialized, [Documentation](doc/MCA2001.md)
 MCA2002 |  Usage   |  Warning | MCA2002InitializeWithAttributeArgumentMustBeValidMethodName, [Documentation](doc/MCA2002.md)
+MCA2003 |  Usage   |  Warning | MCA2003InitializeWithAttributeNotAllowedInClassWithExplicitConstructors, [Documentation](doc/MCA2003.md)

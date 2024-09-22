@@ -276,25 +276,42 @@ If any creation of an instance of `Foo` is not immediately followed by a call to
 
 *warning MCA2001: Object must be initialized with a call to the 'InitializeContentAsync' method*
 
-The `InitializeWith` attribute can be used in a `class` or `record` (structs are not supported). It must specify a method name of the same class (overloads are not supported).
+The `InitializeWith` attribute can be used in a `class` or `record` (structs are not supported). It must specify a method name of the same class (overloads are not supported). Also, multiple constructors can specify different initializing methods.
+
+### Implicit constructor
+
+If the class has no explicit constructor, one can add the `InitializeWith` attribute to the class itself, and it will apply to the implicit contructor the compiler generates. For example, the code above can be simplified as follow:
+
+````csharp
+[InitializeWith(nameof(InitializeContentAsync))]
+public class Foo(Uri uri)
+{
+    public string Content { get; private set; } = null!;
+    //...
+````
+
+### Inherited constructors
+
+If a base class contains one or more constructors with the `InitializeWith` attribute, a descendant class that inherits and calls a base constructor with `:base()`, followed by a call to the initializer, could fully initialize the instance of the descendant class. Therefore, no diagnostic is emitted for descendants and the programmer must ensure new `InitializeWith` attributes are added in them as appropriate.
 
 ## List of diagnostics
 
-| Code                      | Diagnostic                                                          |
-| ------------------------- | ------------------------------------------------------------------- |
-| [MCA1001](doc/MCA1001.md) | Verified method must be private.                                    |
-| [MCA1002](doc/MCA1002.md) | Verified method must be within type.                                |
-| [MCA1003](doc/MCA1003.md) | Verified method is missing suffix.                                  |
-| [MCA1004](doc/MCA1004.md) | Attribute is missing argument.                                      |
-| [MCA1005](doc/MCA1005.md) | `Access` attribute argument must be a valid modifier.               |
-| [MCA1006](doc/MCA1006.md) | `RequireNotNull` attribute argument must be a valid parameter name. |
-| [MCA1007](doc/MCA1007.md) | `RequireNotNull` attribute has too many arguments.                  |
-| [MCA1008](doc/MCA1008.md) | `RequireNotNull` attribute uses invalid alias.                      |
-| [MCA1009](doc/MCA1009.md) | `RequireNotNull` attribute uses invalid type.                       |
-| [MCA1010](doc/MCA1010.md) | `RequireNotNull` attribute uses invalid name.                       |
-| [MCA1011](doc/MCA1011.md) | `Require` attribute argument must be valid.                         |
-| [MCA1012](doc/MCA1012.md) | `Require` attribute has too many arguments.                         |
-| [MCA1013](doc/MCA1013.md) | `Ensure` attribute argument must be valid.                          |
-| [MCA1014](doc/MCA1014.md) | `Ensure` attribute has too many arguments.                          |
-| [MCA2001](doc/MCA2001.md) | Object must be initialized.                                         |
-| [MCA2002](doc/MCA2002.md) | `InitializeWith` attribute argument must be a valid method name.    |
+| Code                      | Diagnostic                                                                  |
+| ------------------------- | --------------------------------------------------------------------------- |
+| [MCA1001](doc/MCA1001.md) | Verified method must be private.                                            |
+| [MCA1002](doc/MCA1002.md) | Verified method must be within type.                                        |
+| [MCA1003](doc/MCA1003.md) | Verified method is missing suffix.                                          |
+| [MCA1004](doc/MCA1004.md) | Attribute is missing argument.                                              |
+| [MCA1005](doc/MCA1005.md) | `Access` attribute argument must be a valid modifier.                       |
+| [MCA1006](doc/MCA1006.md) | `RequireNotNull` attribute argument must be a valid parameter name.         |
+| [MCA1007](doc/MCA1007.md) | `RequireNotNull` attribute has too many arguments.                          |
+| [MCA1008](doc/MCA1008.md) | `RequireNotNull` attribute uses invalid alias.                              |
+| [MCA1009](doc/MCA1009.md) | `RequireNotNull` attribute uses invalid type.                               |
+| [MCA1010](doc/MCA1010.md) | `RequireNotNull` attribute uses invalid name.                               |
+| [MCA1011](doc/MCA1011.md) | `Require` attribute argument must be valid.                                 |
+| [MCA1012](doc/MCA1012.md) | `Require` attribute has too many arguments.                                 |
+| [MCA1013](doc/MCA1013.md) | `Ensure` attribute argument must be valid.                                  |
+| [MCA1014](doc/MCA1014.md) | `Ensure` attribute has too many arguments.                                  |
+| [MCA2001](doc/MCA2001.md) | Object must be initialized.                                                 |
+| [MCA2002](doc/MCA2002.md) | `InitializeWith` attribute argument must be a valid method name.            |
+| [MCA2003](doc/MCA2003.md) | `InitializeWith` attribute not allowed in class with explicit constructors. |

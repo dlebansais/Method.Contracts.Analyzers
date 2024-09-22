@@ -42,9 +42,20 @@ internal class InitializerAnalysisAssertion : IAnalysisAssertion
 
     private bool HasInitializeWithAttribute(SyntaxNodeAnalysisContext context, IMethodSymbol constructorSymbol)
     {
-        var Attributes = constructorSymbol.GetAttributes();
+        ITypeSymbol ClassSymbol = constructorSymbol.ContainingType;
 
-        foreach (AttributeData Attribute in Attributes)
+        if (HasInitializeWithAttribute(context, constructorSymbol.GetAttributes(), ClassSymbol))
+            return true;
+
+        if (HasInitializeWithAttribute(context, ClassSymbol.GetAttributes(), ClassSymbol))
+            return true;
+
+        return false;
+    }
+
+    private bool HasInitializeWithAttribute(SyntaxNodeAnalysisContext context, IEnumerable<AttributeData> attributes, ITypeSymbol classSymbol)
+    {
+        foreach (AttributeData Attribute in attributes)
         {
             if (Attribute.AttributeClass is IErrorTypeSymbol)
                 continue;
@@ -53,7 +64,7 @@ internal class InitializerAnalysisAssertion : IAnalysisAssertion
 
             if (AnalyzerTools.IsExpectedAttribute<InitializeWithAttribute>(context, AttributeClass))
             {
-                if (TryGetInitializers(constructorSymbol, Attribute, out List<IMethodSymbol> Initializers))
+                if (TryGetInitializers(classSymbol, Attribute, out List<IMethodSymbol> Initializers))
                 {
                     InitializerMethodSymbols.Clear();
                     InitializerMethodSymbols.AddRange(Initializers);
@@ -65,9 +76,9 @@ internal class InitializerAnalysisAssertion : IAnalysisAssertion
         return false;
     }
 
-    private static bool TryGetInitializers(IMethodSymbol constructorSymbol, AttributeData attribute, out List<IMethodSymbol> initializers)
+    private static bool TryGetInitializers(ITypeSymbol classSymbol, AttributeData attribute, out List<IMethodSymbol> initializers)
     {
-        Contract.RequireNotNull(constructorSymbol, out IMethodSymbol ConstructorSymbol);
+        Contract.RequireNotNull(classSymbol, out ITypeSymbol ClassSymbol);
         Contract.RequireNotNull(attribute, out AttributeData Attribute);
 
         if (Attribute.ConstructorArguments.Length != 1)
@@ -80,7 +91,7 @@ internal class InitializerAnalysisAssertion : IAnalysisAssertion
         string ArgumentValue = Contract.AssertNotNull(FirstArgument.Value as string);
 
         List<IMethodSymbol> InitializerOverloads = new();
-        ImmutableArray<ISymbol> Members = ConstructorSymbol.ContainingType.GetMembers();
+        ImmutableArray<ISymbol> Members = ClassSymbol.GetMembers();
 
         foreach (var Member in Members)
             if (Member is IMethodSymbol MethodSymbol && MethodSymbol.Name == ArgumentValue)

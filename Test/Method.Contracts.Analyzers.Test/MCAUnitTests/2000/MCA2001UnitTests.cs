@@ -1210,4 +1210,127 @@ internal partial class Program
 }
 ").ConfigureAwait(false);
     }
+
+    [TestMethod]
+    public async Task MultipleConstructors_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal class Test
+{
+    [InitializeWith(nameof(InitializeString))]
+    public Test(string value)
+    {
+    }
+
+    [InitializeWith(nameof(InitializeInt))]
+    public Test(int value)
+    {
+    }
+
+    public void InitializeString()
+    {
+    }
+
+    public void InitializeInt()
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static void Main()
+    {
+        var test1 = new Test(string.Empty);
+        test1.InitializeString();
+
+        var test2 = new Test(0);
+        test2.InitializeInt();
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task MultipleConstructorsMixed_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal class Test
+{
+    [InitializeWith(nameof(InitializeString))]
+    public Test(string value)
+    {
+    }
+
+    [InitializeWith(nameof(InitializeInt))]
+    public Test(int value)
+    {
+    }
+
+    public void InitializeString()
+    {
+    }
+
+    public void InitializeInt()
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static void Main()
+    {
+        var test1 = [|new Test(string.Empty)|];
+        test1.InitializeInt();
+
+        var test2 = [|new Test(0)|];
+        test2.InitializeString();
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task DefaultConstructorInitializerNotCalled_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+[InitializeWith(nameof(Initialize))]
+internal class Test
+{
+    public void Initialize()
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static void Main()
+    {
+        var test = [|new Test()|];
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task DefaultConstructorInitializerCalled_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+[InitializeWith(nameof(Initialize))]
+internal class Test
+{
+    public void Initialize()
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static void Main()
+    {
+        var test = new Test();
+        test.Initialize();
+    }
+}
+").ConfigureAwait(false);
+    }
 }

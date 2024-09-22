@@ -1,8 +1,6 @@
 ﻿namespace Contracts.Analyzers;
 
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -69,8 +67,9 @@ public class MCA2002InitializeWithAttributeArgumentMustBeValidMethodName : Diagn
 
         string MethodName = ArgumentValue;
 
-        SyntaxList<MemberDeclarationSyntax>? Members;
+        SyntaxList<MemberDeclarationSyntax> Members;
 
+        // No diagnostic if not a class or record.
         if (attributeArgument.FirstAncestorOrSelf<ClassDeclarationSyntax>() is ClassDeclarationSyntax ClassDeclaration)
             Members = ClassDeclaration.Members;
         else if (attributeArgument.FirstAncestorOrSelf<RecordDeclarationSyntax>() is RecordDeclarationSyntax RecordDeclaration)

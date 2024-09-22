@@ -73,10 +73,13 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
         IMethodSymbol InitializerMethodSymbol = InitializerMethodSymbols.First();
         string InitializerName = InitializerMethodSymbol.Name;
 
+        // Diagnostic if there isn't exactly one initializer.
         if (InitializerMethodSymbols.Count == 1)
         {
+            // Diagnostic if we can't find the created instance or the next statement.
             if (GetCreatedObjectAndFollowUpStatements(context, objectCreationExpression, out ISymbol CreatedSymbol, out StatementSyntax nextStatement))
             {
+                // No diagnostic if the next statement is a call to the initializer.
                 if (IsFollowUpStatementInitialization(context, nextStatement, CreatedSymbol, InitializerMethodSymbol))
                     return;
             }
