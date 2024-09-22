@@ -229,7 +229,7 @@ You don't have to specify all values if you're changing just one setting. Note t
 
 In C# constructors have some limitations, including:
 
-+ No call to async methods.
++ No async calls to methods.
 + Should not call virtual methods of the class.
 
 A simple workaround is to write a minimal constructor and a separate initialization method. For instance:
@@ -261,7 +261,7 @@ The initialization method in class `Foo` is `async` and calls a virtual method.
 
 A problem with this approach is that if the code creating a new instance of `Foo` does not call the initialization method, the instance will not be initialized properly (`Content` will be `null`).
 
-To ensure that all instances are initialized, add the `InitializedWith` attribute to the constructor:
+To ensure that all instances are initialized, add the `InitializeWith` attribute to the constructor:
 
 ````csharp
 public class Foo
@@ -276,7 +276,7 @@ If any creation of an instance of `Foo` is not immediately followed by a call to
 
 *warning MCA2001: Object must be initialized with a call to the 'InitializeContentAsync' method*
 
-The `InitializedWith` attribute can be used in a `class` or `record` (structs are not supported). It must specify a method name of the same class (overloads are not supported).
+The `InitializeWith` attribute can be used in a `class` or `record` (structs are not supported). It must specify a method name of the same class (overloads are not supported).
 
 ## List of diagnostics
 
