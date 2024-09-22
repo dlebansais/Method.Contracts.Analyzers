@@ -85,13 +85,7 @@ internal static class AnalyzerTools
     public static bool IsExpectedAttribute<T>(SyntaxNodeAnalysisContext context, AttributeSyntax? attribute)
         where T : Attribute
     {
-        // There must be a parent attribute to any argument except in the most pathological cases.
-        Contract.RequireNotNull(attribute, out AttributeSyntax Attribute);
-
-        var TypeInfo = context.SemanticModel.GetTypeInfo(Attribute);
-        ITypeSymbol? TypeSymbol = TypeInfo.Type;
-
-        return IsExpectedAttribute<T>(context, TypeSymbol);
+        return IsExpectedAttribute(context, typeof(T), attribute);
     }
 
     /// <summary>
@@ -103,7 +97,29 @@ internal static class AnalyzerTools
     public static bool IsExpectedAttribute<T>(SyntaxNodeAnalysisContext context, ITypeSymbol? typeSymbol)
         where T : Attribute
     {
-        ITypeSymbol? ExpectedTypeSymbol = context.Compilation.GetTypeByMetadataName(typeof(T).FullName);
+        return IsExpectedAttribute(context, typeof(T), typeSymbol);
+    }
+
+    /// <summary>
+    /// Checks whether an attribute is of the expected type.
+    /// </summary>
+    /// <param name="context">The context.</param>
+    /// <param name="attributeType">The type.</param>
+    /// <param name="attribute">The attribute.</param>
+    public static bool IsExpectedAttribute(SyntaxNodeAnalysisContext context, Type attributeType, AttributeSyntax? attribute)
+    {
+        // There must be a parent attribute to any argument except in the most pathological cases.
+        Contract.RequireNotNull(attribute, out AttributeSyntax Attribute);
+
+        var TypeInfo = context.SemanticModel.GetTypeInfo(Attribute);
+        ITypeSymbol? TypeSymbol = TypeInfo.Type;
+
+        return IsExpectedAttribute(context, attributeType, TypeSymbol);
+    }
+
+    private static bool IsExpectedAttribute(SyntaxNodeAnalysisContext context, Type attributeType, ITypeSymbol? typeSymbol)
+    {
+        ITypeSymbol? ExpectedTypeSymbol = context.Compilation.GetTypeByMetadataName(attributeType.FullName);
 
         return SymbolEqualityComparer.Default.Equals(typeSymbol, ExpectedTypeSymbol);
     }

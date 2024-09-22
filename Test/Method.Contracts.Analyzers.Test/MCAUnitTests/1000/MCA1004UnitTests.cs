@@ -3,6 +3,8 @@
 extern alias Analyzers;
 
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1004AttributeIsMissingArgument>;
 
@@ -128,4 +130,40 @@ internal partial class Program
 }
 ").ConfigureAwait(false);
     }
+
+    [TestMethod]
+    public async Task NoArgumentOtherAccess_NoDiagnostic()
+    {
+        var DescriptorCS7036 = new DiagnosticDescriptor(
+            "CS7036",
+            "title",
+            "There is no argument given that corresponds to the required parameter 'value' of 'AccessAttribute.AccessAttribute(string)'",
+            "description",
+            DiagnosticSeverity.Error,
+            true
+            );
+
+        var Expected = new DiagnosticResult(DescriptorCS7036);
+        Expected = Expected.WithLocation("/0/Test0.cs", 15, 6);
+
+        await VerifyCS.VerifyAnalyzerAsync(Prologs.NoContract, @"
+namespace Test;
+
+internal class AccessAttribute : Attribute
+{
+    public AccessAttribute(string value) { Value = value; }
+    public string Value { get; set; }
+}
+
+internal partial class Program
+{
+    [Access]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+", Expected).ConfigureAwait(false);
+    }
+
 }

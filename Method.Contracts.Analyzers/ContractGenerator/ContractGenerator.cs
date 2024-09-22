@@ -14,14 +14,14 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 public partial class ContractGenerator : IIncrementalGenerator
 {
     /// <summary>
-    /// Gets the list of supported attributes by their name.
+    /// Gets the list of supported attributes by their type.
     /// </summary>
-    public static Collection<string> SupportedAttributeNames { get; } = new()
+    public static Collection<Type> SupportedAttributeTypes { get; } = new()
     {
-        nameof(AccessAttribute),
-        nameof(RequireNotNullAttribute),
-        nameof(RequireAttribute),
-        nameof(EnsureAttribute),
+        typeof(AccessAttribute),
+        typeof(RequireNotNullAttribute),
+        typeof(RequireAttribute),
+        typeof(EnsureAttribute),
     };
 
     /// <summary>

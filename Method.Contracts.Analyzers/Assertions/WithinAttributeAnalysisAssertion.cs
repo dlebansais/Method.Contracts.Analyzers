@@ -16,7 +16,7 @@ internal class WithinAttributeAnalysisAssertion<T> : IAnalysisAssertion
     /// </summary>
     public AttributeSyntax? AncestorAttribute { get; private set; }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IAnalysisAssertion.IsTrue(SyntaxNodeAnalysisContext)" />
     public bool IsTrue(SyntaxNodeAnalysisContext context)
     {
         AttributeArgumentSyntax AttributeArgument = (AttributeArgumentSyntax)context.Node;

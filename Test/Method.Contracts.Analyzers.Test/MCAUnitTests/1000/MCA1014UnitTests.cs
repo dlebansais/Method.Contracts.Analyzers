@@ -17,7 +17,6 @@ public partial class MCA1014UnitTests
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
 {
-    [Access(""public"", ""static"")]
     [Ensure(""text.Length > 0"", [|""text.Length > 0""|], DebugOnly = true)]
     private static void HelloFromVerified(string text, out string textPlus)
     {
@@ -69,5 +68,30 @@ internal partial class Program
     }
 }
 ", Expected).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task OtherAttribute_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(Prologs.NoContract, @"
+namespace Test;
+
+internal class EnsureAttribute : Attribute
+{
+    public EnsureAttribute(string value1, string value2) { Value1 = value1; Value2 = value2; }
+    public string Value1 { get; set; }
+    public string Value2 { get; set; }
+    public bool DebugOnly { get; set; }
+}
+
+internal partial class Program
+{
+    [Ensure(""text.Length > 0"", ""text.Length > 0"", DebugOnly = true)]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+").ConfigureAwait(false);
     }
 }

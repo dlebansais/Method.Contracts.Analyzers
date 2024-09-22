@@ -17,7 +17,6 @@ public partial class MCA1007UnitTests
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
 {
-    [Access(""public"", ""static"")]
     [RequireNotNull(""text"", [|""foo""|], AliasName = ""Text"")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
@@ -201,5 +200,30 @@ internal partial class Program
     }
 }
 ", Expected).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task OtherAttribute_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(Prologs.NoContract, @"
+namespace Test;
+
+internal class RequireNotNullAttribute : Attribute
+{
+    public RequireNotNullAttribute(string value1, string value2) { Value1 = value1; Value2 = value2; }
+    public string Value1 { get; set; }
+    public string Value2 { get; set; }
+    public string AliasName { get; set; }
+}
+
+internal partial class Program
+{
+    [RequireNotNull(""text"", ""foo"", AliasName = ""Text"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+").ConfigureAwait(false);
     }
 }

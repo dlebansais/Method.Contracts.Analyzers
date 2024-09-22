@@ -10,12 +10,11 @@ using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1010Req
 public partial class MCA1010UnitTests
 {
     [TestMethod]
-    public async Task InvalidType_Diagnostic()
+    public async Task InvalidName_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
 {
-    [Access(""public"", ""static"")]
     [RequireNotNull(""text"", [|Name = ""@@""|])]
     private static void HelloFromVerified(string text, out string textPlus)
     {
@@ -26,7 +25,7 @@ internal partial class Program
     }
 
     [TestMethod]
-    public async Task ValidType_NoDiagnostic()
+    public async Task ValidName_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
@@ -145,6 +144,30 @@ internal partial class Program
 {
     [Access(""public"", ""static"")]
     [RequireNotNull(""text"", [|Name = ""@@""|], AliasName = ""Text"", Type = ""string"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task OtherAttribute_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(Prologs.NoContract, @"
+namespace Test;
+
+internal class RequireNotNullAttribute : Attribute
+{
+    public RequireNotNullAttribute(string value) { Value = value; }
+    public string Value { get; set; }
+    public string Name { get; set; }
+}
+
+internal partial class Program
+{
+    [RequireNotNull(""text"", Name = ""@@"")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";

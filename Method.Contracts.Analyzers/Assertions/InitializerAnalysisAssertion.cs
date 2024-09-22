@@ -18,7 +18,7 @@ internal class InitializerAnalysisAssertion : IAnalysisAssertion
     /// </summary>
     public List<IMethodSymbol> InitializerMethodSymbols { get; } = new();
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IAnalysisAssertion.IsTrue(SyntaxNodeAnalysisContext)" />
     public bool IsTrue(SyntaxNodeAnalysisContext context)
     {
         BaseObjectCreationExpressionSyntax ObjectCreationExpression = (BaseObjectCreationExpressionSyntax)context.Node;

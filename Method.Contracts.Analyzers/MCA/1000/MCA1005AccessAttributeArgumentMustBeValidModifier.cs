@@ -57,15 +57,8 @@ public class MCA1005AccessAttributeArgumentMustBeValidModifier : DiagnosticAnaly
             context,
             LanguageVersion.CSharp7,
             AnalyzeVerifiedNode,
-            new SimpleAnalysisAssertion(context => IsAccessAttribute(((AttributeArgumentSyntax)context.Node).FirstAncestorOrSelf<AttributeSyntax>())),
+            new WithinAttributeAnalysisAssertion<AccessAttribute>(),
             new WithinMethodAnalysisAssertion());
-    }
-
-    private static bool IsAccessAttribute(AttributeSyntax? attribute)
-    {
-        // There must be a parent attribute to any argument except in the most pathological cases.
-        Contract.RequireNotNull(attribute, out AttributeSyntax Attribute);
-        return GeneratorHelper.ToAttributeName(Attribute) == nameof(AccessAttribute);
     }
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeArgumentSyntax attributeArgument, IAnalysisAssertion[] analysisAssertions)

@@ -14,7 +14,7 @@ internal class WithinMethodAnalysisAssertion : IAnalysisAssertion
     /// </summary>
     public MethodDeclarationSyntax? AncestorMethodDeclaration { get; private set; }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IAnalysisAssertion.IsTrue(SyntaxNodeAnalysisContext)" />
     public bool IsTrue(SyntaxNodeAnalysisContext context)
     {
         AttributeArgumentSyntax AttributeArgument = (AttributeArgumentSyntax)context.Node;

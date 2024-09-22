@@ -161,8 +161,8 @@ internal static class GeneratorHelper
     /// </summary>
     /// <param name="context">The analysis context. Can be <see langword="null"/> if no context is available.</param>
     /// <param name="methodDeclaration">The method.</param>
-    /// <param name="supportedAttributeNames">The list of supported attributes.</param>
-    public static List<AttributeSyntax> GetMethodSupportedAttributes(SyntaxNodeAnalysisContext? context, MethodDeclarationSyntax methodDeclaration, Collection<string> supportedAttributeNames)
+    /// <param name="supportedAttributeTypes">The list of supported attributes.</param>
+    public static List<AttributeSyntax> GetMethodSupportedAttributes(SyntaxNodeAnalysisContext? context, MethodDeclarationSyntax methodDeclaration, Collection<Type> supportedAttributeTypes)
     {
         List<AttributeSyntax> Result = new();
 
@@ -195,7 +195,7 @@ internal static class GeneratorHelper
                 {
                     string AttributeName = ToAttributeName(Attribute);
 
-                    if (supportedAttributeNames.Contains(AttributeName))
+                    if (supportedAttributeTypes.ToList().ConvertAll(item => item.Name).Contains(AttributeName))
                     {
                         Result.Add(Attribute);
                     }

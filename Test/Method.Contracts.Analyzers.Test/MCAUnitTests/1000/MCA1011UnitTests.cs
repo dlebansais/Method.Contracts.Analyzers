@@ -15,7 +15,6 @@ public partial class MCA1011UnitTests
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
 {
-    [Access(""public"", ""static"")]
     [Require([|""""|])]
     private static void HelloFromVerified(string text, out string textPlus)
     {
@@ -129,6 +128,29 @@ internal partial class Program
 {
     [Access(""public"", ""static"")]
     [Require([|""""|], DebugOnly = false)]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task OtherAttribute_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(Prologs.NoContract, @"
+namespace Test;
+
+internal class RequireAttribute : Attribute
+{
+    public RequireAttribute(string value) { Value = value; }
+    public string Value { get; set; }
+}
+
+internal partial class Program
+{
+    [Require("""")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";

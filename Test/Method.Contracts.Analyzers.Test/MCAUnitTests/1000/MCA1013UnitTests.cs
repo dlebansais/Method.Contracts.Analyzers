@@ -136,4 +136,27 @@ internal partial class Program
 }
 ").ConfigureAwait(false);
     }
+
+    [TestMethod]
+    public async Task OtherAttribute_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(Prologs.NoContract, @"
+namespace Test;
+
+internal class EnsureAttribute : Attribute
+{
+    public EnsureAttribute(string value) { Value = value; }
+    public string Value { get; set; }
+}
+
+internal partial class Program
+{
+    [Ensure("""")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+").ConfigureAwait(false);
+    }
 }

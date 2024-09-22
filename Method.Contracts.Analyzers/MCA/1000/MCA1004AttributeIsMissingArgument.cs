@@ -1,5 +1,7 @@
 ﻿namespace Contracts.Analyzers;
 
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Contracts.Analyzers.Helper;
 using Microsoft.CodeAnalysis;
@@ -57,13 +59,13 @@ public class MCA1004AttributeIsMissingArgument : DiagnosticAnalyzer
             context,
             LanguageVersion.CSharp7,
             AnalyzeVerifiedNode,
-            new SimpleAnalysisAssertion(context => IsAccessAttribute((AttributeSyntax)context.Node)));
+            new SimpleAnalysisAssertion(context => IsContractAttribute(context, (AttributeSyntax)context.Node)));
     }
 
-    private static bool IsAccessAttribute(AttributeSyntax attribute)
+    private static bool IsContractAttribute(SyntaxNodeAnalysisContext context, AttributeSyntax attribute)
     {
-        foreach (string AttributeName in ContractGenerator.SupportedAttributeNames)
-            if (GeneratorHelper.ToAttributeName(attribute) == AttributeName)
+        foreach (Type AttributeType in ContractGenerator.SupportedAttributeTypes)
+            if (AnalyzerTools.IsExpectedAttribute(context, AttributeType, attribute))
                 return true;
 
         return false;

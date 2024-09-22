@@ -68,7 +68,7 @@ public partial class ContractGenerator
         Contract.RequireNotNull(methodDeclaration, out MethodDeclarationSyntax MethodDeclaration);
 
         // Get a list of all supported attributes for this method.
-        List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMethodSupportedAttributes(context, MethodDeclaration, SupportedAttributeNames);
+        List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMethodSupportedAttributes(context, MethodDeclaration, SupportedAttributeTypes);
         List<string> AttributeNames = new();
         bool IsDebugGeneration = MethodDeclaration.SyntaxTree.Options.PreprocessorSymbolNames.Contains("DEBUG");
 

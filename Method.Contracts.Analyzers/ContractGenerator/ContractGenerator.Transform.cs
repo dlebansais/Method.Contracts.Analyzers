@@ -257,7 +257,7 @@ public partial class ContractGenerator
     private static List<AttributeModel> GetModelContract(MethodDeclarationSyntax methodDeclaration)
     {
         List<AttributeModel> Result = new();
-        List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMethodSupportedAttributes(context: null, methodDeclaration, SupportedAttributeNames);
+        List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMethodSupportedAttributes(context: null, methodDeclaration, SupportedAttributeTypes);
 
         Dictionary<string, Func<MethodDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, List<AttributeArgumentModel>>> AttributeTransformTable = new()
         {
