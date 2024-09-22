@@ -165,5 +165,4 @@ internal partial class Program
 }
 ", Expected).ConfigureAwait(false);
     }
-
 }

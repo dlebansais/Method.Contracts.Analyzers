@@ -184,7 +184,12 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
     {
         if (firstStatement is ExpressionStatementSyntax ExpressionStatement)
         {
-            if (ExpressionStatement.Expression is InvocationExpressionSyntax InvocationExpression)
+            ExpressionSyntax Expression = ExpressionStatement.Expression;
+
+            if (Expression is AwaitExpressionSyntax AwaitExpression)
+                Expression = AwaitExpression.Expression;
+
+            if (Expression is InvocationExpressionSyntax InvocationExpression)
             {
                 if (InvocationExpression.Expression is MemberAccessExpressionSyntax MemberAccessExpression)
                 {

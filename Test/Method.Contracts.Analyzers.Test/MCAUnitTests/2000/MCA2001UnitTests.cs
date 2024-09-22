@@ -1127,4 +1127,34 @@ internal partial class Program
 }
 ").ConfigureAwait(false);
     }
+
+    [TestMethod]
+    public async Task AsyncInitializerCalled_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(Prologs.Default, @"
+using System.Threading.Tasks;
+
+internal class Test
+{
+    [InitializeWith(nameof(InitializeAsync))]
+    public Test()
+    {
+    }
+
+    public async Task InitializeAsync()
+    {
+        await Task.CompletedTask;
+    }
+}
+
+internal partial class Program
+{
+    private static async Task Main()
+    {
+        var test = new Test();
+        await test.InitializeAsync();
+    }
+}
+").ConfigureAwait(false);
+    }
 }
