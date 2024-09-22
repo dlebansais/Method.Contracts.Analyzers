@@ -224,7 +224,60 @@ To change a setting, modify the `.csproj` file of your project as follow (*Demo*
 ````
 
 You don't have to specify all values if you're changing just one setting. Note that empty strings for `VerifierSuffix` and `ReturnIdentifier` are ignored, as well as `TabLength` if it's not a strictly positive integer value.
- 
+
+## InitializeWith attribute
+
+In C# constructors have some limitations, including:
+
++ No call to async methods.
++ Should not call virtual methods of the class.
+
+A simple workaround is to write a minimal constructor and a separate initialization method. For instance:
+
+````csharp
+using System;
+using System.Net;
+using System.Threading.Tasks;
+using Contracts;
+
+public class Foo(Uri uri)
+{
+    public string Content { get; private set; } = null!;
+
+    public async Task InitializeContentAsync()
+    {
+        using WebClient webClient = CreateClient();
+        Content = await webClient.DownloadStringTaskAsync(uri);
+    }
+
+    protected virtual WebClient CreateClient() => new();
+}
+
+Foo foo = new(new Uri("http://whatever"));
+await foo.InitializeContentAsync();
+````
+
+The initialization method in class `Foo` is `async` and calls a virtual method.
+
+A problem with this approach is that if the code creating a new instance of `Foo` does not call the initialization method, the instance will not be initialized properly (`Content` will be `null`).
+
+To ensure that all instances are initialized, add the `InitializedWith` attribute to the constructor:
+
+````csharp
+public class Foo
+{
+    private readonly Uri uri;
+
+    [InitializeWith(nameof(InitializeContentAsync))]
+    public Foo(Uri uri) => this.uri = uri;
+````
+
+If any creation of an instance of `Foo` is not immediately followed by a call to `InitializeContentAsync`, a warning will be issued:
+
+*warning MCA2001: Object must be initialized with a call to the 'InitializeContentAsync' method*
+
+The `InitializedWith` attribute can be used in a `class` or `record` (structs are not supported). It must specify a method name of the same class (overloads are not supported).
+
 ## List of diagnostics
 
 | Code                      | Diagnostic                                                          |
@@ -243,3 +296,5 @@ You don't have to specify all values if you're changing just one setting. Note t
 | [MCA1012](doc/MCA1012.md) | `Require` attribute has too many arguments.                         |
 | [MCA1013](doc/MCA1013.md) | `Ensure` attribute argument must be valid.                          |
 | [MCA1014](doc/MCA1014.md) | `Ensure` attribute has too many arguments.                          |
+| [MCA2001](doc/MCA2001.md) | Object must be initialized.                                         |
+| [MCA2002](doc/MCA2002.md) | `InitializeWith` attribute argument must be a valid method name.    |
