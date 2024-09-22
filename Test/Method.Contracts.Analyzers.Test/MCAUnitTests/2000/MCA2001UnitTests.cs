@@ -141,6 +141,173 @@ Test test = [|new Test()|];
     }
 
     [TestMethod]
+    public async Task InitializerNotCalled5_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal class Test
+{
+    [InitializeWith(nameof(Initialize))]
+    public Test()
+    {
+    }
+
+    public void Initialize()
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static void Main()
+    {
+        var test1 = [|new Test()|];
+        var test2 = [|new Test()|];
+        test1.Initialize();
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task InitializerNotCalled6_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal class Test
+{
+    [InitializeWith(nameof(Initialize))]
+    public Test()
+    {
+    }
+
+    public void Initialize()
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static void Main()
+    {
+        int[] test = new int[] { 0 };
+        var test1 = [|new Test()|];
+        var test2 = [|new Test()|];
+        test[0] = 0;
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task InitializerNotCalled7_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal class Test
+{
+    [InitializeWith(nameof(Initialize))]
+    public Test()
+    {
+    }
+
+    public void Initialize()
+    {
+    }
+
+    public Test Foo { get; set; }
+}
+
+internal partial class Program
+{
+    private static void Main()
+    {
+        var test = [|new Test()|];
+        test.Foo.Initialize();
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task InitializerNotCalled8_Diagnostic()
+    {
+        var DescriptorCS0103 = new DiagnosticDescriptor(
+            "CS0103",
+            "title",
+            "The name 'foo' does not exist in the current context",
+            "description",
+            DiagnosticSeverity.Error,
+            true
+            );
+
+        var Expected = new DiagnosticResult(DescriptorCS0103);
+        Expected = Expected.WithLocation("/0/Test0.cs", 25, 9);
+
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal class Test
+{
+    [InitializeWith(nameof(Initialize))]
+    public Test()
+    {
+    }
+
+    public void Initialize()
+    {
+    }
+
+    public Test Foo { get; set; }
+}
+
+internal partial class Program
+{
+    private static void Main()
+    {
+        var test = [|new Test()|];
+        foo.Initialize();
+    }
+}
+", Expected).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task InitializerNotCalled9_Diagnostic()
+    {
+        var DescriptorCS0311 = new DiagnosticDescriptor(
+            "CS0311",
+            "title",
+            "The type 'string' cannot be used as type parameter 'T' in the generic type or method 'Test.Initialize<T>()'. There is no implicit reference conversion from 'string' to 'Test'.",
+            "description",
+            DiagnosticSeverity.Error,
+            true
+            );
+
+        var Expected = new DiagnosticResult(DescriptorCS0311);
+        Expected = Expected.WithLocation("/0/Test0.cs", 24, 14);
+
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal class Test
+{
+    [InitializeWith(nameof(Initialize))]
+    public Test()
+    {
+    }
+
+    public void Initialize<T>()
+        where T : Test
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static void Main()
+    {
+        var test = [|new Test()|];
+        test.Initialize<string>();
+    }
+}
+", Expected).ConfigureAwait(false);
+    }
+
+    [TestMethod]
     public async Task InitializerCalled_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -639,7 +806,7 @@ internal partial class Program
     }
 
     [TestMethod]
-    public async Task FieldInitialization_Diagnostic()
+    public async Task CreatedObjectFieldInitialization_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal class Test
@@ -704,5 +871,260 @@ internal partial class Program
     }
 }
 ", Expected).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task GlobalStatementInitializerCalled_NoDiagnostic()
+    {
+        var DescriptorCS8805 = new DiagnosticDescriptor(
+            "CS8805",
+            "title",
+            "Program using top-level statements must be an executable.",
+            "description",
+            DiagnosticSeverity.Error,
+            true
+            );
+
+        var Expected = new DiagnosticResult(DescriptorCS8805);
+        Expected = Expected.WithLocation("/0/Test0.cs", 6, 1);
+
+        await VerifyCS.VerifyAnalyzerAsync(@"
+Test test = new Test();
+test.Initialize();
+
+internal class Test
+{
+    [InitializeWith(nameof(Initialize))]
+    public Test()
+    {
+    }
+
+    public void Initialize()
+    {
+    }
+}
+", Expected).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task NotSimpleLeftExpression_Diagnostic()
+    {
+        var DescriptorCS1001 = new DiagnosticDescriptor(
+            "CS1001",
+            "title",
+            "Identifier expected",
+            "description",
+            DiagnosticSeverity.Error,
+            true
+            );
+
+        var DescriptorCS0103 = new DiagnosticDescriptor(
+            "CS0103",
+            "title",
+            "The name 'Initialize' does not exist in the current context",
+            "description",
+            DiagnosticSeverity.Error,
+            true
+            );
+
+        var Expected1 = new DiagnosticResult(DescriptorCS1001);
+        Expected1 = Expected1.WithLocation("/0/Test0.cs", 23, 16);
+
+        var Expected2 = new DiagnosticResult(DescriptorCS0103);
+        Expected2 = Expected2.WithLocation("/0/Test0.cs", 23, 17);
+
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal class Test
+{
+    [InitializeWith(nameof(Initialize))]
+    public Test()
+    {
+    }
+
+    public void Initialize()
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static void Main()
+    {
+        var test = [|new Test()|];
+        (test).(Initialize)();
+    }
+}
+", Expected1, Expected2).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task VariableDeclaredInLoop_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal class Test
+{
+    [InitializeWith(nameof(Initialize))]
+    public Test()
+    {
+    }
+
+    public void Initialize()
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static void Main()
+    {
+        for (Test test = [|new Test()|];;)
+        {
+        }
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task FieldInitialization_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal class Test
+{
+    [InitializeWith(nameof(Initialize))]
+    public Test()
+    {
+    }
+
+    public void Initialize()
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static Test test;
+
+    private static void Main()
+    {
+        test = new Test();
+        test.Initialize();
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task FieldInitializationMissingInit_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal class Test
+{
+    [InitializeWith(nameof(Initialize))]
+    public Test()
+    {
+    }
+
+    public void Initialize()
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static Test test;
+
+    private static void Main()
+    {
+        test = [|new Test()|];
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task ArrayInitialization_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal class Test
+{
+    [InitializeWith(nameof(Initialize))]
+    public Test()
+    {
+    }
+
+    public void Initialize()
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static Test[] test = new Test[1];
+
+    private static void Main()
+    {
+        test[0] = [|new Test()|];
+        test[0].Initialize();
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task PropertyInitialization_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal class Test
+{
+    [InitializeWith(nameof(Initialize))]
+    public Test()
+    {
+    }
+
+    public void Initialize()
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static Test test { get; set; }
+
+    private static void Main()
+    {
+        test = new Test();
+        test.Initialize();
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task PropertyInitializationMissingInit_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal class Test
+{
+    [InitializeWith(nameof(Initialize))]
+    public Test()
+    {
+    }
+
+    public void Initialize()
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static Test test { get; set; }
+
+    private static void Main()
+    {
+        test = [|new Test()|];
+    }
+}
+").ConfigureAwait(false);
     }
 }

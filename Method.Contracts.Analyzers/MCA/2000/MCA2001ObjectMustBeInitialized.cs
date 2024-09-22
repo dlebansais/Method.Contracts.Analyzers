@@ -94,6 +94,14 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
             }
         }
 
+        if (objectCreationExpression.Parent is AssignmentExpressionSyntax AssignmentExpression)
+        {
+            if (AssignmentExpression.Left is IdentifierNameSyntax IdentifierName)
+            {
+                return CheckAssignmentExpression(context, IdentifierName, AssignmentExpression, out createdSymbol, out nextStatement);
+            }
+        }
+
         Contract.Unused(out createdSymbol);
         Contract.Unused(out nextStatement);
         return false;
@@ -103,22 +111,55 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
     {
         ISymbol DeclaredSymbol = Contract.AssertNotNull(context.SemanticModel.GetDeclaredSymbol(variableDeclarator));
         VariableDeclarationSyntax VariableDeclaration = Contract.AssertNotNull(variableDeclarator.Parent as VariableDeclarationSyntax);
-        LocalDeclarationStatementSyntax LocalDeclarationStatement = Contract.AssertNotNull(VariableDeclaration.Parent as LocalDeclarationStatementSyntax);
 
-        if (LocalDeclarationStatement.Parent is BlockSyntax Block)
+        if (VariableDeclaration.Parent is LocalDeclarationStatementSyntax LocalDeclarationStatement)
+        {
+            if (CheckDestinationAndNextStatement(context, LocalDeclarationStatement, out nextStatement))
+            {
+                createdSymbol = DeclaredSymbol;
+                return true;
+            }
+        }
+
+        Contract.Unused(out createdSymbol);
+        Contract.Unused(out nextStatement);
+        return false;
+    }
+
+    private static bool CheckAssignmentExpression(SyntaxNodeAnalysisContext context, IdentifierNameSyntax identifierName, AssignmentExpressionSyntax assignmentExpression, out ISymbol createdSymbol, out StatementSyntax nextStatement)
+    {
+        var AssignedSymbolInfo = context.SemanticModel.GetSymbolInfo(identifierName);
+        ISymbol AssignedSymbol = Contract.AssertNotNull(AssignedSymbolInfo.Symbol);
+
+        if (assignmentExpression.Parent is ExpressionStatementSyntax ExpressionStatement)
+        {
+            if (CheckDestinationAndNextStatement(context, ExpressionStatement, out nextStatement))
+            {
+                createdSymbol = AssignedSymbol;
+                return true;
+            }
+        }
+
+        Contract.Unused(out createdSymbol);
+        Contract.Unused(out nextStatement);
+        return false;
+    }
+
+    private static bool CheckDestinationAndNextStatement(SyntaxNodeAnalysisContext context, StatementSyntax currentStatement, out StatementSyntax nextStatement)
+    {
+        if (currentStatement.Parent is BlockSyntax Block)
         {
             var Statements = Block.Statements.ToImmutableList();
-            int DeclarationIndex = Statements.IndexOf(LocalDeclarationStatement);
+            int DeclarationIndex = Statements.IndexOf(currentStatement);
 
             if (DeclarationIndex + 1 < Statements.Count)
             {
-                createdSymbol = DeclaredSymbol;
                 nextStatement = Statements[DeclarationIndex + 1];
                 return true;
             }
         }
 
-        if (LocalDeclarationStatement.Parent is GlobalStatementSyntax GlobalStatement)
+        if (currentStatement.Parent is GlobalStatementSyntax GlobalStatement)
         {
             CompilationUnitSyntax CompilationUnit = Contract.AssertNotNull(GlobalStatement.Parent as CompilationUnitSyntax);
             var Members = CompilationUnit.Members.ToImmutableList();
@@ -129,14 +170,12 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
                 var NextMember = Members[DeclarationIndex + 1];
                 if (NextMember is GlobalStatementSyntax NextGlobalStatement)
                 {
-                    createdSymbol = DeclaredSymbol;
                     nextStatement = NextGlobalStatement.Statement;
                     return true;
                 }
             }
         }
 
-        Contract.Unused(out createdSymbol);
         Contract.Unused(out nextStatement);
         return false;
     }

@@ -3,6 +3,8 @@
 extern alias Analyzers;
 
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1005AccessAttributeArgumentMustBeValidModifier>;
 
@@ -82,5 +84,29 @@ internal partial class Program
     }
 }
 ").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task AttributeOnProperty_NoDiagnostic()
+    {
+        var DescriptorCS0592 = new DiagnosticDescriptor(
+            "CS0592",
+            "title",
+            "Attribute 'Access' is not valid on this declaration type. It is only valid on 'method' declarations.",
+            "description",
+            DiagnosticSeverity.Error,
+            true
+            );
+
+        var Expected = new DiagnosticResult(DescriptorCS0592);
+        Expected = Expected.WithLocation("/0/Test0.cs", 10, 6);
+
+        await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
+internal partial class Program
+{
+    [Access(""public"")]
+    public int Foo { get; set; }
+}
+", Expected).ConfigureAwait(false);
     }
 }
