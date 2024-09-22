@@ -335,6 +335,59 @@ internal partial class Program
     }
 
     [TestMethod]
+    public async Task RecordInitializerNotCalled_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal record Test
+{
+    [InitializeWith(nameof(Initialize))]
+    public Test()
+    {
+    }
+
+    public void Initialize()
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static void Main()
+    {
+        var test = [|new Test()|];
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task RecordInitializerCalled_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal record Test
+{
+    [InitializeWith(nameof(Initialize))]
+    public Test()
+    {
+    }
+
+    public void Initialize()
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static void Main()
+    {
+        var test = new Test();
+        test.Initialize();
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
     public async Task UnknownClass_NoDiagnostic()
     {
         var DescriptorCS8754 = new DiagnosticDescriptor(

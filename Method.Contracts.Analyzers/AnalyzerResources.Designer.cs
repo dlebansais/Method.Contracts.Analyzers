@@ -464,5 +464,32 @@ namespace Contracts.Analyzers {
                 return ResourceManager.GetString("MCA2001AnalyzerTitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to InitializeWith attribute argument must be a valid method name..
+        /// </summary>
+        internal static string MCA2002AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA2002AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Method &apos;{0}&apos; not found.
+        /// </summary>
+        internal static string MCA2002AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA2002AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to InitializeWith attribute argument must be a valid method name.
+        /// </summary>
+        internal static string MCA2002AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA2002AnalyzerTitle", resourceCulture);
+            }
+        }
     }
 }

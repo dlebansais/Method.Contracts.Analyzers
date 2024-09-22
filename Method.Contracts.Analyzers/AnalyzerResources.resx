@@ -297,4 +297,16 @@
     <value>Object must be initialized</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="MCA2002AnalyzerDescription" xml:space="preserve">
+    <value>InitializeWith attribute argument must be a valid method name.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA2002AnalyzerMessageFormat" xml:space="preserve">
+    <value>Method '{0}' not found</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA2002AnalyzerTitle" xml:space="preserve">
+    <value>InitializeWith attribute argument must be a valid method name</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
 </root>

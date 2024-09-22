@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 using Contracts.Analyzers.Helper;
 using Microsoft.CodeAnalysis;
@@ -203,7 +204,7 @@ public partial class ContractGenerator
         // If we reach this method there is at least one end of line, therefore at least one trivia.
         Contract.Assert(trivias.Count > 0);
 
-        SyntaxTrivia FirstTrivia = trivias[0];
+        SyntaxTrivia FirstTrivia = trivias.First();
 
         if (!FirstTrivia.IsKind(SyntaxKind.WhitespaceTrivia))
             return false;

@@ -76,7 +76,7 @@ public partial class ContractGenerator
             if (!IsValidAttribute(Attribute, MethodDeclaration, IsDebugGeneration, AttributeNames))
                 return null;
 
-        return AttributeNames.Count > 0 ? AttributeNames[0] : null;
+        return AttributeNames.Count > 0 ? AttributeNames.First() : null;
     }
 
     private static bool IsValidAttribute(AttributeSyntax attribute, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration, List<string> attributeNames)
@@ -445,7 +445,7 @@ public partial class ContractGenerator
             InvocationExpression.Expression is IdentifierNameSyntax IdentifierName &&
             IdentifierName.Identifier.Text == "nameof" &&
             InvocationExpression.ArgumentList.Arguments.Count == 1 &&
-            InvocationExpression.ArgumentList.Arguments[0].Expression is IdentifierNameSyntax ExpressionIdentifierName)
+            InvocationExpression.ArgumentList.Arguments.First().Expression is IdentifierNameSyntax ExpressionIdentifierName)
         {
             string ArgumentText = ExpressionIdentifierName.Identifier.Text;
 

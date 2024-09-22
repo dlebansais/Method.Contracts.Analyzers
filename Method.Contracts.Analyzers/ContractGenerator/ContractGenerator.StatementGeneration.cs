@@ -60,8 +60,8 @@ public partial class ContractGenerator
 
                 if (Arguments.Any(argument => argument.Name != string.Empty))
                 {
-                    Contract.Assert(Arguments[0].Name == string.Empty);
-                    string ParameterName = Arguments[0].Value;
+                    Contract.Assert(Arguments.First().Name == string.Empty);
+                    string ParameterName = Arguments.First().Value;
                     string OriginalParameterName = ParameterName;
 
                     GetModifiedIdentifiers(Arguments, ref ParameterName, out string AliasName);
@@ -328,8 +328,8 @@ public partial class ContractGenerator
     private static List<StatementSyntax> GenerateRequireNotNullStatementWithAlias(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration)
     {
         Contract.Assert(attributeArguments.Count > 0);
-        Contract.Assert(attributeArguments[0].Name == string.Empty);
-        string ParameterName = attributeArguments[0].Value;
+        Contract.Assert(attributeArguments.First().Name == string.Empty);
+        string ParameterName = attributeArguments.First().Value;
 
         bool IsParameterTypeValid = GetParameterType(ParameterName, methodDeclaration, out TypeSyntax Type);
         Contract.Assert(IsParameterTypeValid);
@@ -423,7 +423,7 @@ public partial class ContractGenerator
 
         if (attributeArguments[1].Value == "false" || isDebugGeneration)
         {
-            List<AttributeArgumentModel> SingleAttributeArgument = new() { attributeArguments[0] };
+            List<AttributeArgumentModel> SingleAttributeArgument = new() { attributeArguments.First() };
             return GenerateMultipleRequireOrEnsureStatement(SingleAttributeArgument, methodDeclaration, contractMethodName);
         }
         else
@@ -463,7 +463,7 @@ public partial class ContractGenerator
     {
         Contract.Assert(text.Length > 0);
 
-        char FirstLetter = text[0];
+        char FirstLetter = text.First();
         string OtherLetters = text.Substring(1);
 
         if (char.IsLower(FirstLetter))

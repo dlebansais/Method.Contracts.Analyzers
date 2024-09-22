@@ -64,6 +64,7 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, BaseObjectCreationExpressionSyntax objectCreationExpression, IAnalysisAssertion[] analysisAssertions)
     {
+        // If we reached this step, there is an initializer method.
         Contract.Assert(analysisAssertions.Length == 1);
         InitializerAnalysisAssertion Assertion = Contract.AssertNotNull(analysisAssertions.First() as InitializerAnalysisAssertion);
         List<IMethodSymbol> InitializerMethodSymbols = Contract.AssertNotNull(Assertion.InitializerMethodSymbols);

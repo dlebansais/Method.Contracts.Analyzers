@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -75,7 +76,7 @@ internal class InitializerAnalysisAssertion : IAnalysisAssertion
             return false;
         }
 
-        TypedConstant FirstArgument = Attribute.ConstructorArguments[0];
+        TypedConstant FirstArgument = Attribute.ConstructorArguments.First();
         string ArgumentValue = Contract.AssertNotNull(FirstArgument.Value as string);
 
         List<IMethodSymbol> InitializerOverloads = new();

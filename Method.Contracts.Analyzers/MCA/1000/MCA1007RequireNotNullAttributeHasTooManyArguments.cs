@@ -1,6 +1,7 @@
 ﻿namespace Contracts.Analyzers;
 
 using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -61,9 +62,9 @@ public class MCA1007RequireNotNullAttributeHasTooManyArguments : DiagnosticAnaly
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeArgumentSyntax attributeArgument, IAnalysisAssertion[] analysisAssertions)
     {
-        // If we reached this step, there is a an attribute.
+        // If we reached this step, there is an attribute.
         Contract.Assert(analysisAssertions.Length == 1);
-        WithinAttributeAnalysisAssertion<RequireNotNullAttribute> FirstAssertion = Contract.AssertNotNull(analysisAssertions[0] as WithinAttributeAnalysisAssertion<RequireNotNullAttribute>);
+        WithinAttributeAnalysisAssertion<RequireNotNullAttribute> FirstAssertion = Contract.AssertNotNull(analysisAssertions.First() as WithinAttributeAnalysisAssertion<RequireNotNullAttribute>);
         AttributeSyntax Attribute = Contract.AssertNotNull(FirstAssertion.AncestorAttribute);
 
         AttributeArgumentListSyntax ArgumentList = Contract.AssertNotNull(Attribute.ArgumentList);

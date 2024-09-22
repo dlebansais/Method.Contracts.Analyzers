@@ -1,5 +1,6 @@
 ﻿namespace Contracts.Analyzers;
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -8,19 +9,19 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
-/// Analyzer for rule MCA1012: Require attribute has too many arguments.
+/// Analyzer for rule MCA2002: InitializeWith attribute argument must be a valid method name.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MCA1012RequireAttributeHasTooManyArguments : DiagnosticAnalyzer
+public class MCA2002InitializeWithAttributeArgumentMustBeValidMethodName : DiagnosticAnalyzer
 {
     /// <summary>
     /// Diagnostic ID for this rule.
     /// </summary>
-    public const string DiagnosticId = "MCA1012";
+    public const string DiagnosticId = "MCA2002";
 
-    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(AnalyzerResources.MCA1012AnalyzerTitle), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
-    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(AnalyzerResources.MCA1012AnalyzerMessageFormat), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
-    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(AnalyzerResources.MCA1012AnalyzerDescription), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(AnalyzerResources.MCA2002AnalyzerTitle), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(AnalyzerResources.MCA2002AnalyzerMessageFormat), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(AnalyzerResources.MCA2002AnalyzerDescription), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
     private const string Category = "Usage";
 
     private static readonly DiagnosticDescriptor Rule = new(DiagnosticId,
@@ -57,28 +58,35 @@ public class MCA1012RequireAttributeHasTooManyArguments : DiagnosticAnalyzer
             context,
             LanguageVersion.CSharp7,
             AnalyzeVerifiedNode,
-            new WithinAttributeAnalysisAssertion<RequireAttribute>());
+            new WithinAttributeAnalysisAssertion<InitializeWithAttribute>());
     }
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeArgumentSyntax attributeArgument, IAnalysisAssertion[] analysisAssertions)
     {
-        // If we reached this step, there is an attribute.
-        Contract.Assert(analysisAssertions.Length == 1);
-        WithinAttributeAnalysisAssertion<RequireAttribute> FirstAssertion = Contract.AssertNotNull(analysisAssertions.First() as WithinAttributeAnalysisAssertion<RequireAttribute>);
-        AttributeSyntax Attribute = Contract.AssertNotNull(FirstAssertion.AncestorAttribute);
-
-        AttributeArgumentListSyntax ArgumentList = Contract.AssertNotNull(Attribute.ArgumentList);
-        var AttributeArguments = ArgumentList.Arguments;
-        int ArgumentIndex = AttributeArguments.IndexOf(attributeArgument);
-
-        // No diagnostic if the attribute has no DebugOnly, or if this is the first argument.
-        if (!ContractGenerator.IsRequireOrEnsureAttributeWithDebugOnly(AttributeArguments) || ArgumentIndex == 0)
+        // No diagnostic if the argument is not a valid string or nameof.
+        if (!ContractGenerator.IsStringOrNameofAttributeArgument(attributeArgument, out string ArgumentValue))
             return;
 
-        // No diagnostic if the argument is not an expression.
-        if (!ContractGenerator.IsStringExpression(attributeArgument))
+        string MethodName = ArgumentValue;
+
+        SyntaxList<MemberDeclarationSyntax>? Members;
+
+        if (attributeArgument.FirstAncestorOrSelf<ClassDeclarationSyntax>() is ClassDeclarationSyntax ClassDeclaration)
+            Members = ClassDeclaration.Members;
+        else if (attributeArgument.FirstAncestorOrSelf<RecordDeclarationSyntax>() is RecordDeclarationSyntax RecordDeclaration)
+            Members = RecordDeclaration.Members;
+        else
             return;
 
-        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), ArgumentIndex));
+        int InitializerCount = 0;
+        foreach (MemberDeclarationSyntax Member in Members)
+            if (Member is MethodDeclarationSyntax MethodDeclaration && MethodDeclaration.Identifier.Text == MethodName)
+                InitializerCount++;
+
+        // No diagnostic if the argument is a valid method name with only one overload.
+        if (InitializerCount == 1)
+            return;
+
+        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), MethodName));
     }
 }
