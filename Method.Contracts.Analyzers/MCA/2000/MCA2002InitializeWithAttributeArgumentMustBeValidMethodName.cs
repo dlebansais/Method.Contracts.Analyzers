@@ -26,7 +26,7 @@ public class MCA2002InitializeWithAttributeArgumentMustBeValidMethodName : Diagn
                                                             Title,
                                                             MessageFormat,
                                                             Category,
-                                                            DiagnosticSeverity.Warning,
+                                                            DiagnosticSeverity.Error,
                                                             isEnabledByDefault: true,
                                                             description: Description,
                                                             AnalyzerTools.GetHelpLink(DiagnosticId));

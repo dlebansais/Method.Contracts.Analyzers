@@ -26,7 +26,7 @@ public class MCA1011RequireAttributeArgumentMustBeValid : DiagnosticAnalyzer
                                                             Title,
                                                             MessageFormat,
                                                             Category,
-                                                            DiagnosticSeverity.Warning,
+                                                            DiagnosticSeverity.Error,
                                                             isEnabledByDefault: true,
                                                             description: Description,
                                                             AnalyzerTools.GetHelpLink(DiagnosticId));

@@ -27,7 +27,7 @@ public class MCA1012RequireAttributeHasTooManyArguments : DiagnosticAnalyzer
                                                             Title,
                                                             MessageFormat,
                                                             Category,
-                                                            DiagnosticSeverity.Warning,
+                                                            DiagnosticSeverity.Error,
                                                             isEnabledByDefault: true,
                                                             description: Description,
                                                             AnalyzerTools.GetHelpLink(DiagnosticId));

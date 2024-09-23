@@ -27,7 +27,7 @@ public class MCA2003InitializeWithAttributeNotAllowedInClassWithExplicitConstruc
                                                             Title,
                                                             MessageFormat,
                                                             Category,
-                                                            DiagnosticSeverity.Warning,
+                                                            DiagnosticSeverity.Error,
                                                             isEnabledByDefault: true,
                                                             description: Description,
                                                             AnalyzerTools.GetHelpLink(DiagnosticId));
