@@ -16,7 +16,7 @@ coverage:
     patch: true
     project: true
 ignore:
-  - "./CSharpLatest.Analyzers/AnalyzerResources.Designer.cs"
+  - "./Method.Contracts.Analyzers/AnalyzerResources.Designer.cs"
 parsers:
   gcov:
     branch_detection:
