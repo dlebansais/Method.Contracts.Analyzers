@@ -296,6 +296,8 @@ If a base class contains one or more constructors with the `InitializeWith` attr
 
 ## List of diagnostics
 
+### Verification
+
 | Code                      | Diagnostic                                                                  |
 | ------------------------- | --------------------------------------------------------------------------- |
 | [MCA1001](doc/MCA1001.md) | Verified method must be private.                                            |
@@ -312,6 +314,12 @@ If a base class contains one or more constructors with the `InitializeWith` attr
 | [MCA1012](doc/MCA1012.md) | `Require` attribute has too many arguments.                                 |
 | [MCA1013](doc/MCA1013.md) | `Ensure` attribute argument must be valid.                                  |
 | [MCA1014](doc/MCA1014.md) | `Ensure` attribute has too many arguments.                                  |
+| [MCA1015](doc/MCA1015.md) | Set parameter as unused before return.                                      |
+
+### Initialization
+
+| Code                      | Diagnostic                                                                  |
+| ------------------------- | --------------------------------------------------------------------------- |
 | [MCA2001](doc/MCA2001.md) | Object must be initialized.                                                 |
 | [MCA2002](doc/MCA2002.md) | `InitializeWith` attribute argument must be a valid method name.            |
 | [MCA2003](doc/MCA2003.md) | `InitializeWith` attribute not allowed in class with explicit constructors. |

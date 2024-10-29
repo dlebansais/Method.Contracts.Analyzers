@@ -18,6 +18,7 @@ MCA1011 |  Usage   |   Error  | MCA1011RequireAttributeArgumentMustBeValid, [Doc
 MCA1012 |  Usage   |   Error  | MCA1012RequireAttributeHasTooManyArguments, [Documentation](doc/MCA1012.md)
 MCA1013 |  Usage   |   Error  | MCA1013EnsureAttributeArgumentMustBeValid, [Documentation](doc/MCA1013.md)
 MCA1014 |  Usage   |   Error  | MCA1014EnsureAttributeHasTooManyArguments, [Documentation](doc/MCA1014.md)
+MCA1015 |  Usage   |  Warning | MCA1015SetParameterAsUnusedBeforeReturn, [Documentation](doc/MCA1015.md)
 MCA2001 |  Usage   |  Warning | MCA2001ObjectMustBeInitialized, [Documentation](doc/MCA2001.md)
 MCA2002 |  Usage   |   Error  | MCA2002InitializeWithAttributeArgumentMustBeValidMethodName, [Documentation](doc/MCA2002.md)
 MCA2003 |  Usage   |   Error  | MCA2003InitializeWithAttributeNotAllowedInClassWithExplicitConstructors, [Documentation](doc/MCA2003.md)

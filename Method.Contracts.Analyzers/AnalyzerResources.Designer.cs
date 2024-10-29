@@ -439,6 +439,33 @@ namespace Contracts.Analyzers {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Set a parameter as unused before a return statement..
+        /// </summary>
+        internal static string MCA1015AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1015AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Set parameter {0} as unused before return.
+        /// </summary>
+        internal static string MCA1015AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1015AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Set parameter as unused before return.
+        /// </summary>
+        internal static string MCA1015AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1015AnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Object must be initialized with a call to the specified method..
         /// </summary>
         internal static string MCA2001AnalyzerDescription {
@@ -491,36 +518,30 @@ namespace Contracts.Analyzers {
                 return ResourceManager.GetString("MCA2002AnalyzerTitle", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to InitializeWith attribute argument must be a valid method name..
+        ///   Looks up a localized string similar to InitializeWith attribute not allowed in class with explicit constructors..
         /// </summary>
-        internal static string MCA2003AnalyzerDescription
-        {
-            get
-            {
+        internal static string MCA2003AnalyzerDescription {
+            get {
                 return ResourceManager.GetString("MCA2003AnalyzerDescription", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to Method &apos;{0}&apos; not found.
+        ///   Looks up a localized string similar to InitializeWith attribute not allowed in class &apos;{0}&apos; with explicit constructors.
         /// </summary>
-        internal static string MCA2003AnalyzerMessageFormat
-        {
-            get
-            {
+        internal static string MCA2003AnalyzerMessageFormat {
+            get {
                 return ResourceManager.GetString("MCA2003AnalyzerMessageFormat", resourceCulture);
             }
         }
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to InitializeWith attribute argument must be a valid method name.
+        ///   Looks up a localized string similar to InitializeWith attribute not allowed in class with explicit constructors.
         /// </summary>
-        internal static string MCA2003AnalyzerTitle
-        {
-            get
-            {
+        internal static string MCA2003AnalyzerTitle {
+            get {
                 return ResourceManager.GetString("MCA2003AnalyzerTitle", resourceCulture);
             }
         }

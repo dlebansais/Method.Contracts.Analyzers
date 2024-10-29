@@ -321,4 +321,16 @@
     <value>InitializeWith attribute not allowed in class with explicit constructors</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="MCA1015AnalyzerDescription" xml:space="preserve">
+    <value>Set a parameter as unused before a return statement.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1015AnalyzerMessageFormat" xml:space="preserve">
+    <value>Set parameter {0} as unused before return</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1015AnalyzerTitle" xml:space="preserve">
+    <value>Set parameter as unused before return</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
 </root>

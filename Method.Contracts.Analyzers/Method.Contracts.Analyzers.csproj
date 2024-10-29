@@ -7,14 +7,14 @@
         <Platforms>x64</Platforms>
 
         <RootNamespace>Contracts.Analyzers</RootNamespace>
-        <Version>1.6.1</Version>
+        <Version>1.7.0</Version>
         <Authors>David Le Bansais</Authors>
         <Company />
         <Product />
         <Description>A code generator companion for Method.Contracts</Description>
         <Copyright>Copyright © 2024 David Le Bansais</Copyright>
-        <AssemblyVersion>1.6.1.20</AssemblyVersion>
-        <FileVersion>1.6.1.20</FileVersion>
+        <AssemblyVersion>1.7.0.21</AssemblyVersion>
+        <FileVersion>1.7.0.21</FileVersion>
         <RepositoryUrl>https://github.com/dlebansais/Method.Contracts.Analyzers</RepositoryUrl>
         <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 

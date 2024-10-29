@@ -138,4 +138,111 @@ internal static class AnalyzerTools
         return s.Replace(oldString, newString);
 #endif
     }
+
+    /// <summary>
+    /// Checks whether a statement is a call to Contract.Unused().
+    /// </summary>
+    /// <param name="context">The context.</param>
+    /// <param name="statement">The statement to check.</param>
+    /// <param name="invocationArgumentName">The name of the out argument upon return.</param>
+    public static bool IsInvocationOfContractUnused(SyntaxNodeAnalysisContext context, StatementSyntax statement, out string invocationArgumentName)
+    {
+        if (statement is not ExpressionStatementSyntax ExpressionStatement)
+        {
+            Contract.Unused(out invocationArgumentName);
+            return false;
+        }
+
+        if (ExpressionStatement.Expression is not InvocationExpressionSyntax InvocationExpression)
+        {
+            Contract.Unused(out invocationArgumentName);
+            return false;
+        }
+
+        if (!IsInvocationOfContractUnused(context, InvocationExpression, out invocationArgumentName))
+            return false;
+
+        return true;
+    }
+
+    /// <summary>
+    /// Checks whether an invocation expression is a call to Contract.Unused().
+    /// </summary>
+    /// <param name="context">The context.</param>
+    /// <param name="invocationExpression">The expression to check.</param>
+    /// <param name="invocationArgumentName">The name of the out argument upon return.</param>
+    public static bool IsInvocationOfContractUnused(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax invocationExpression, out string invocationArgumentName)
+    {
+        if (invocationExpression.Expression is not MemberAccessExpressionSyntax MemberAccessExpression)
+        {
+            Contract.Unused(out invocationArgumentName);
+            return false;
+        }
+
+        if (MemberAccessExpression.Expression is not IdentifierNameSyntax IdentifierName)
+        {
+            Contract.Unused(out invocationArgumentName);
+            return false;
+        }
+
+        SymbolInfo ClassSymbolInfo = context.SemanticModel.GetSymbolInfo(IdentifierName);
+        if (ClassSymbolInfo.Symbol is not ITypeSymbol ClassSymbol)
+        {
+            Contract.Unused(out invocationArgumentName);
+            return false;
+        }
+
+        ITypeSymbol ContractTypeSymbol = Contract.AssertNotNull(context.Compilation.GetTypeByMetadataName(typeof(Contract).FullName));
+        if (!SymbolEqualityComparer.Default.Equals(ClassSymbol, ContractTypeSymbol))
+        {
+            Contract.Unused(out invocationArgumentName);
+            return false;
+        }
+
+        SymbolInfo NameSymbolInfo = context.SemanticModel.GetSymbolInfo(MemberAccessExpression.Name);
+        if (NameSymbolInfo.Symbol is not ISymbol NameSymbol)
+        {
+            Contract.Unused(out invocationArgumentName);
+            return false;
+        }
+
+        ISymbol UnusedMethodSymbol = ContractTypeSymbol.GetMembers().First(member => member.Name == "Unused");
+        if (!SymbolEqualityComparer.Default.Equals(ClassSymbol, ContractTypeSymbol))
+        {
+            Contract.Unused(out invocationArgumentName);
+            return false;
+        }
+
+        if (invocationExpression.ArgumentList.Arguments.Count != 1)
+        {
+            Contract.Unused(out invocationArgumentName);
+            return false;
+        }
+
+        ArgumentSyntax Argument = invocationExpression.ArgumentList.Arguments[0];
+
+        if (!Argument.RefKindKeyword.IsKind(SyntaxKind.OutKeyword))
+        {
+            Contract.Unused(out invocationArgumentName);
+            return false;
+        }
+
+        if (Argument.Expression is not IdentifierNameSyntax ArgumentIdentifierName)
+        {
+            Contract.Unused(out invocationArgumentName);
+            return false;
+        }
+
+        invocationArgumentName = ArgumentIdentifierName.Identifier.Text;
+        return true;
+    }
+
+    /// <summary>
+    /// Checks whether a statement is the last one in a method.
+    /// </summary>
+    /// <param name="statement">The statement to check.</param>
+    public static bool IsLastStementOfMethod(StatementSyntax statement)
+    {
+        return false;
+    }
 }
