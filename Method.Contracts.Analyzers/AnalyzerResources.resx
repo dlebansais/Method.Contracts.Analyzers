@@ -326,11 +326,23 @@
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="MCA1015AnalyzerMessageFormat" xml:space="preserve">
-    <value>Set parameter {0} as unused before return</value>
+    <value>Set parameter '{0}' as unused before return</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
   <data name="MCA1015AnalyzerTitle" xml:space="preserve">
     <value>Set parameter as unused before return</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
+  <data name="MCA1016AnalyzerDescription" xml:space="preserve">
+    <value>Only use Contract.Unused with parameters.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1016AnalyzerMessageFormat" xml:space="preserve">
+    <value>'{0}' is not a parameter, only use Contract.Unused with parameters</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1016AnalyzerTitle" xml:space="preserve">
+    <value>Only use Contract.Unused with parameters</value>
     <comment>The title of the diagnostic.</comment>
   </data>
 </root>

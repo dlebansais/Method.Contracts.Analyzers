@@ -448,7 +448,7 @@ namespace Contracts.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Set parameter {0} as unused before return.
+        ///   Looks up a localized string similar to Set parameter &apos;{0}&apos; as unused before return.
         /// </summary>
         internal static string MCA1015AnalyzerMessageFormat {
             get {
@@ -462,6 +462,33 @@ namespace Contracts.Analyzers {
         internal static string MCA1015AnalyzerTitle {
             get {
                 return ResourceManager.GetString("MCA1015AnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only use Contract.Unused with parameters..
+        /// </summary>
+        internal static string MCA1016AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1016AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; is not a parameter, only use Contract.Unused with parameters.
+        /// </summary>
+        internal static string MCA1016AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1016AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only use Contract.Unused with parameters.
+        /// </summary>
+        internal static string MCA1016AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1016AnalyzerTitle", resourceCulture);
             }
         }
         

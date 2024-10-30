@@ -23,7 +23,7 @@ internal class ContractUnusedInvocationAssertion : IAnalysisAssertion
     /// <summary>
     /// Gets the argument in the call to Contract.Unused.
     /// </summary>
-    public string? ArgumentName { get; private set; }
+    public IdentifierNameSyntax? ArgumentIdentifierName { get; private set; }
 
     /// <inheritdoc cref="IAnalysisAssertion.IsTrue(SyntaxNodeAnalysisContext)" />
     public bool IsTrue(SyntaxNodeAnalysisContext context)
@@ -33,11 +33,11 @@ internal class ContractUnusedInvocationAssertion : IAnalysisAssertion
         if (InvocationExpression.Parent is not ExpressionStatementSyntax ExpressionStatement)
             return false;
 
-        if (!AnalyzerTools.IsInvocationOfContractUnused(context, ExpressionStatement, out string InvocationArgumentName))
+        if (!AnalyzerTools.IsInvocationOfContractUnused(context, ExpressionStatement, out IdentifierNameSyntax IdentifierName))
             return false;
 
         InvocationStatement = ExpressionStatement;
-        ArgumentName = InvocationArgumentName;
+        ArgumentIdentifierName = IdentifierName;
 
         return true;
     }

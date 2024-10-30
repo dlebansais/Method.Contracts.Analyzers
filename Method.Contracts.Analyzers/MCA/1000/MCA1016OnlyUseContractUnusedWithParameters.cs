@@ -1,6 +1,5 @@
 ﻿namespace Contracts.Analyzers;
 
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -9,19 +8,19 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
-/// Analyzer for rule MCA1015: Set parameter as unused before return.
+/// Analyzer for rule MCA1016: Only use Contract.Unused with parameters.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MCA1015SetParameterAsUnusedBeforeReturn : DiagnosticAnalyzer
+public class MCA1016OnlyUseContractUnusedWithParameters : DiagnosticAnalyzer
 {
     /// <summary>
     /// Diagnostic ID for this rule.
     /// </summary>
-    public const string DiagnosticId = "MCA1015";
+    public const string DiagnosticId = "MCA1016";
 
-    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(AnalyzerResources.MCA1015AnalyzerTitle), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
-    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(AnalyzerResources.MCA1015AnalyzerMessageFormat), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
-    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(AnalyzerResources.MCA1015AnalyzerDescription), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(AnalyzerResources.MCA1016AnalyzerTitle), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(AnalyzerResources.MCA1016AnalyzerMessageFormat), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(AnalyzerResources.MCA1016AnalyzerDescription), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
     private const string Category = "Usage";
 
     private static readonly DiagnosticDescriptor Rule = new(DiagnosticId,
@@ -67,14 +66,11 @@ public class MCA1015SetParameterAsUnusedBeforeReturn : DiagnosticAnalyzer
         Contract.Assert(analysisAssertions.Length == 1);
         ContractUnusedInvocationAssertion Assertion = Contract.AssertNotNull(analysisAssertions.First() as ContractUnusedInvocationAssertion);
         IdentifierNameSyntax ArgumentIdentifierName = Contract.AssertNotNull(Assertion.ArgumentIdentifierName);
-        StatementSyntax InvocationStatement = Contract.AssertNotNull(Assertion.InvocationStatement);
         string ArgumentName = ArgumentIdentifierName.Identifier.Text;
 
-        List<StatementSyntax> RemainingStatements = AnalyzerTools.FindSubsequentStatements(InvocationStatement);
-        bool IsFollowedByOtherStatement = RemainingStatements.Any(statement => !AnalyzerTools.IsInvocationOfContractUnused(context, statement, out _));
-
-        // No diagnostic if the statement is only followed by other invocations of Contract.Unused() or a return.
-        if (!IsFollowedByOtherStatement)
+        // No diagnostic if the argument is a parameter.
+        SymbolInfo ParameterSymbolInfo = context.SemanticModel.GetSymbolInfo(ArgumentIdentifierName);
+        if (ParameterSymbolInfo.Symbol is IParameterSymbol)
             return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), ArgumentName));
