@@ -67,29 +67,14 @@ public class MCA1015SetParameterAsUnusedBeforeReturn : DiagnosticAnalyzer
         // If we reached this step, there is a list of remaining statements.
         Contract.Assert(analysisAssertions.Length == 1);
         ContractUnusedInvocationAssertion Assertion = Contract.AssertNotNull(analysisAssertions.First() as ContractUnusedInvocationAssertion);
-        List<StatementSyntax> RemainingStatements = Contract.AssertNotNull(Assertion.RemainingStatements);
         string ParameterName = Contract.AssertNotNull(Assertion.ArgumentName);
-        StatementSyntax LastStatement = Contract.AssertNotNull(Assertion.InvocationStatement);
-        bool IsFollowedByOtherStatement = false;
+        StatementSyntax InvocationStatement = Contract.AssertNotNull(Assertion.InvocationStatement);
 
-        foreach (StatementSyntax statement in RemainingStatements)
-        {
-            // Tolerate other invocations of Contract.Unused().
-            if (AnalyzerTools.IsInvocationOfContractUnused(context, statement, out _))
-            {
-                LastStatement = statement;
-                continue;
-            }
+        List<StatementSyntax> RemainingStatements = AnalyzerTools.FindSubsequentStatements(InvocationStatement);
+        bool IsFollowedByOtherStatement = RemainingStatements.Any(statement => !AnalyzerTools.IsInvocationOfContractUnused(context, statement, out _));
 
-            // No diagnostic if we reach a return statement.
-            if (statement is ReturnStatementSyntax)
-                return;
-
-            IsFollowedByOtherStatement = true;
-        }
-
-        // The return can be implicit for the last statement of a method.
-        if (!IsFollowedByOtherStatement && AnalyzerTools.IsLastStementOfMethod(LastStatement))
+        // No diagnostic if the statement is only followed by other invocations of Contract.Unused() or a return.
+        if (!IsFollowedByOtherStatement)
             return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), ParameterName));

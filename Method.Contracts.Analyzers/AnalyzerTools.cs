@@ -1,6 +1,7 @@
 ﻿namespace Contracts.Analyzers;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Contracts.Analyzers.Helper;
 using Microsoft.CodeAnalysis;
@@ -179,13 +180,7 @@ internal static class AnalyzerTools
             return false;
         }
 
-        if (MemberAccessExpression.Expression is not IdentifierNameSyntax IdentifierName)
-        {
-            Contract.Unused(out invocationArgumentName);
-            return false;
-        }
-
-        SymbolInfo ClassSymbolInfo = context.SemanticModel.GetSymbolInfo(IdentifierName);
+        SymbolInfo ClassSymbolInfo = context.SemanticModel.GetSymbolInfo(MemberAccessExpression.Expression);
         if (ClassSymbolInfo.Symbol is not ITypeSymbol ClassSymbol)
         {
             Contract.Unused(out invocationArgumentName);
@@ -207,25 +202,16 @@ internal static class AnalyzerTools
         }
 
         ISymbol UnusedMethodSymbol = ContractTypeSymbol.GetMembers().First(member => member.Name == "Unused");
-        if (!SymbolEqualityComparer.Default.Equals(ClassSymbol, ContractTypeSymbol))
+        if (!SymbolEqualityComparer.Default.Equals(NameSymbol.OriginalDefinition, UnusedMethodSymbol))
         {
             Contract.Unused(out invocationArgumentName);
             return false;
         }
 
-        if (invocationExpression.ArgumentList.Arguments.Count != 1)
-        {
-            Contract.Unused(out invocationArgumentName);
-            return false;
-        }
-
+        // If NameSymbol is the right symbol, there is exactly one argument and it's 'out' something.
+        Contract.Assert(invocationExpression.ArgumentList.Arguments.Count == 1);
         ArgumentSyntax Argument = invocationExpression.ArgumentList.Arguments[0];
-
-        if (!Argument.RefKindKeyword.IsKind(SyntaxKind.OutKeyword))
-        {
-            Contract.Unused(out invocationArgumentName);
-            return false;
-        }
+        Contract.Assert(Argument.RefKindKeyword.IsKind(SyntaxKind.OutKeyword));
 
         if (Argument.Expression is not IdentifierNameSyntax ArgumentIdentifierName)
         {
@@ -238,11 +224,105 @@ internal static class AnalyzerTools
     }
 
     /// <summary>
-    /// Checks whether a statement is the last one in a method.
+    /// Gets the list of statements a statement is part of.
     /// </summary>
-    /// <param name="statement">The statement to check.</param>
-    public static bool IsLastStementOfMethod(StatementSyntax statement)
+    /// <param name="statement">The statement.</param>
+    /// <param name="parentStatements">A list of other statements next to <paramref name="statement"/>.</param>
+    /// <param name="parentStatement">The parent statement.</param>
+    /// <returns><see langword="true"/> if there is a parent statement, otherwise, <see langword="false"/>.</returns>
+    public static bool GetStatementParentList(StatementSyntax statement, out List<StatementSyntax> parentStatements, out StatementSyntax parentStatement)
     {
+        StatementSyntax? Parent;
+
+        if (statement.Parent is BlockSyntax Block)
+        {
+            parentStatements = new List<StatementSyntax>(Block.Statements);
+
+            if (Block.Parent is CatchClauseSyntax CatchClause)
+            {
+                Parent = CatchClause.Parent as TryStatementSyntax;
+            }
+            else if (Block.Parent is FinallyClauseSyntax FinallyClause)
+            {
+                Parent = FinallyClause.Parent as TryStatementSyntax;
+            }
+            else
+            {
+                Parent = Block.Parent as StatementSyntax;
+            }
+        }
+        else if (statement.Parent is SwitchSectionSyntax SwitchSection)
+        {
+            parentStatements = new List<StatementSyntax>(SwitchSection.Statements);
+            Parent = SwitchSection.Parent as SwitchStatementSyntax;
+        }
+        else if (statement.Parent is ElseClauseSyntax ElseClause)
+        {
+            parentStatements = new List<StatementSyntax>() { statement };
+            Parent = ElseClause.Parent as IfStatementSyntax;
+        }
+        else
+        {
+            parentStatements = new List<StatementSyntax>() { statement };
+
+            // If the parent is a statement we can continue, otherwise it's some method declaration.
+            Parent = statement.Parent as StatementSyntax;
+        }
+
+        if (Parent is not null)
+        {
+            parentStatement = Parent;
+            return true;
+        }
+        else
+        {
+            Contract.Unused(out parentStatement);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Gets all statements that can follow the provided statement until the end of the method or a return statement.
+    /// </summary>
+    /// <param name="statement">The statement.</param>
+    public static List<StatementSyntax> FindSubsequentStatements(StatementSyntax statement)
+    {
+        List<StatementSyntax> RemainingStatements = new();
+        StatementSyntax CurrentStatement = statement;
+        List<StatementSyntax> ParentStatements;
+        StatementSyntax ParentStatement;
+
+        for (; ;)
+        {
+            bool HasParentStatement = GetStatementParentList(CurrentStatement, out ParentStatements, out ParentStatement);
+
+            int StatementIndex = ParentStatements.IndexOf(CurrentStatement);
+            Contract.Assert(StatementIndex >= 0);
+            Contract.Assert(StatementIndex < ParentStatements.Count);
+
+            bool HasReturn = AddSubsequentStatements(RemainingStatements, ParentStatements, StatementIndex + 1);
+
+            if (!HasParentStatement || HasReturn)
+                break;
+
+            CurrentStatement = ParentStatement;
+        }
+
+        return RemainingStatements;
+    }
+
+    private static bool AddSubsequentStatements(List<StatementSyntax> remainingStatements, List<StatementSyntax> parentStatements, int startIndex)
+    {
+        for (int i = startIndex; i < parentStatements.Count; i++)
+        {
+            StatementSyntax NextStatement = parentStatements[i];
+
+            if (NextStatement is ReturnStatementSyntax)
+                return true;
+
+            remainingStatements.Add(NextStatement);
+        }
+
         return false;
     }
 }

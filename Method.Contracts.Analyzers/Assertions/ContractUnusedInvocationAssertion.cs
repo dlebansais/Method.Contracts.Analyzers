@@ -25,11 +25,6 @@ internal class ContractUnusedInvocationAssertion : IAnalysisAssertion
     /// </summary>
     public string? ArgumentName { get; private set; }
 
-    /// <summary>
-    /// Gets the list of remaining statements if true.
-    /// </summary>
-    public List<StatementSyntax> RemainingStatements { get; } = new();
-
     /// <inheritdoc cref="IAnalysisAssertion.IsTrue(SyntaxNodeAnalysisContext)" />
     public bool IsTrue(SyntaxNodeAnalysisContext context)
     {
@@ -41,24 +36,8 @@ internal class ContractUnusedInvocationAssertion : IAnalysisAssertion
         if (!AnalyzerTools.IsInvocationOfContractUnused(context, ExpressionStatement, out string InvocationArgumentName))
             return false;
 
-        SyntaxList<StatementSyntax> ParentList;
-
-        if (ExpressionStatement.Parent is BlockSyntax Block)
-            ParentList = Block.Statements;
-        else if (ExpressionStatement.Parent is SwitchSectionSyntax SwitchSection)
-            ParentList = SwitchSection.Statements;
-        else
-            return false;
-
         InvocationStatement = ExpressionStatement;
         ArgumentName = InvocationArgumentName;
-
-        int StatementIndex = ParentList.IndexOf(ExpressionStatement);
-        Contract.Assert(StatementIndex >= 0);
-        Contract.Assert(StatementIndex < ParentList.Count);
-
-        for (int i = StatementIndex + 1; i < ParentList.Count; i++)
-            RemainingStatements.Add(ParentList[i]);
 
         return true;
     }
