@@ -315,16 +315,16 @@ internal partial class Program
     [TestMethod]
     public async Task InvalidInvocation1_NoDiagnostic()
     {
-        var DescriptorCS7036 = new DiagnosticDescriptor(
-            "CS7036",
+        var DescriptorCS1501 = new DiagnosticDescriptor(
+            "CS1501",
             "title",
-            "There is no argument given that corresponds to the required parameter 'result' of 'Contract.Unused<T>(out T)'",
+            "No overload for method 'Unused' takes 0 arguments",
             "description",
             DiagnosticSeverity.Error,
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS7036);
+        var Expected = new DiagnosticResult(DescriptorCS1501);
         Expected = Expected.WithLocation("/0/Test0.cs", 18, 22);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -351,17 +351,17 @@ internal partial class Program
     [TestMethod]
     public async Task InvalidInvocation2_NoDiagnostic()
     {
-        var DescriptorCS1620 = new DiagnosticDescriptor(
-            "CS1620",
+        var DescriptorCS0453 = new DiagnosticDescriptor(
+            "CS0453",
             "title",
-            "Argument 1 must be passed with the 'out' keyword",
+            "The type 'string' must be a non-nullable value type in order to use it as parameter 'T' in the generic type or method 'Contract.Unused<T>(out T, T?)'",
             "description",
             DiagnosticSeverity.Error,
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS1620);
-        Expected = Expected.WithLocation("/0/Test0.cs", 18, 29);
+        var Expected = new DiagnosticResult(DescriptorCS0453);
+        Expected = Expected.WithLocation("/0/Test0.cs", 18, 22);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
