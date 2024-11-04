@@ -9,7 +9,7 @@ using Contracts;
 
 partial class Program
 {
-    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.7.0.21")]
+    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.7.1.22")]
     public static void HelloFrom(string text1, object? text2, out string textPlus)
     {
         Contract.RequireNotNull(text1, out string Text1);
