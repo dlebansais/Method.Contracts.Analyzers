@@ -586,4 +586,100 @@ internal partial class Program
 }
 ").ConfigureAwait(false);
     }
+
+    [TestMethod]
+    public async Task InvocationClassOverride_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    private static int Foo(out string text)
+    {
+        Contract.Unused(out text);
+        return -1;
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task InvocationStructOverride_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    private static int Foo(out int n)
+    {
+        Contract.Unused(out n);
+        return -1;
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task InvocationNullableOverride_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    private static int Foo(out int? p)
+    {
+        Contract.Unused(out p);
+        return -1;
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task InvocationMultipleOverride1_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    private static int Foo(out string text, out int n, out int? p)
+    {
+        Contract.Unused(out text);
+        Contract.Unused(out n);
+        Contract.Unused(out p);
+        return -1;
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task InvocationMultipleOverride2_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    private static int Foo(out string text, out int n, out int? p)
+    {
+        Contract.Unused(out n);
+        Contract.Unused(out p);
+        Contract.Unused(out text);
+        return -1;
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task InvocationMultipleOverride3_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    private static int Foo(out string text, out int n, out int? p)
+    {
+        Contract.Unused(out p);
+        Contract.Unused(out text);
+        Contract.Unused(out n);
+        return -1;
+    }
+}
+").ConfigureAwait(false);
+    }
 }

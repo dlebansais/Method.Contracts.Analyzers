@@ -201,8 +201,9 @@ internal static class AnalyzerTools
             return false;
         }
 
-        ISymbol UnusedMethodSymbol = ContractTypeSymbol.GetMembers().First(member => member.Name == "Unused");
-        if (!SymbolEqualityComparer.Default.Equals(NameSymbol.OriginalDefinition, UnusedMethodSymbol))
+        IEnumerable<ISymbol> UnusedMethodSymbols = ContractTypeSymbol.GetMembers().Where(member => member.Name == "Unused");
+        bool IsUnusedMethodSymbol = UnusedMethodSymbols.Any(symbol => SymbolEqualityComparer.Default.Equals(NameSymbol.OriginalDefinition, symbol));
+        if (!IsUnusedMethodSymbol)
         {
             Contract.Unused(out argumentIdentifierName);
             return false;
