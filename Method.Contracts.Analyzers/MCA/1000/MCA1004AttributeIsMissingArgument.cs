@@ -1,7 +1,6 @@
 ﻿namespace Contracts.Analyzers;
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using Contracts.Analyzers.Helper;
 using Microsoft.CodeAnalysis;
