@@ -3,13 +3,13 @@
 extern alias Analyzers;
 
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1006RequireNotNullAttributeArgumentMustBeValidParameterName>;
 
-[TestClass]
-public partial class MCA1006UnitTests
+[TestFixture]
+internal partial class MCA1006UnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task InvalidParameterName_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -24,7 +24,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task OneArgument_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -40,7 +40,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task OneArgumentNullable_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -56,7 +56,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidArgument_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -72,7 +72,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task MultipleArguments_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -88,7 +88,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task MultipleArgumentsOneBad_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -104,7 +104,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task OneNameofArgument_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -120,7 +120,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task MultipleNameofArguments_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -136,7 +136,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task MixedNameofArguments_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -152,7 +152,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task ArgumentWithAlias_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -168,7 +168,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task ArgumentWithType_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -184,7 +184,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task ArgumentWithName_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -200,7 +200,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task ArgumentWithAliasTypeAndName_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -216,7 +216,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task BadArgumentWithAlias_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -232,7 +232,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task BadArgumentWithType_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -248,7 +248,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task BadArgumentWithName_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -264,7 +264,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task BadArgumentWithAliasTypeAndName_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -280,7 +280,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task OtherAttribute_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.NoContract, @"

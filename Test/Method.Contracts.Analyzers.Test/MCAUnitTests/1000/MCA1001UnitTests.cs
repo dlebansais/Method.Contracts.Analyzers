@@ -5,13 +5,13 @@ extern alias Analyzers;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1001VerifiedMethodMustBePrivate>;
 
-[TestClass]
-public partial class MCA1001UnitTests
+[TestFixture]
+internal partial class MCA1001UnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task Protected_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -26,7 +26,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task Private_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -41,7 +41,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task ProtectedNullable_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -56,7 +56,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task Public_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -71,7 +71,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task Internal_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -86,7 +86,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task DifferentAttribute_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.NoContract, @"
@@ -109,10 +109,10 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task UndefinedAttribute_NoDiagnostic()
     {
-        var DescriptorCS0116 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS0116 = new(
             "CS0246",
             "title",
             "The type or namespace name 'Access' could not be found (are you missing a using directive or an assembly reference?)",
@@ -121,10 +121,10 @@ internal partial class Program
             true
             );
 
-        var Expected1 = new DiagnosticResult(DescriptorCS0116);
+        DiagnosticResult Expected1 = new(DescriptorCS0116);
         Expected1 = Expected1.WithLocation("/0/Test0.cs", 7, 6);
 
-        var DescriptorCS0246 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS0246 = new(
             "CS0246",
             "title",
             "The type or namespace name 'AccessAttribute' could not be found (are you missing a using directive or an assembly reference?)",
@@ -133,7 +133,7 @@ internal partial class Program
             true
             );
 
-        var Expected2 = new DiagnosticResult(DescriptorCS0246);
+        DiagnosticResult Expected2 = new(DescriptorCS0246);
         Expected2 = Expected2.WithLocation("/0/Test0.cs", 7, 6);
 
         await VerifyCS.VerifyAnalyzerAsync(Prologs.NoContract, @"

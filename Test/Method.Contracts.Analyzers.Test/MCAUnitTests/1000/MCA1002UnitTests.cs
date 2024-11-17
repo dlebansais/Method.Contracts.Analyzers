@@ -5,13 +5,13 @@ extern alias Analyzers;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1002VerifiedMethodMustBeWithinType>;
 
-[TestClass]
-public partial class MCA1002UnitTests
+[TestFixture]
+internal partial class MCA1002UnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task NoTypeWithin_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -26,7 +26,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task WithinClass_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -43,7 +43,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task WithinStruct_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -60,7 +60,7 @@ internal partial struct Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task WithinRecord_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -77,7 +77,7 @@ internal partial record Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task NoTypeWithinNullable_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -92,10 +92,10 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task NoWithin_Diagnostic()
     {
-        var DescriptorCS0116 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS0116 = new(
             "CS0116",
             "title",
             "A namespace cannot directly contain members such as fields, methods or statements",
@@ -104,7 +104,7 @@ internal partial class Program
             true
             );
 
-        var DescriptorMCA1002 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorMCA1002 = new(
             Analyzers.Contracts.Analyzers.MCA1002VerifiedMethodMustBeWithinType.DiagnosticId,
             "title",
             "'FooVerified' must be within type",
@@ -113,13 +113,13 @@ internal partial class Program
             true
             );
 
-        var Expected1 = new DiagnosticResult(DescriptorCS0116);
+        DiagnosticResult Expected1 = new(DescriptorCS0116);
         Expected1 = Expected1.WithLocation("/0/Test0.cs", 8, 13);
 
-        var Expected2 = new DiagnosticResult(DescriptorMCA1002);
+        DiagnosticResult Expected2 = new(DescriptorMCA1002);
         Expected2 = Expected2.WithLocation("/0/Test0.cs", 12, 1);
 
-        var Expected3 = new DiagnosticResult(DescriptorCS0116);
+        DiagnosticResult Expected3 = new(DescriptorCS0116);
         Expected3 = Expected3.WithLocation("/0/Test0.cs", 13, 6);
 
         await VerifyCS.VerifyAnalyzerAsync(@"

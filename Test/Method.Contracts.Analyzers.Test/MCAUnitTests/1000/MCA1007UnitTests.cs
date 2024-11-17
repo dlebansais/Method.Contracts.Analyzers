@@ -5,13 +5,13 @@ extern alias Analyzers;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1007RequireNotNullAttributeHasTooManyArguments>;
 
-[TestClass]
-public partial class MCA1007UnitTests
+[TestFixture]
+internal partial class MCA1007UnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task InvalidParameterNameWithAlias_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -26,7 +26,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task NoAlias_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -42,7 +42,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidParameterNameWithType_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -58,7 +58,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidParameterNameWithName_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -74,7 +74,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidParameterNameWithAliasTypeAndName_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -90,10 +90,10 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidLastParameterNameWithAlias_Diagnostic()
     {
-        var DescriptorCS1016 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS1016 = new(
             "CS1016",
             "title",
             "Named attribute argument expected",
@@ -102,7 +102,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS1016);
+        DiagnosticResult Expected = new(DescriptorCS1016);
         Expected = Expected.WithLocation("/0/Test0.cs", 9, 49);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -118,10 +118,10 @@ internal partial class Program
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidLastParameterNameWithType_Diagnostic()
     {
-        var DescriptorCS1016 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS1016 = new(
             "CS1016",
             "title",
             "Named attribute argument expected",
@@ -130,7 +130,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS1016);
+        DiagnosticResult Expected = new(DescriptorCS1016);
         Expected = Expected.WithLocation("/0/Test0.cs", 9, 46);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -146,10 +146,10 @@ internal partial class Program
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidLastParameterNameWithName_Diagnostic()
     {
-        var DescriptorCS1016 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS1016 = new(
             "CS1016",
             "title",
             "Named attribute argument expected",
@@ -158,7 +158,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS1016);
+        DiagnosticResult Expected = new(DescriptorCS1016);
         Expected = Expected.WithLocation("/0/Test0.cs", 9, 47);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -174,10 +174,10 @@ internal partial class Program
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidLastParameterNameWithAliasTypeAndName_Diagnostic()
     {
-        var DescriptorCS1016 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS1016 = new(
             "CS1016",
             "title",
             "Named attribute argument expected",
@@ -186,7 +186,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS1016);
+        DiagnosticResult Expected = new(DescriptorCS1016);
         Expected = Expected.WithLocation("/0/Test0.cs", 9, 77);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -202,7 +202,7 @@ internal partial class Program
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task OtherAttribute_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.NoContract, @"

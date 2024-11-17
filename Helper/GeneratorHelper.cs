@@ -39,8 +39,10 @@ internal static class GeneratorHelper
         string[] Lines = usings.Split('\n');
 
         foreach (string Line in Lines)
+        {
             if (Line == "using global::System;" || StringStartsWith(Line, "using global::System."))
                 return true;
+        }
 
         return false;
     }
@@ -55,12 +57,14 @@ internal static class GeneratorHelper
         if (usings == string.Empty)
             return string.Empty;
 
-        List<string> Namespaces = new();
+        List<string> Namespaces = [];
         string[] Lines = usings.Split('\n');
 
         foreach (string Line in Lines)
+        {
             if (IsUsingDirective(Line, out string Directive))
                 Namespaces.Add(Directive);
+        }
 
         Namespaces.Sort(SortWithSystemFirst);
         Namespaces = Namespaces.Distinct().ToList();
@@ -82,7 +86,7 @@ internal static class GeneratorHelper
             string RawNamespace = TrimmedLine.Substring(UsingDirectivePrefix.Length, TrimmedLine.Length - UsingDirectivePrefix.Length - 1);
             string[] Names = RawNamespace.Split('.');
 
-            List<string> TrimmedNames = new();
+            List<string> TrimmedNames = [];
             foreach (string Name in Names)
                 TrimmedNames.Add(Name.Trim());
 
@@ -164,7 +168,7 @@ internal static class GeneratorHelper
     /// <param name="supportedAttributeTypes">The list of supported attributes.</param>
     public static List<AttributeSyntax> GetMethodSupportedAttributes(SyntaxNodeAnalysisContext? context, MethodDeclarationSyntax methodDeclaration, Collection<Type> supportedAttributeTypes)
     {
-        List<AttributeSyntax> Result = new();
+        List<AttributeSyntax> Result = [];
 
         for (int IndexList = 0; IndexList < methodDeclaration.AttributeLists.Count; IndexList++)
         {
@@ -177,7 +181,7 @@ internal static class GeneratorHelper
 
                 if (context is SyntaxNodeAnalysisContext AvailableContext)
                 {
-                    var SymbolInfo = AvailableContext.SemanticModel.GetSymbolInfo(Attribute);
+                    SymbolInfo SymbolInfo = AvailableContext.SemanticModel.GetSymbolInfo(Attribute);
                     if (SymbolInfo.Symbol is ISymbol AttributeSymbol)
                     {
                         ITypeSymbol AccessTypeSymbol = Contract.AssertNotNull(AvailableContext.Compilation.GetTypeByMetadataName(typeof(AccessAttribute).FullName));
@@ -188,7 +192,9 @@ internal static class GeneratorHelper
                         IsSameNamespaceAssembly &= SymbolEqualityComparer.Default.Equals(ContainingAssembly, AttributeSymbol.ContainingAssembly);
                     }
                     else
+                    {
                         IsSameNamespaceAssembly = false;
+                    }
                 }
 
                 if (IsSameNamespaceAssembly)

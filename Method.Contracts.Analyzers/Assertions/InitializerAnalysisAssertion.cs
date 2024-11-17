@@ -1,6 +1,5 @@
 ﻿namespace Contracts.Analyzers;
 
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -17,13 +16,13 @@ internal class InitializerAnalysisAssertion : IAnalysisAssertion
     /// <summary>
     /// Gets the list of initializers if the assertion is true.
     /// </summary>
-    public List<IMethodSymbol> InitializerMethodSymbols { get; } = new();
+    public List<IMethodSymbol> InitializerMethodSymbols { get; } = [];
 
     /// <inheritdoc cref="IAnalysisAssertion.IsTrue(SyntaxNodeAnalysisContext)" />
     public bool IsTrue(SyntaxNodeAnalysisContext context)
     {
         BaseObjectCreationExpressionSyntax ObjectCreationExpression = (BaseObjectCreationExpressionSyntax)context.Node;
-        var TypeInfo = context.SemanticModel.GetTypeInfo(ObjectCreationExpression);
+        TypeInfo TypeInfo = context.SemanticModel.GetTypeInfo(ObjectCreationExpression);
 
         if (TypeInfo.Type is IErrorTypeSymbol)
             return false;
@@ -90,12 +89,14 @@ internal class InitializerAnalysisAssertion : IAnalysisAssertion
         TypedConstant FirstArgument = Attribute.ConstructorArguments.First();
         string ArgumentValue = Contract.AssertNotNull(FirstArgument.Value as string);
 
-        List<IMethodSymbol> InitializerOverloads = new();
+        List<IMethodSymbol> InitializerOverloads = [];
         ImmutableArray<ISymbol> Members = ClassSymbol.GetMembers();
 
-        foreach (var Member in Members)
+        foreach (ISymbol Member in Members)
+        {
             if (Member is IMethodSymbol MethodSymbol && MethodSymbol.Name == ArgumentValue)
                 InitializerOverloads.Add(MethodSymbol);
+        }
 
         if (InitializerOverloads.Count == 0)
         {

@@ -16,13 +16,13 @@ public partial class ContractGenerator : IIncrementalGenerator
     /// <summary>
     /// Gets the list of supported attributes by their type.
     /// </summary>
-    public static Collection<Type> SupportedAttributeTypes { get; } = new()
-    {
+    public static Collection<Type> SupportedAttributeTypes { get; } =
+    [
         typeof(AccessAttribute),
         typeof(RequireNotNullAttribute),
         typeof(RequireAttribute),
         typeof(EnsureAttribute),
-    };
+    ];
 
     /// <summary>
     /// The namespace of the Method.Contracts assemblies.
@@ -37,7 +37,7 @@ public partial class ContractGenerator : IIncrementalGenerator
     /// <inheritdoc cref="IIncrementalGenerator.Initialize"/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var Settings = context.AnalyzerConfigOptionsProvider.SelectMany(ReadSettings);
+        IncrementalValuesProvider<GeneratorSettings> Settings = context.AnalyzerConfigOptionsProvider.SelectMany(ReadSettings);
 
         InitializePipeline<AccessAttribute>(context, Settings);
         InitializePipeline<RequireNotNullAttribute>(context, Settings);
@@ -48,7 +48,7 @@ public partial class ContractGenerator : IIncrementalGenerator
     private static void InitializePipeline<T>(IncrementalGeneratorInitializationContext context, IncrementalValuesProvider<GeneratorSettings> settings)
         where T : Attribute
     {
-        var pipeline = context.SyntaxProvider.ForAttributeWithMetadataName(
+        IncrementalValuesProvider<ContractModel> pipeline = context.SyntaxProvider.ForAttributeWithMetadataName(
             fullyQualifiedMetadataName: GetFullyQualifiedMetadataName<T>(),
             predicate: KeepNodeForPipeline<T>,
             transform: TransformContractAttributes);

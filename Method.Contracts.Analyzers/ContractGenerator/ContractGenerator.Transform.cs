@@ -93,7 +93,7 @@ public partial class ContractGenerator
 
         Contract.Assert(GeneratorHelper.StringEndsWith(SymbolName, VerifiedSuffix));
         Contract.Assert(SymbolName.Length > VerifiedSuffix.Length);
-        string ShortMethodName = SymbolName.Substring(0, SymbolName.Length - VerifiedSuffix.Length);
+        string ShortMethodName = SymbolName[..^VerifiedSuffix.Length];
 
         return new ContractModel(
             Namespace: Namespace,
@@ -105,7 +105,7 @@ public partial class ContractGenerator
             ShortMethodName: ShortMethodName,
             UniqueOverloadIdentifier: GetUniqueOverloadIdentifier(methodDeclaration),
             Documentation: string.Empty,
-            Attributes: new List<AttributeModel>(),
+            Attributes: [],
             GeneratedMethodDeclaration: string.Empty,
             IsAsync: false);
     }
@@ -136,12 +136,14 @@ public partial class ContractGenerator
 
         if (methodDeclaration.HasLeadingTrivia)
         {
-            var LeadingTrivia = methodDeclaration.GetLeadingTrivia();
+            SyntaxTriviaList LeadingTrivia = methodDeclaration.GetLeadingTrivia();
 
-            List<SyntaxTrivia> SupportedTrivias = new();
-            foreach (var trivia in LeadingTrivia)
+            List<SyntaxTrivia> SupportedTrivias = [];
+            foreach (SyntaxTrivia trivia in LeadingTrivia)
+            {
                 if (IsSupportedTrivia(trivia))
                     SupportedTrivias.Add(trivia);
+            }
 
             // Trim consecutive end of lines until there is only at most one at the beginning.
             bool HadEndOfLine = false;
@@ -161,19 +163,23 @@ public partial class ContractGenerator
             // Remove successive whitespace trivias.
             int i = 0;
             while (i + 1 < SupportedTrivias.Count)
+            {
                 if (SupportedTrivias[i].IsKind(SyntaxKind.WhitespaceTrivia) && SupportedTrivias[i + 1].IsKind(SyntaxKind.WhitespaceTrivia))
                     SupportedTrivias.RemoveAt(i);
                 else
                     i++;
+            }
 
             LeadingTrivia = SyntaxFactory.TriviaList(SupportedTrivias);
 
-            foreach (var Trivia in LeadingTrivia)
+            foreach (SyntaxTrivia Trivia in LeadingTrivia)
+            {
                 if (Trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia))
                 {
                     Documentation = LeadingTrivia.ToString().Trim('\r').Trim('\n').TrimEnd(' ');
                     break;
                 }
+            }
         }
 
         Dictionary<string, string> ParameterNameReplacementTable = GetParameterNameReplacementTable(model, methodDeclaration);
@@ -199,7 +205,7 @@ public partial class ContractGenerator
                trivia.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia);
     }
 
-    private static bool IsFirstTriviaWhitespace(IList<SyntaxTrivia> trivias)
+    private static bool IsFirstTriviaWhitespace(List<SyntaxTrivia> trivias)
     {
         // If we reach this method there is at least one end of line, therefore at least one trivia.
         Contract.Assert(trivias.Count > 0);
@@ -231,14 +237,16 @@ public partial class ContractGenerator
 
     private static Dictionary<string, string> GetParameterNameReplacementTable(ContractModel model, MethodDeclarationSyntax methodDeclaration)
     {
-        Dictionary<string, string> Result = new();
+        Dictionary<string, string> Result = [];
 
         ParameterListSyntax ParameterList = methodDeclaration.ParameterList;
         SeparatedSyntaxList<ParameterSyntax> Parameters = ParameterList.Parameters;
 
-        foreach (var Parameter in Parameters)
+        foreach (ParameterSyntax Parameter in Parameters)
+        {
             if (IsParameterNameReplaced(model, Parameter, out string ParameterName, out string ReplacementName))
                 Result.Add(ParameterName, ReplacementName);
+        }
 
         return Result;
     }
@@ -249,15 +257,17 @@ public partial class ContractGenerator
         replacementName = string.Empty;
 
         foreach (AttributeModel Attribute in model.Attributes)
+        {
             if (AttributeHasTypeOrName(Attribute, out parameterName, out _, out replacementName) && parameterName == parameter.Identifier.Text && replacementName != string.Empty)
                 return true;
+        }
 
         return false;
     }
 
     private static List<AttributeModel> GetModelContract(MethodDeclarationSyntax methodDeclaration)
     {
-        List<AttributeModel> Result = new();
+        List<AttributeModel> Result = [];
         List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMethodSupportedAttributes(context: null, methodDeclaration, SupportedAttributeTypes);
 
         Dictionary<string, Func<MethodDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, List<AttributeArgumentModel>>> AttributeTransformTable = new()
@@ -269,26 +279,28 @@ public partial class ContractGenerator
         };
 
         foreach (AttributeSyntax Attribute in MethodAttributes)
+        {
             if (Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
             {
                 string AttributeName = GeneratorHelper.ToAttributeName(Attribute);
                 IReadOnlyList<AttributeArgumentSyntax> AttributeArguments = AttributeArgumentList.Arguments;
 
                 Contract.Assert(AttributeTransformTable.ContainsKey(AttributeName));
-                var AttributeTransform = AttributeTransformTable[AttributeName];
+                Func<MethodDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, List<AttributeArgumentModel>> AttributeTransform = AttributeTransformTable[AttributeName];
                 List<AttributeArgumentModel> Arguments = AttributeTransform(methodDeclaration, AttributeArguments);
 
                 AttributeModel Model = new(AttributeName, Arguments);
 
                 Result.Add(Model);
             }
+        }
 
         return Result;
     }
 
     private static List<AttributeArgumentModel> TransformAccessAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        return TransformStringOnlyAttribute(methodDeclaration, attributeArguments);
+        return TransformStringOnlyAttribute(attributeArguments);
     }
 
     private static List<AttributeArgumentModel> TransformRequireNotNullAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
@@ -296,7 +308,7 @@ public partial class ContractGenerator
         if (IsRequireNotNullAttributeWithAliasTypeOrName(attributeArguments))
             return TransformRequireNotNullAttributeWithAlias(methodDeclaration, attributeArguments);
         else
-            return TransformRequireNotNullAttributeNoAlias(methodDeclaration, attributeArguments);
+            return TransformRequireNotNullAttributeNoAlias(attributeArguments);
     }
 
     private static List<AttributeArgumentModel> TransformRequireNotNullAttributeWithAlias(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
@@ -324,7 +336,7 @@ public partial class ContractGenerator
 
         for (int i = 1; i < attributeArguments.Count; i++)
         {
-            bool IsValidAttributeArgument = IsValidArgumentWithAliasTypeOrName(methodDeclaration, attributeArguments[i], ref Type, ref Name, ref AliasName);
+            bool IsValidAttributeArgument = IsValidArgumentWithAliasTypeOrName(attributeArguments[i], ref Type, ref Name, ref AliasName);
 
             // This was verified in IsValidRequireNotNullAttributeWithAlias().
             Contract.Assert(IsValidAttributeArgument);
@@ -333,7 +345,7 @@ public partial class ContractGenerator
         // This was verified in IsValidRequireNotNullAttributeWithAlias().
         Contract.Assert(Type != string.Empty || Name != string.Empty || AliasName != string.Empty);
 
-        List<AttributeArgumentModel> Result = new() { new AttributeArgumentModel(Name: string.Empty, Value: ParameterName) };
+        List<AttributeArgumentModel> Result = [new AttributeArgumentModel(Name: string.Empty, Value: ParameterName)];
 
         if (Type != string.Empty)
             Result.Add(new AttributeArgumentModel(Name: nameof(RequireNotNullAttribute.Type), Value: Type));
@@ -349,11 +361,11 @@ public partial class ContractGenerator
         return Result;
     }
 
-    private static List<AttributeArgumentModel> TransformRequireNotNullAttributeNoAlias(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static List<AttributeArgumentModel> TransformRequireNotNullAttributeNoAlias(IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        List<AttributeArgumentModel> Result = new();
+        List<AttributeArgumentModel> Result = [];
 
-        foreach (var AttributeArgument in attributeArguments)
+        foreach (AttributeArgumentSyntax AttributeArgument in attributeArguments)
         {
             // This was verified in IsValidRequireNotNullAttributeWithAlias().
             Contract.Assert(AttributeArgument.NameEquals is null);
@@ -371,23 +383,23 @@ public partial class ContractGenerator
 
     private static List<AttributeArgumentModel> TransformRequireAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        return TransformRequireOrEnsureAttribute(methodDeclaration, attributeArguments);
+        return TransformRequireOrEnsureAttribute(attributeArguments);
     }
 
     private static List<AttributeArgumentModel> TransformEnsureAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        return TransformRequireOrEnsureAttribute(methodDeclaration, attributeArguments);
+        return TransformRequireOrEnsureAttribute(attributeArguments);
     }
 
-    private static List<AttributeArgumentModel> TransformRequireOrEnsureAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static List<AttributeArgumentModel> TransformRequireOrEnsureAttribute(IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
         if (IsRequireOrEnsureAttributeWithDebugOnly(attributeArguments))
-            return TransformRequireOrEnsureAttributeWithDebugOnly(methodDeclaration, attributeArguments);
+            return TransformRequireOrEnsureAttributeWithDebugOnly(attributeArguments);
         else
-            return TransformStringOnlyAttribute(methodDeclaration, attributeArguments);
+            return TransformStringOnlyAttribute(attributeArguments);
     }
 
-    private static List<AttributeArgumentModel> TransformRequireOrEnsureAttributeWithDebugOnly(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static List<AttributeArgumentModel> TransformRequireOrEnsureAttributeWithDebugOnly(IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
         // This was verified in IsRequireOrEnsureAttributeWithDebugOnly().
         Contract.Assert(attributeArguments.Count > 0);
@@ -405,7 +417,7 @@ public partial class ContractGenerator
 
         for (int i = 1; i < attributeArguments.Count; i++)
         {
-            bool IsValidAttributeArgument = IsValidDebugOnlyArgument(methodDeclaration, attributeArguments[i], ref IsDebugOnly);
+            bool IsValidAttributeArgument = IsValidDebugOnlyArgument(attributeArguments[i], ref IsDebugOnly);
 
             // This was verified in IsValidRequireOrEnsureAttributeWithDebugOnly().
             Contract.Assert(IsValidAttributeArgument);
@@ -414,21 +426,21 @@ public partial class ContractGenerator
         // This was verified in IsValidRequireNotNullAttributeWithAlias().
         Contract.Assert(IsDebugOnly.HasValue);
 
-        List<AttributeArgumentModel> Result = new()
-        {
+        List<AttributeArgumentModel> Result =
+        [
             new AttributeArgumentModel(Name: string.Empty, Value: Expression),
             new AttributeArgumentModel(Name: nameof(RequireAttribute.DebugOnly), Value: IsDebugOnly == true ? "true" : "false"),
-        };
+        ];
 
         return Result;
     }
 
-    private static List<AttributeArgumentModel> TransformStringOnlyAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static List<AttributeArgumentModel> TransformStringOnlyAttribute(IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
         bool IsValid = IsValidStringOnlyAttribute(attributeArguments, out Collection<string> ArgumentValues, out _);
         Contract.Assert(IsValid);
 
-        List<AttributeArgumentModel> Result = new();
+        List<AttributeArgumentModel> Result = [];
         foreach (string ArgumentValue in ArgumentValues)
             Result.Add(new AttributeArgumentModel(Name: string.Empty, Value: ArgumentValue));
 

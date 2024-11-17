@@ -1,14 +1,7 @@
 ﻿namespace Contracts.Analyzers;
 
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Linq;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis.Operations;
 
 /// <summary>
 /// Represents an analysis assertion that checks if an invocation is a call to Contract.Unused.

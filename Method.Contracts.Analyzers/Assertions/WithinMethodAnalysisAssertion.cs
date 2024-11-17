@@ -1,6 +1,5 @@
 ﻿namespace Contracts.Analyzers;
 
-using System;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 

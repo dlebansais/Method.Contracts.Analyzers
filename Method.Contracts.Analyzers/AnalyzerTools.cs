@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Contracts.Analyzers.Helper;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -57,7 +56,7 @@ internal static class AnalyzerTools
 
     private static bool IsFeatureSupportedInThisVersion(SyntaxNodeAnalysisContext context, LanguageVersion minimumLanguageVersion)
     {
-        var ParseOptions = (CSharpParseOptions)context.SemanticModel.SyntaxTree.Options;
+        CSharpParseOptions ParseOptions = (CSharpParseOptions)context.SemanticModel.SyntaxTree.Options;
         return ParseOptions.LanguageVersion >= minimumLanguageVersion;
     }
 
@@ -112,7 +111,7 @@ internal static class AnalyzerTools
         // There must be a parent attribute to any argument except in the most pathological cases.
         Contract.RequireNotNull(attribute, out AttributeSyntax Attribute);
 
-        var TypeInfo = context.SemanticModel.GetTypeInfo(Attribute);
+        TypeInfo TypeInfo = context.SemanticModel.GetTypeInfo(Attribute);
         ITypeSymbol? TypeSymbol = TypeInfo.Type;
 
         return IsExpectedAttribute(context, attributeType, TypeSymbol);
@@ -239,18 +238,12 @@ internal static class AnalyzerTools
         {
             parentStatements = new List<StatementSyntax>(Block.Statements);
 
-            if (Block.Parent is CatchClauseSyntax CatchClause)
+            Parent = Block.Parent switch
             {
-                Parent = CatchClause.Parent as TryStatementSyntax;
-            }
-            else if (Block.Parent is FinallyClauseSyntax FinallyClause)
-            {
-                Parent = FinallyClause.Parent as TryStatementSyntax;
-            }
-            else
-            {
-                Parent = Block.Parent as StatementSyntax;
-            }
+                CatchClauseSyntax CatchClause => CatchClause.Parent as TryStatementSyntax,
+                FinallyClauseSyntax FinallyClause => FinallyClause.Parent as TryStatementSyntax,
+                _ => Block.Parent as StatementSyntax,
+            };
         }
         else if (statement.Parent is SwitchSectionSyntax SwitchSection)
         {
@@ -259,12 +252,12 @@ internal static class AnalyzerTools
         }
         else if (statement.Parent is ElseClauseSyntax ElseClause)
         {
-            parentStatements = new List<StatementSyntax>() { statement };
+            parentStatements = [statement];
             Parent = ElseClause.Parent as IfStatementSyntax;
         }
         else
         {
-            parentStatements = new List<StatementSyntax>() { statement };
+            parentStatements = [statement];
 
             // If the parent is a statement we can continue, otherwise it's some method declaration.
             Parent = statement.Parent as StatementSyntax;
@@ -288,14 +281,12 @@ internal static class AnalyzerTools
     /// <param name="statement">The statement.</param>
     public static List<StatementSyntax> FindSubsequentStatements(StatementSyntax statement)
     {
-        List<StatementSyntax> RemainingStatements = new();
+        List<StatementSyntax> RemainingStatements = [];
         StatementSyntax CurrentStatement = statement;
-        List<StatementSyntax> ParentStatements;
-        StatementSyntax ParentStatement;
 
-        for (; ;)
+        while (true)
         {
-            bool HasParentStatement = GetStatementParentList(CurrentStatement, out ParentStatements, out ParentStatement);
+            bool HasParentStatement = GetStatementParentList(CurrentStatement, out List<StatementSyntax> ParentStatements, out StatementSyntax ParentStatement);
 
             int StatementIndex = ParentStatements.IndexOf(CurrentStatement);
             Contract.Assert(StatementIndex >= 0);

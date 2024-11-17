@@ -35,7 +35,7 @@ public class MCA1014EnsureAttributeHasTooManyArguments : DiagnosticAnalyzer
     /// <summary>
     /// Gets the list of supported diagnostic.
     /// </summary>
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return [Rule]; } }
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
     /// <summary>
     /// Initializes the rule analyzer.
@@ -68,7 +68,7 @@ public class MCA1014EnsureAttributeHasTooManyArguments : DiagnosticAnalyzer
         AttributeSyntax Attribute = Contract.AssertNotNull(FirstAssertion.AncestorAttribute);
 
         AttributeArgumentListSyntax ArgumentList = Contract.AssertNotNull(Attribute.ArgumentList);
-        var AttributeArguments = ArgumentList.Arguments;
+        SeparatedSyntaxList<AttributeArgumentSyntax> AttributeArguments = ArgumentList.Arguments;
         int ArgumentIndex = AttributeArguments.IndexOf(attributeArgument);
 
         // No diagnostic if the attribute has no DebugOnly, or if this is the first argument.

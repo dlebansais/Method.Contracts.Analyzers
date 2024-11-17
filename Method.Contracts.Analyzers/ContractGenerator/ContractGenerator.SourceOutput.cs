@@ -1,6 +1,5 @@
 ﻿namespace Contracts.Analyzers;
 
-using System;
 using System.Collections.Immutable;
 using System.Text;
 using Contracts.Analyzers.Helper;

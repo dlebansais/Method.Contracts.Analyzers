@@ -34,7 +34,7 @@ public class MCA1002VerifiedMethodMustBeWithinType : DiagnosticAnalyzer
     /// <summary>
     /// Gets the list of supported diagnostic.
     /// </summary>
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return [Rule]; } }
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
     /// <summary>
     /// Initializes the rule analyzer.
@@ -66,7 +66,9 @@ public class MCA1002VerifiedMethodMustBeWithinType : DiagnosticAnalyzer
         if (methodDeclaration.FirstAncestorOrSelf<ClassDeclarationSyntax>() is null &&
             methodDeclaration.FirstAncestorOrSelf<StructDeclarationSyntax>() is null &&
             methodDeclaration.FirstAncestorOrSelf<RecordDeclarationSyntax>() is null)
+        {
             return false;
+        }
 
         if (methodDeclaration.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>() is null)
             return false;
@@ -76,7 +78,7 @@ public class MCA1002VerifiedMethodMustBeWithinType : DiagnosticAnalyzer
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, IAnalysisAssertion[] analysisAssertions)
     {
-        var Text = methodDeclaration.Identifier.ValueText;
+        string Text = methodDeclaration.Identifier.ValueText;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), Text));
     }

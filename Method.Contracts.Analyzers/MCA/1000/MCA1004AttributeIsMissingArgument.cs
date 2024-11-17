@@ -36,7 +36,7 @@ public class MCA1004AttributeIsMissingArgument : DiagnosticAnalyzer
     /// <summary>
     /// Gets the list of supported diagnostic.
     /// </summary>
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return [Rule]; } }
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
     /// <summary>
     /// Initializes the rule analyzer.
@@ -64,8 +64,10 @@ public class MCA1004AttributeIsMissingArgument : DiagnosticAnalyzer
     private static bool IsContractAttribute(SyntaxNodeAnalysisContext context, AttributeSyntax attribute)
     {
         foreach (Type AttributeType in ContractGenerator.SupportedAttributeTypes)
+        {
             if (AnalyzerTools.IsExpectedAttribute(context, AttributeType, attribute))
                 return true;
+        }
 
         return false;
     }

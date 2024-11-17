@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using VerifyNUnit;
 using VerifyTests;
 
-public static class VerifyRequire
+internal static class VerifyRequire
 {
     public static async Task<VerifyResult> Verify(GeneratorDriver driver)
     {

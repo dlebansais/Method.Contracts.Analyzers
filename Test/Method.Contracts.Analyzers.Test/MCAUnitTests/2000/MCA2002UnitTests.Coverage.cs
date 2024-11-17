@@ -4,11 +4,13 @@ extern alias Analyzers;
 
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA2002InitializeWithAttributeArgumentMustBeValidMethodName>;
 
-public partial class MCA2002UnitTests
+[TestFixture]
+internal partial class MCA2002UnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task CoverageDirective_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -24,7 +26,7 @@ internal class Test
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task OldLanguageVersion_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Default, @"

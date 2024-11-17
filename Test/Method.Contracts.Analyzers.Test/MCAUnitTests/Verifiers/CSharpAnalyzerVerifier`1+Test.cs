@@ -14,7 +14,7 @@ using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 
-public static partial class CSharpAnalyzerVerifier<TAnalyzer>
+internal static partial class CSharpAnalyzerVerifier<TAnalyzer>
     where TAnalyzer : DiagnosticAnalyzer, new()
 {
     private class Test : CSharpAnalyzerTest<TAnalyzer, DefaultVerifier>
@@ -23,14 +23,14 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
         {
             SolutionTransforms.Add((solution, projectId) =>
             {
-                var compilationOptions = solution.GetProject(projectId)?.CompilationOptions;
+                CompilationOptions? compilationOptions = solution.GetProject(projectId)?.CompilationOptions;
                 compilationOptions = compilationOptions?.WithSpecificDiagnosticOptions(compilationOptions.SpecificDiagnosticOptions.SetItems(CSharpVerifierHelper.NullableWarnings));
                 compilationOptions = compilationOptions?.WithPlatform(Platform.X64);
                 solution = solution.WithProjectCompilationOptions(projectId, compilationOptions ?? throw new NullReferenceException());
 
                 string RuntimePath = GetRuntimePath();
-                List<MetadataReference> DefaultReferences = new()
-                {
+                List<MetadataReference> DefaultReferences =
+                [
                     //MetadataReference.CreateFromFile(typeof(Binder).GetTypeInfo().Assembly.Location),
                     MetadataReference.CreateFromFile(typeof(AccessAttribute).GetTypeInfo().Assembly.Location),
                     MetadataReference.CreateFromFile(string.Format(CultureInfo.InvariantCulture, RuntimePath, "mscorlib")),
@@ -40,7 +40,7 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
                     MetadataReference.CreateFromFile(string.Format(CultureInfo.InvariantCulture, RuntimePath, "PresentationCore")),
                     MetadataReference.CreateFromFile(string.Format(CultureInfo.InvariantCulture, RuntimePath, "PresentationFramework")),
                     MetadataReference.CreateFromFile(string.Format(CultureInfo.InvariantCulture, RuntimePath, @"Facades\System.Runtime")),
-                };
+                ];
 
                 solution = solution.WithProjectMetadataReferences(projectId, DefaultReferences);
 
@@ -63,8 +63,10 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
             string RuntimeDirectory = string.Empty;
 
             foreach (string FolderPath in GetRuntimeDirectories(RuntimeDirectoryBase))
+            {
                 if (IsValidRuntimeDirectory(FolderPath))
                     RuntimeDirectory = FolderPath;
+            }
 
             string RuntimePath = RuntimeDirectory + @"\{0}.dll";
 
@@ -73,10 +75,11 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
 
         private static List<string> GetRuntimeDirectories(string runtimeDirectoryBase)
         {
-            List<string> Directories = System.IO.Directory.GetDirectories(runtimeDirectoryBase).ToList();
-            Directories.Sort(CompareIgnoreCase);
+            string[] Directories = System.IO.Directory.GetDirectories(runtimeDirectoryBase);
+            List<string> DirectoryList = [.. Directories];
+            DirectoryList.Sort(CompareIgnoreCase);
 
-            return Directories;
+            return DirectoryList;
         }
 
         private static int CompareIgnoreCase(string s1, string s2)
@@ -93,8 +96,10 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
 
             string[] Parts = FolderName.Substring(Prefix.Length).Split('.');
             foreach (string Part in Parts)
+            {
                 if (!int.TryParse(Part, out _))
                     return false;
+            }
 
             return true;
         }

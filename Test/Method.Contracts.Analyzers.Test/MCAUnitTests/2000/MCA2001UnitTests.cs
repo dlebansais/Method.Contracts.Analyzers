@@ -5,13 +5,13 @@ extern alias Analyzers;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA2001ObjectMustBeInitialized>;
 
-[TestClass]
-public partial class MCA2001UnitTests
+[TestFixture]
+internal partial class MCA2001UnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task InitializerNotCalled1_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -37,7 +37,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InitializerNotCalled2_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -64,10 +64,10 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InitializerNotCalled3_Diagnostic()
     {
-        var DescriptorCS8805 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS8805 = new(
             "CS8805",
             "title",
             "Program using top-level statements must be an executable.",
@@ -76,7 +76,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS8805);
+        DiagnosticResult Expected = new(DescriptorCS8805);
         Expected = Expected.WithLocation("/0/Test0.cs", 6, 1);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -96,10 +96,10 @@ internal class Test
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InitializerNotCalled4_Diagnostic()
     {
-        var DescriptorCS8803 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS8803 = new(
             "CS8803",
             "title",
             "Top-level statements must precede namespace and type declarations.",
@@ -108,7 +108,7 @@ internal class Test
             true
             );
 
-        var DescriptorCS8805 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS8805 = new(
             "CS8805",
             "title",
             "Program using top-level statements must be an executable.",
@@ -117,10 +117,10 @@ internal class Test
             true
             );
 
-        var Expected1 = new DiagnosticResult(DescriptorCS8803);
+        DiagnosticResult Expected1 = new(DescriptorCS8803);
         Expected1 = Expected1.WithLocation("/0/Test0.cs", 18, 1);
 
-        var Expected2 = new DiagnosticResult(DescriptorCS8805);
+        DiagnosticResult Expected2 = new(DescriptorCS8805);
         Expected2 = Expected2.WithLocation("/0/Test0.cs", 18, 1);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -140,7 +140,7 @@ Test test = [|new Test()|];
 ", Expected1, Expected2).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InitializerNotCalled5_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -168,7 +168,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InitializerNotCalled6_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -197,7 +197,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InitializerNotCalled7_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -226,10 +226,10 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InitializerNotCalled8_Diagnostic()
     {
-        var DescriptorCS0103 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS0103 = new(
             "CS0103",
             "title",
             "The name 'foo' does not exist in the current context",
@@ -238,7 +238,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS0103);
+        DiagnosticResult Expected = new(DescriptorCS0103);
         Expected = Expected.WithLocation("/0/Test0.cs", 25, 9);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -267,10 +267,10 @@ internal partial class Program
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InitializerNotCalled9_Diagnostic()
     {
-        var DescriptorCS0311 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS0311 = new(
             "CS0311",
             "title",
             "The type 'string' cannot be used as type parameter 'T' in the generic type or method 'Test.Initialize<T>()'. There is no implicit reference conversion from 'string' to 'Test'.",
@@ -279,7 +279,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS0311);
+        DiagnosticResult Expected = new(DescriptorCS0311);
         Expected = Expected.WithLocation("/0/Test0.cs", 24, 14);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -307,7 +307,7 @@ internal partial class Program
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InitializerCalled_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -334,7 +334,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task RecordInitializerNotCalled_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -360,7 +360,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task RecordInitializerCalled_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -387,10 +387,10 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task UnknownClass_NoDiagnostic()
     {
-        var DescriptorCS8754 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS8754 = new(
             "CS8754",
             "title",
             "There is no target type for 'new()'",
@@ -399,7 +399,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS8754);
+        DiagnosticResult Expected = new(DescriptorCS8754);
         Expected = Expected.WithLocation("/0/Test0.cs", 10, 19);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -414,7 +414,7 @@ internal partial class Program
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task Struct_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -441,10 +441,10 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task Interface_NoDiagnostic()
     {
-        var DescriptorCS0144 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS0144 = new(
             "CS0144",
             "title",
             "Cannot create an instance of the abstract type or interface 'ITest'",
@@ -453,7 +453,7 @@ internal partial class Program
             true
             );
 
-        var DescriptorCS1061 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS1061 = new(
             "CS1061",
             "title",
             "'ITest' does not contain a definition for 'Initialize' and no accessible extension method 'Initialize' accepting a first argument of type 'ITest' could be found (are you missing a using directive or an assembly reference?)",
@@ -462,10 +462,10 @@ internal partial class Program
             true
             );
 
-        var Expected1 = new DiagnosticResult(DescriptorCS0144);
+        DiagnosticResult Expected1 = new(DescriptorCS0144);
         Expected1 = Expected1.WithLocation("/0/Test0.cs", 14, 20);
 
-        var Expected2 = new DiagnosticResult(DescriptorCS1061);
+        DiagnosticResult Expected2 = new(DescriptorCS1061);
         Expected2 = Expected2.WithLocation("/0/Test0.cs", 15, 14);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -484,10 +484,10 @@ internal partial class Program
 ", Expected1, Expected2).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task ConstructorNotFound_NoDiagnostic()
     {
-        var DescriptorCS1729 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS1729 = new(
             "CS1729",
             "title",
             "'Test' does not contain a constructor that takes 1 arguments",
@@ -496,7 +496,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS1729);
+        DiagnosticResult Expected = new(DescriptorCS1729);
         Expected = Expected.WithLocation("/0/Test0.cs", 22, 24);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -523,10 +523,10 @@ internal partial class Program
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task UnknownAttribute_NoDiagnostic()
     {
-        var DescriptorCS0246 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS0246 = new(
             "CS0246",
             "title",
             "The type or namespace name 'Foo' could not be found (are you missing a using directive or an assembly reference?)",
@@ -535,7 +535,7 @@ internal partial class Program
             true
             );
 
-        var DescriptorCS0246Attribute = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS0246Attribute = new(
             "CS0246",
             "title",
             "The type or namespace name 'FooAttribute' could not be found (are you missing a using directive or an assembly reference?)",
@@ -544,7 +544,7 @@ internal partial class Program
             true
             );
 
-        var DescriptorCS1061 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS1061 = new(
             "CS1061",
             "title",
             "'Test' does not contain a definition for 'Initialize' and no accessible extension method 'Initialize' accepting a first argument of type 'Test' could be found (are you missing a using directive or an assembly reference?)",
@@ -553,13 +553,13 @@ internal partial class Program
             true
             );
 
-        var Expected1 = new DiagnosticResult(DescriptorCS0246);
+        DiagnosticResult Expected1 = new(DescriptorCS0246);
         Expected1 = Expected1.WithLocation("/0/Test0.cs", 8, 6);
 
-        var Expected2 = new DiagnosticResult(DescriptorCS0246Attribute);
+        DiagnosticResult Expected2 = new(DescriptorCS0246Attribute);
         Expected2 = Expected2.WithLocation("/0/Test0.cs", 8, 6);
 
-        var Expected3 = new DiagnosticResult(DescriptorCS1061);
+        DiagnosticResult Expected3 = new(DescriptorCS1061);
         Expected3 = Expected3.WithLocation("/0/Test0.cs", 19, 14);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -582,7 +582,7 @@ internal partial class Program
 ", Expected1, Expected2, Expected3).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task NotOurAttribute_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -617,7 +617,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InitializerDoesNotExist_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -646,10 +646,10 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task NotEnoughAttributeArgument_NoDiagnostic()
     {
-        var DescriptorCS7036 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS7036 = new(
             "CS7036",
             "title",
             "There is no argument given that corresponds to the required parameter 'methodName' of 'InitializeWithAttribute.InitializeWithAttribute(string)'",
@@ -658,7 +658,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS7036);
+        DiagnosticResult Expected = new(DescriptorCS7036);
         Expected = Expected.WithLocation("/0/Test0.cs", 8, 6);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -685,10 +685,10 @@ internal partial class Program
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task TooManyAttributeArguments_NoDiagnostic()
     {
-        var DescriptorCS1729 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS1729 = new(
             "CS1729",
             "title",
             "'InitializeWithAttribute' does not contain a constructor that takes 2 arguments",
@@ -697,7 +697,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS1729);
+        DiagnosticResult Expected = new(DescriptorCS1729);
         Expected = Expected.WithLocation("/0/Test0.cs", 8, 6);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -724,10 +724,10 @@ internal partial class Program
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task WrongAttributeArgument_NoDiagnostic()
     {
-        var DescriptorCS1503 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS1503 = new(
             "CS1503",
             "title",
             "Argument 1: cannot convert from 'int' to 'string'",
@@ -736,7 +736,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS1503);
+        DiagnosticResult Expected = new(DescriptorCS1503);
         Expected = Expected.WithLocation("/0/Test0.cs", 8, 21);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -763,7 +763,7 @@ internal partial class Program
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task OtherMembers_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -796,7 +796,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task MultipleInitializerOverloads_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -827,7 +827,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task ObjectCreatedOutsideBlock_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -858,7 +858,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task CreatedObjectFieldInitialization_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -889,10 +889,10 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task ParameterDefaultValue_Diagnostic()
     {
-        var DescriptorCS1736 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS1736 = new(
             "CS1736",
             "title",
             "Default parameter value for 'test' must be a compile-time constant",
@@ -901,7 +901,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS1736);
+        DiagnosticResult Expected = new(DescriptorCS1736);
         Expected = Expected.WithLocation("/0/Test0.cs", 20, 42);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -926,10 +926,10 @@ internal partial class Program
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task GlobalStatementInitializerCalled_NoDiagnostic()
     {
-        var DescriptorCS8805 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS8805 = new(
             "CS8805",
             "title",
             "Program using top-level statements must be an executable.",
@@ -938,7 +938,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS8805);
+        DiagnosticResult Expected = new(DescriptorCS8805);
         Expected = Expected.WithLocation("/0/Test0.cs", 6, 1);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -959,10 +959,10 @@ internal class Test
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task NotSimpleLeftExpression_Diagnostic()
     {
-        var DescriptorCS1001 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS1001 = new(
             "CS1001",
             "title",
             "Identifier expected",
@@ -971,7 +971,7 @@ internal class Test
             true
             );
 
-        var DescriptorCS0103 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS0103 = new(
             "CS0103",
             "title",
             "The name 'Initialize' does not exist in the current context",
@@ -980,10 +980,10 @@ internal class Test
             true
             );
 
-        var Expected1 = new DiagnosticResult(DescriptorCS1001);
+        DiagnosticResult Expected1 = new(DescriptorCS1001);
         Expected1 = Expected1.WithLocation("/0/Test0.cs", 23, 16);
 
-        var Expected2 = new DiagnosticResult(DescriptorCS0103);
+        DiagnosticResult Expected2 = new(DescriptorCS0103);
         Expected2 = Expected2.WithLocation("/0/Test0.cs", 23, 17);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -1010,7 +1010,7 @@ internal partial class Program
 ", Expected1, Expected2).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task VariableDeclaredInLoop_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -1038,7 +1038,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task FieldInitialization_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -1067,7 +1067,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task FieldInitializationMissingInit_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -1095,7 +1095,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task ArrayInitialization_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -1124,7 +1124,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task PropertyInitialization_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -1153,7 +1153,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task PropertyInitializationMissingInit_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -1181,7 +1181,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task AsyncInitializerCalled_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Default, @"
@@ -1211,7 +1211,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task MultipleConstructors_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -1250,7 +1250,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task MultipleConstructorsMixed_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -1289,7 +1289,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task DefaultConstructorInitializerNotCalled_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -1311,7 +1311,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task DefaultConstructorInitializerCalled_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

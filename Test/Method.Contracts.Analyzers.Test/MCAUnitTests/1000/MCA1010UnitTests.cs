@@ -3,13 +3,13 @@
 extern alias Analyzers;
 
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1010RequireNotNullAttributeUsesInvalidName>;
 
-[TestClass]
-public partial class MCA1010UnitTests
+[TestFixture]
+internal partial class MCA1010UnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task InvalidName_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -24,7 +24,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task ValidName_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -40,7 +40,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task ParametersOnly_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -56,7 +56,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task WithAliasOnly_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -72,7 +72,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task WithTypeOnly_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -88,7 +88,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task NameNotValidStringOrNameof_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -104,7 +104,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidNameWithAlias_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -120,7 +120,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidNameWithType_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -136,7 +136,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidNameWithTypeAndName_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -152,7 +152,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task OtherAttribute_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.NoContract, @"

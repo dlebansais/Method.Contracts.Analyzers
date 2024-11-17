@@ -9,28 +9,27 @@ using GeneratorSettingsEntry = Helper::Contracts.Analyzers.Helper.GeneratorSetti
 using GeneratorHelper = Helper::Contracts.Analyzers.Helper.GeneratorHelper;
 
 [TestFixture]
-public class TestSettings
+internal class TestSettings
 {
     [Test]
     public void TestAsString()
     {
         const string TestValue = "test";
         string Value;
-        bool IsDefault;
 
         GeneratorSettingsEntry Entry = new(BuildKey: ContractGenerator.ResultIdentifierKey, DefaultValue: ContractGenerator.DefaultResultIdentifier);
 
-        Value = Entry.StringValueOrDefault(null, out IsDefault);
+        Value = Entry.StringValueOrDefault(null, out bool IsNullDefault);
         Assert.That(Value, Is.EqualTo(ContractGenerator.DefaultResultIdentifier));
-        Assert.That(IsDefault, Is.True);
+        Assert.That(IsNullDefault, Is.True);
 
-        Value = Entry.StringValueOrDefault(string.Empty, out IsDefault);
+        Value = Entry.StringValueOrDefault(string.Empty, out bool IsEmptyDefault);
         Assert.That(Value, Is.EqualTo(ContractGenerator.DefaultResultIdentifier));
-        Assert.That(IsDefault, Is.True);
+        Assert.That(IsEmptyDefault, Is.True);
 
-        Value = Entry.StringValueOrDefault(TestValue, out IsDefault);
+        Value = Entry.StringValueOrDefault(TestValue, out bool IsValueDefault);
         Assert.That(Value, Is.EqualTo(TestValue));
-        Assert.That(IsDefault, Is.False);
+        Assert.That(IsValueDefault, Is.False);
     }
 
     [Test]
@@ -39,25 +38,24 @@ public class TestSettings
         const string InvalidIntTestValue = "test";
         const int ValidIntTestValue = 1;
         int Value;
-        bool IsDefault;
 
         GeneratorSettingsEntry Entry = new(BuildKey: ContractGenerator.TabLengthKey, DefaultValue: $"{ContractGenerator.DefaultTabLength}");
 
-        Value = Entry.IntValueOrDefault(null, out IsDefault);
+        Value = Entry.IntValueOrDefault(null, out bool IsNullDefault);
         Assert.That(Value, Is.EqualTo(ContractGenerator.DefaultTabLength));
-        Assert.That(IsDefault, Is.True);
+        Assert.That(IsNullDefault, Is.True);
 
-        Value = Entry.IntValueOrDefault(string.Empty, out IsDefault);
+        Value = Entry.IntValueOrDefault(string.Empty, out bool IsEmptyDefault);
         Assert.That(Value, Is.EqualTo(ContractGenerator.DefaultTabLength));
-        Assert.That(IsDefault, Is.True);
+        Assert.That(IsEmptyDefault, Is.True);
 
-        Value = Entry.IntValueOrDefault(InvalidIntTestValue, out IsDefault);
+        Value = Entry.IntValueOrDefault(InvalidIntTestValue, out bool IsInvalidDefault);
         Assert.That(Value, Is.EqualTo(ContractGenerator.DefaultTabLength));
-        Assert.That(IsDefault, Is.True);
+        Assert.That(IsInvalidDefault, Is.True);
 
-        Value = Entry.IntValueOrDefault($"{ValidIntTestValue}", out IsDefault);
+        Value = Entry.IntValueOrDefault($"{ValidIntTestValue}", out bool IsValidDefault);
         Assert.That(Value, Is.EqualTo(ValidIntTestValue));
-        Assert.That(IsDefault, Is.False);
+        Assert.That(IsValidDefault, Is.False);
     }
 
     [Test]

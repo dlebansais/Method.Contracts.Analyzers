@@ -1,11 +1,12 @@
 ﻿namespace Contracts.Analyzers.Test;
 
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 using NUnit.Framework;
 using VerifyTests;
 
 [TestFixture]
-public class TestRequireNotNull
+internal class TestRequireNotNull
 {
     [Test]
     public async Task TestCommand()
@@ -35,7 +36,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        Microsoft.CodeAnalysis.GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -69,7 +70,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -103,7 +104,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -136,7 +137,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -173,7 +174,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -211,7 +212,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -248,7 +249,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -284,7 +285,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -321,7 +322,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -354,7 +355,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -388,7 +389,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -422,7 +423,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -455,7 +456,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -488,7 +489,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -521,7 +522,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -557,7 +558,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -595,7 +596,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -633,7 +634,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -671,7 +672,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -709,7 +710,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -747,7 +748,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -785,7 +786,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -823,7 +824,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -861,7 +862,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);

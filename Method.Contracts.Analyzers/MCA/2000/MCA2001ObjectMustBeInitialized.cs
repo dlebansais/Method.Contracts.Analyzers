@@ -36,7 +36,7 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
     /// <summary>
     /// Gets the list of supported diagnostic.
     /// </summary>
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return [Rule]; } }
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
     /// <summary>
     /// Initializes the rule analyzer.
@@ -117,7 +117,7 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
 
         if (VariableDeclaration.Parent is LocalDeclarationStatementSyntax LocalDeclarationStatement)
         {
-            if (CheckDestinationAndNextStatement(context, LocalDeclarationStatement, out nextStatement))
+            if (CheckDestinationAndNextStatement(LocalDeclarationStatement, out nextStatement))
             {
                 createdSymbol = DeclaredSymbol;
                 return true;
@@ -131,12 +131,12 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
 
     private static bool CheckAssignmentExpression(SyntaxNodeAnalysisContext context, IdentifierNameSyntax identifierName, AssignmentExpressionSyntax assignmentExpression, out ISymbol createdSymbol, out StatementSyntax nextStatement)
     {
-        var AssignedSymbolInfo = context.SemanticModel.GetSymbolInfo(identifierName);
+        SymbolInfo AssignedSymbolInfo = context.SemanticModel.GetSymbolInfo(identifierName);
         ISymbol AssignedSymbol = Contract.AssertNotNull(AssignedSymbolInfo.Symbol);
 
         if (assignmentExpression.Parent is ExpressionStatementSyntax ExpressionStatement)
         {
-            if (CheckDestinationAndNextStatement(context, ExpressionStatement, out nextStatement))
+            if (CheckDestinationAndNextStatement(ExpressionStatement, out nextStatement))
             {
                 createdSymbol = AssignedSymbol;
                 return true;
@@ -148,11 +148,11 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
         return false;
     }
 
-    private static bool CheckDestinationAndNextStatement(SyntaxNodeAnalysisContext context, StatementSyntax currentStatement, out StatementSyntax nextStatement)
+    private static bool CheckDestinationAndNextStatement(StatementSyntax currentStatement, out StatementSyntax nextStatement)
     {
         if (currentStatement.Parent is BlockSyntax Block)
         {
-            var Statements = Block.Statements.ToImmutableList();
+            ImmutableList<StatementSyntax> Statements = [.. Block.Statements];
             int DeclarationIndex = Statements.IndexOf(currentStatement);
 
             if (DeclarationIndex + 1 < Statements.Count)
@@ -165,12 +165,12 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
         if (currentStatement.Parent is GlobalStatementSyntax GlobalStatement)
         {
             CompilationUnitSyntax CompilationUnit = Contract.AssertNotNull(GlobalStatement.Parent as CompilationUnitSyntax);
-            var Members = CompilationUnit.Members.ToImmutableList();
+            ImmutableList<MemberDeclarationSyntax> Members = [.. CompilationUnit.Members];
             int DeclarationIndex = Members.IndexOf(GlobalStatement);
 
             if (DeclarationIndex + 1 < Members.Count)
             {
-                var NextMember = Members[DeclarationIndex + 1];
+                MemberDeclarationSyntax NextMember = Members[DeclarationIndex + 1];
                 if (NextMember is GlobalStatementSyntax NextGlobalStatement)
                 {
                     nextStatement = NextGlobalStatement.Statement;
@@ -201,7 +201,7 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
 
                     if (MemberAccessExpression.Expression is IdentifierNameSyntax ObjectIdentifierName)
                     {
-                        var IdentifierNameInfo = context.SemanticModel.GetSymbolInfo(ObjectIdentifierName);
+                        SymbolInfo IdentifierNameInfo = context.SemanticModel.GetSymbolInfo(ObjectIdentifierName);
                         if (IdentifierNameInfo.Symbol is ISymbol ObjectSymbol)
                         {
                             ExpressionSymbol = ObjectSymbol;
@@ -210,7 +210,7 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
 
                     if (MemberAccessExpression.Name is IdentifierNameSyntax IdentifierName)
                     {
-                        var IdentifierNameInfo = context.SemanticModel.GetSymbolInfo(IdentifierName);
+                        SymbolInfo IdentifierNameInfo = context.SemanticModel.GetSymbolInfo(IdentifierName);
                         if (IdentifierNameInfo.Symbol is IMethodSymbol CalledMethodNameSymbol)
                         {
                             MethodSymbol = CalledMethodNameSymbol;

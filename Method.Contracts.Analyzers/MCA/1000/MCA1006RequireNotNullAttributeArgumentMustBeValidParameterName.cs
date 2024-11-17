@@ -34,7 +34,7 @@ public class MCA1006RequireNotNullAttributeArgumentMustBeValidParameterName : Di
     /// <summary>
     /// Gets the list of supported diagnostic.
     /// </summary>
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return [Rule]; } }
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
     /// <summary>
     /// Initializes the rule analyzer.
@@ -70,7 +70,7 @@ public class MCA1006RequireNotNullAttributeArgumentMustBeValidParameterName : Di
         MethodDeclarationSyntax MethodDeclaration = Contract.AssertNotNull(SecondAssertion.AncestorMethodDeclaration);
 
         AttributeArgumentListSyntax ArgumentList = Contract.AssertNotNull(Attribute.ArgumentList);
-        var AttributeArguments = ArgumentList.Arguments;
+        SeparatedSyntaxList<AttributeArgumentSyntax> AttributeArguments = ArgumentList.Arguments;
         int ArgumentIndex = AttributeArguments.IndexOf(attributeArgument);
 
         // No diagnostic if the attribute has an alias, type or name, and this is not the first argument.

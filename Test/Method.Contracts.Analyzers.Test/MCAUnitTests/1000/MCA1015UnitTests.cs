@@ -5,13 +5,13 @@ extern alias Analyzers;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1015SetParameterAsUnusedBeforeReturn>;
 
-[TestClass]
-public partial class MCA1015UnitTests
+[TestFixture]
+internal partial class MCA1015UnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task InvocationWithoutReturn_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -30,7 +30,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvocationWithReturn_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -53,7 +53,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task FullNamespaceInvocation_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -77,7 +77,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task NestedInvocation_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -96,7 +96,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvocationOfOtherMethod_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -120,7 +120,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvocationInElseClause_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -142,7 +142,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task NonInvocationBeforeReturn_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -166,7 +166,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task ComplexInvocation_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -192,10 +192,10 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task UnknownClassSymbolInvocation_Diagnostic()
     {
-        var DescriptorCS0103 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS0103 = new(
             "CS0103",
             "title",
             "The name 'Bar' does not exist in the current context",
@@ -204,7 +204,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS0103);
+        DiagnosticResult Expected = new(DescriptorCS0103);
         Expected = Expected.WithLocation("/0/Test0.cs", 17, 13);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -228,10 +228,10 @@ internal partial class Program
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task UnknownMethodSymbolInvocation_Diagnostic()
     {
-        var DescriptorCS0117 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS0117 = new(
             "CS0117",
             "title",
             "'Contract' does not contain a definition for 'Bar'",
@@ -240,7 +240,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS0117);
+        DiagnosticResult Expected = new(DescriptorCS0117);
         Expected = Expected.WithLocation("/0/Test0.cs", 17, 22);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -264,7 +264,7 @@ internal partial class Program
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task OtherClassSymbol_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -288,7 +288,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task OtherMethodSymbol_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -312,10 +312,10 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidInvocation1_NoDiagnostic()
     {
-        var DescriptorCS1501 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS1501 = new(
             "CS1501",
             "title",
             "No overload for method 'Unused' takes 0 arguments",
@@ -324,7 +324,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS1501);
+        DiagnosticResult Expected = new(DescriptorCS1501);
         Expected = Expected.WithLocation("/0/Test0.cs", 18, 22);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -348,10 +348,10 @@ internal partial class Program
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidInvocation2_NoDiagnostic()
     {
-        var DescriptorCS0453 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS0453 = new(
             "CS0453",
             "title",
             "The type 'string' must be a non-nullable value type in order to use it as parameter 'T' in the generic type or method 'Contract.Unused<T>(out T, T?)'",
@@ -360,7 +360,7 @@ internal partial class Program
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS0453);
+        DiagnosticResult Expected = new(DescriptorCS0453);
         Expected = Expected.WithLocation("/0/Test0.cs", 18, 22);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -384,7 +384,7 @@ internal partial class Program
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvalidInvocation3_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -408,7 +408,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvocationWithoutReturnInSwitch_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -432,7 +432,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task NestedInvocationWithoutReturn_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -453,7 +453,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task NestedInvocationWithReturn_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -475,7 +475,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task NestedInvocationWithSubsequentStatement1_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -497,7 +497,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task NestedInvocationWithSubsequentStatement2_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -518,7 +518,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task NestedInvocationWithSubsequentStatement3_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -541,7 +541,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task NestedInvocationWithSubsequentStatement4_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -567,7 +567,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task NestedInvocationWithSubsequentStatement5_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -587,7 +587,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvocationClassOverride_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -602,7 +602,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvocationStructOverride_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -617,7 +617,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvocationNullableOverride_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -632,7 +632,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvocationMultipleOverride1_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -649,7 +649,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvocationMultipleOverride2_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -666,7 +666,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task InvocationMultipleOverride3_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

@@ -1,11 +1,12 @@
 ﻿namespace Contracts.Analyzers.Test;
 
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 using NUnit.Framework;
 using VerifyTests;
 
 [TestFixture]
-public class TestGlobal
+internal class TestGlobal
 {
     [Test]
     public async Task TestNonGlobal()
@@ -34,7 +35,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifiyGlobal.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -67,7 +68,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifiyGlobal.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -101,7 +102,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifiyGlobal.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -135,7 +136,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifiyGlobal.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);

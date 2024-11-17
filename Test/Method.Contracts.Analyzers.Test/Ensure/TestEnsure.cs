@@ -1,11 +1,12 @@
 ﻿namespace Contracts.Analyzers.Test;
 
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 using NUnit.Framework;
 using VerifyTests;
 
 [TestFixture]
-public class TestEnsure
+internal class TestEnsure
 {
     [Test]
     public async Task TestSuccess()
@@ -35,7 +36,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyEnsure.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -69,7 +70,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyEnsure.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -101,7 +102,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyEnsure.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -134,7 +135,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyEnsure.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -168,7 +169,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyEnsure.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -201,7 +202,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyEnsure.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -234,7 +235,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source, setDebug: false);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source, setDebug: false);
         VerifyResult Result = await VerifyEnsure.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -267,7 +268,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source, setDebug: true);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source, setDebug: true);
         VerifyResult Result = await VerifyEnsure.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -300,7 +301,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source, setDebug: false);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source, setDebug: false);
         VerifyResult Result = await VerifyEnsure.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -333,7 +334,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source, setDebug: true);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source, setDebug: true);
         VerifyResult Result = await VerifyEnsure.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -366,7 +367,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source, setDebug: true);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source, setDebug: true);
         VerifyResult Result = await VerifyEnsure.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
@@ -400,7 +401,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        var Driver = TestHelper.GetDriver(Source, setDebug: false);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source, setDebug: false);
         VerifyResult Result = await VerifyEnsure.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);

@@ -72,6 +72,6 @@ public partial class ContractGenerator
             DisabledWarnings = DisabledWarnings,
         };
 
-        return new List<GeneratorSettings>() { Settings };
+        return [Settings];
     }
 }

@@ -8,11 +8,11 @@ using Analyzers::Contracts.Analyzers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-public static class TestHelper
+internal static class TestHelper
 {
     public static GeneratorDriver GetDriver(string source, bool setDebug = false)
     {
-        List<string> PreprocessorDirectives = new();
+        List<string> PreprocessorDirectives = [];
         if (setDebug)
             PreprocessorDirectives.Add("DEBUG");
 
@@ -35,8 +35,8 @@ public static class TestHelper
         // Create a Roslyn compilation for the syntax tree.
         CSharpCompilation Compilation = CSharpCompilation.Create(
             assemblyName: "compilation",
-            syntaxTrees: new[] { SyntaxTree },
-            references: new[] { ReferenceBinder, ReferenceContracts },
+            syntaxTrees: [SyntaxTree],
+            references: [ReferenceBinder, ReferenceContracts],
             Options);
 
         // Create an instance of our EnumGenerator incremental source generator.

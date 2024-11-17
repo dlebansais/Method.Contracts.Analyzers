@@ -34,7 +34,7 @@ public class MCA2003InitializeWithAttributeNotAllowedInClassWithExplicitConstruc
     /// <summary>
     /// Gets the list of supported diagnostic.
     /// </summary>
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return [Rule]; } }
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
     /// <summary>
     /// Initializes the rule analyzer.
@@ -84,8 +84,10 @@ public class MCA2003InitializeWithAttributeNotAllowedInClassWithExplicitConstruc
 
         int ConstructorCount = 0;
         foreach (MemberDeclarationSyntax Member in Members)
+        {
             if (Member is ConstructorDeclarationSyntax)
                 ConstructorCount++;
+        }
 
         // No diagnostic if no explicit constructors.
         if (ConstructorCount == 0)

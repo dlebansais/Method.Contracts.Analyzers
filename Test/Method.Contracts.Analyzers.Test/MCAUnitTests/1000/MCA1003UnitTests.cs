@@ -3,13 +3,13 @@
 extern alias Analyzers;
 
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1003VerifiedMethodIsMissingSuffix>;
 
-[TestClass]
-public partial class MCA1003UnitTests
+[TestFixture]
+internal partial class MCA1003UnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task FooPrefix_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -24,7 +24,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task VerifiedPrefix_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -39,7 +39,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task FooPrefixNullable_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
@@ -54,7 +54,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task OnlyPrefix_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

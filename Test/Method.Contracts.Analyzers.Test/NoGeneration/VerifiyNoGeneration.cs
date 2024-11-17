@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using VerifyNUnit;
 using VerifyTests;
 
-public static class VerifiyNoGeneration
+internal static class VerifiyNoGeneration
 {
     public static async Task<VerifyResult> Verify(GeneratorDriver driver)
     {

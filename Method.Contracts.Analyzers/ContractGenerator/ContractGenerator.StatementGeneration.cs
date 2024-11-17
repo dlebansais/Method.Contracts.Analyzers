@@ -15,7 +15,7 @@ public partial class ContractGenerator
 {
     private static List<StatementSyntax> GenerateStatements(ContractModel model, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration, SyntaxTriviaList tabStatementTrivia, SyntaxTriviaList tabStatementExtraLineEndTrivia, bool isAsync)
     {
-        List<StatementSyntax> Statements = new();
+        List<StatementSyntax> Statements = [];
 
         GetParameterReplacementTable(model, isDebugGeneration, out Dictionary<string, string> AliasNameReplacementTable, out bool IsContainingRequire);
         GetCallAndReturnStatements(model,
@@ -30,8 +30,10 @@ public partial class ContractGenerator
 
         int CallStatementIndex = -1;
         foreach (AttributeModel AttributeModel in model.Attributes)
+        {
             if (AttributeModel.Name != nameof(AccessAttribute))
                 AddAttributeStatements(methodDeclaration, isDebugGeneration, tabStatementTrivia, tabStatementExtraLineEndTrivia, Statements, AttributeModel, ref CallStatementIndex);
+        }
 
         if (CallStatementIndex < 0)
             CallStatementIndex = Statements.Count;
@@ -46,7 +48,7 @@ public partial class ContractGenerator
 
     private static void GetParameterReplacementTable(ContractModel model, bool isDebugGeneration, out Dictionary<string, string> aliasNameReplacementTable, out bool isContainingRequire)
     {
-        aliasNameReplacementTable = new();
+        aliasNameReplacementTable = [];
         isContainingRequire = false;
 
         foreach (AttributeModel Item in model.Attributes)
@@ -70,7 +72,7 @@ public partial class ContractGenerator
                 }
                 else
                 {
-                    foreach (var Argument in Item.Arguments)
+                    foreach (AttributeArgumentModel Argument in Item.Arguments)
                     {
                         string ParameterName = Argument.Value;
                         aliasNameReplacementTable.Add(ParameterName, ToIdentifierLocalName(ParameterName));
@@ -108,10 +110,9 @@ public partial class ContractGenerator
             returnStatement = GenerateReturnStatement();
         }
 
-        if (isContainingRequire)
-            callStatement = callStatement.WithLeadingTrivia(tabStatementExtraLineEndTrivia);
-        else
-            callStatement = callStatement.WithLeadingTrivia(tabStatementTrivia);
+        callStatement = isContainingRequire
+            ? callStatement.WithLeadingTrivia(tabStatementExtraLineEndTrivia)
+            : callStatement.WithLeadingTrivia(tabStatementTrivia);
     }
 
     private static bool IsCommandMethod(MethodDeclarationSyntax methodDeclaration, bool isAsync)
@@ -126,20 +127,18 @@ public partial class ContractGenerator
 
         while (Name is QualifiedNameSyntax QualifiedName)
         {
-            if (ReturnIdentifierWithNamespace is null)
-                ReturnIdentifierWithNamespace = $"{QualifiedName.Right}";
-            else
-                ReturnIdentifierWithNamespace = $"{QualifiedName.Right}.{ReturnIdentifierWithNamespace}";
+            ReturnIdentifierWithNamespace = ReturnIdentifierWithNamespace is null
+                ? $"{QualifiedName.Right}"
+                : $"{QualifiedName.Right}.{ReturnIdentifierWithNamespace}";
 
             Name = QualifiedName.Left;
         }
 
         if (Name is IdentifierNameSyntax IdentifierName)
         {
-            if (ReturnIdentifierWithNamespace is null)
-                ReturnIdentifierWithNamespace = IdentifierName.Identifier.Text;
-            else
-                ReturnIdentifierWithNamespace = $"{IdentifierName.Identifier.Text}.{ReturnIdentifierWithNamespace}";
+            ReturnIdentifierWithNamespace = ReturnIdentifierWithNamespace is null
+                ? IdentifierName.Identifier.Text
+                : $"{IdentifierName.Identifier.Text}.{ReturnIdentifierWithNamespace}";
         }
 
         return ReturnIdentifierWithNamespace is "Task" or "System.Threading.Tasks.Task";
@@ -181,7 +180,9 @@ public partial class ContractGenerator
                 statements.Add(Statement.WithLeadingTrivia(tabStatementExtraLineEndTrivia));
             }
             else
+            {
                 statements.Add(Statement.WithLeadingTrivia(tabStatementTrivia));
+            }
         }
     }
 
@@ -193,13 +194,13 @@ public partial class ContractGenerator
         string VerifiedSuffix = Settings.VerifiedSuffix;
         ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(methodName + VerifiedSuffix);
 
-        List<ArgumentSyntax> Arguments = new();
+        List<ArgumentSyntax> Arguments = [];
         foreach (ParameterSyntax Parameter in parameterList.Parameters)
         {
             bool IsRef = false;
             bool IsOut = false;
 
-            foreach (var Modifier in Parameter.Modifiers)
+            foreach (SyntaxToken Modifier in Parameter.Modifiers)
             {
                 if (Modifier.IsKind(SyntaxKind.RefKeyword))
                     IsRef = true;
@@ -213,13 +214,12 @@ public partial class ContractGenerator
 
             IdentifierNameSyntax ParameterIdentifier = SyntaxFactory.IdentifierName(ParameterName);
 
-            ArgumentSyntax Argument;
-            if (IsRef)
-                Argument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.RefKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia));
-            else if (IsOut)
-                Argument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia));
-            else
-                Argument = SyntaxFactory.Argument(ParameterIdentifier);
+            ArgumentSyntax Argument =
+                IsRef
+                ? SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.RefKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia))
+                : IsOut
+                  ? SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia))
+                  : SyntaxFactory.Argument(ParameterIdentifier);
 
             if (Arguments.Count > 0)
                 Argument = Argument.WithLeadingTrivia(WhitespaceTrivia);
@@ -246,13 +246,13 @@ public partial class ContractGenerator
         string VerifiedSuffix = Settings.VerifiedSuffix;
         ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(methodName + VerifiedSuffix);
 
-        List<ArgumentSyntax> Arguments = new();
+        List<ArgumentSyntax> Arguments = [];
         foreach (ParameterSyntax Parameter in parameterList.Parameters)
         {
             bool IsRef = false;
             bool IsOut = false;
 
-            foreach (var Modifier in Parameter.Modifiers)
+            foreach (SyntaxToken Modifier in Parameter.Modifiers)
             {
                 if (Modifier.IsKind(SyntaxKind.RefKeyword))
                     IsRef = true;
@@ -266,13 +266,12 @@ public partial class ContractGenerator
 
             IdentifierNameSyntax ParameterIdentifier = SyntaxFactory.IdentifierName(ParameterName);
 
-            ArgumentSyntax Argument;
-            if (IsRef)
-                Argument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.RefKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia));
-            else if (IsOut)
-                Argument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia));
-            else
-                Argument = SyntaxFactory.Argument(ParameterIdentifier);
+            ArgumentSyntax Argument =
+                IsRef
+                ? SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.RefKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia))
+                : IsOut
+                  ? SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia))
+                  : SyntaxFactory.Argument(ParameterIdentifier);
 
             if (Arguments.Count > 0)
                 Argument = Argument.WithLeadingTrivia(WhitespaceTrivia);
@@ -290,7 +289,7 @@ public partial class ContractGenerator
         SyntaxToken ResultIdentifier = SyntaxFactory.Identifier(Settings.ResultIdentifier);
         EqualsValueClauseSyntax Initializer = SyntaxFactory.EqualsValueClause(CallExpression).WithLeadingTrivia(WhitespaceTrivia);
         VariableDeclaratorSyntax VariableDeclarator = SyntaxFactory.VariableDeclarator(ResultIdentifier, null, Initializer).WithLeadingTrivia(WhitespaceTrivia);
-        VariableDeclarationSyntax Declaration = SyntaxFactory.VariableDeclaration(VarIdentifier, SyntaxFactory.SeparatedList(new List<VariableDeclaratorSyntax>() { VariableDeclarator }));
+        VariableDeclarationSyntax Declaration = SyntaxFactory.VariableDeclaration(VarIdentifier, SyntaxFactory.SeparatedList([VariableDeclarator]));
         LocalDeclarationStatementSyntax LocalDeclarationStatement = SyntaxFactory.LocalDeclarationStatement(Declaration);
 
         return LocalDeclarationStatement;
@@ -338,25 +337,29 @@ public partial class ContractGenerator
 
         ExpressionStatementSyntax ExpressionStatement = GenerateOneRequireNotNullStatement(ParameterName, Type, AliasName);
 
-        return new List<StatementSyntax>() { ExpressionStatement };
+        return [ExpressionStatement];
     }
 
     private static void GetModifiedIdentifiers(List<AttributeArgumentModel> attributeArguments, ref string parameterName, out string aliasName)
     {
         foreach (AttributeArgumentModel argument in attributeArguments)
+        {
             if (argument.Name == nameof(RequireNotNullAttribute.Name))
                 parameterName = argument.Value;
+        }
 
         aliasName = ToIdentifierLocalName(parameterName);
 
         foreach (AttributeArgumentModel argument in attributeArguments)
+        {
             if (argument.Name == nameof(RequireNotNullAttribute.AliasName))
                 aliasName = argument.Value;
+        }
     }
 
     private static List<StatementSyntax> GenerateMultipleRequireNotNullStatement(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration)
     {
-        List<StatementSyntax> Statements = new();
+        List<StatementSyntax> Statements = [];
 
         foreach (AttributeArgumentModel argument in attributeArguments)
         {
@@ -389,7 +392,7 @@ public partial class ContractGenerator
         ArgumentSyntax OutputArgument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), DeclarationExpression.WithLeadingTrivia(WhitespaceTrivia));
         OutputArgument = OutputArgument.WithLeadingTrivia(WhitespaceTrivia);
 
-        List<ArgumentSyntax> Arguments = new() { InputArgument, OutputArgument };
+        List<ArgumentSyntax> Arguments = [InputArgument, OutputArgument];
         ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(Arguments));
 
         ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(MemberAccessExpression, ArgumentList);
@@ -400,39 +403,41 @@ public partial class ContractGenerator
 
     private static List<StatementSyntax> GenerateRequireStatement(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration)
     {
-        return GenerateRequireOrEnsureStatement(attributeArguments, methodDeclaration, isDebugGeneration, "Require");
+        return GenerateRequireOrEnsureStatement(attributeArguments, isDebugGeneration, "Require");
     }
 
     private static List<StatementSyntax> GenerateEnsureStatement(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration)
     {
-        return GenerateRequireOrEnsureStatement(attributeArguments, methodDeclaration, isDebugGeneration, "Ensure");
+        return GenerateRequireOrEnsureStatement(attributeArguments, isDebugGeneration, "Ensure");
     }
 
-    private static List<StatementSyntax> GenerateRequireOrEnsureStatement(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration, string contractMethodName)
+    private static List<StatementSyntax> GenerateRequireOrEnsureStatement(List<AttributeArgumentModel> attributeArguments, bool isDebugGeneration, string contractMethodName)
     {
         if (attributeArguments.Count > 1 && attributeArguments.Any(argument => argument.Name != string.Empty))
-            return GenerateRequireOrEnsureStatementWithDebugOnly(attributeArguments, methodDeclaration, isDebugGeneration, contractMethodName);
+            return GenerateRequireOrEnsureStatementWithDebugOnly(attributeArguments, isDebugGeneration, contractMethodName);
         else
-            return GenerateMultipleRequireOrEnsureStatement(attributeArguments, methodDeclaration, contractMethodName);
+            return GenerateMultipleRequireOrEnsureStatement(attributeArguments, contractMethodName);
     }
 
-    private static List<StatementSyntax> GenerateRequireOrEnsureStatementWithDebugOnly(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration, string contractMethodName)
+    private static List<StatementSyntax> GenerateRequireOrEnsureStatementWithDebugOnly(List<AttributeArgumentModel> attributeArguments, bool isDebugGeneration, string contractMethodName)
     {
         // This is the result of TransformRequireOrEnsureAttributeWithDebugOnly().
         Contract.Assert(attributeArguments.Count == 2);
 
         if (attributeArguments[1].Value == "false" || isDebugGeneration)
         {
-            List<AttributeArgumentModel> SingleAttributeArgument = new() { attributeArguments.First() };
-            return GenerateMultipleRequireOrEnsureStatement(SingleAttributeArgument, methodDeclaration, contractMethodName);
+            List<AttributeArgumentModel> SingleAttributeArgument = [attributeArguments.First()];
+            return GenerateMultipleRequireOrEnsureStatement(SingleAttributeArgument, contractMethodName);
         }
         else
-            return new List<StatementSyntax>();
+        {
+            return [];
+        }
     }
 
-    private static List<StatementSyntax> GenerateMultipleRequireOrEnsureStatement(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration, string contractMethodName)
+    private static List<StatementSyntax> GenerateMultipleRequireOrEnsureStatement(List<AttributeArgumentModel> attributeArguments, string contractMethodName)
     {
-        List<StatementSyntax> Statements = new();
+        List<StatementSyntax> Statements = [];
 
         foreach (AttributeArgumentModel AttributeArgument in attributeArguments)
         {
@@ -442,7 +447,7 @@ public partial class ContractGenerator
 
             IdentifierNameSyntax InputName = SyntaxFactory.IdentifierName(AttributeArgument.Value);
             ArgumentSyntax InputArgument = SyntaxFactory.Argument(InputName);
-            List<ArgumentSyntax> Arguments = new() { InputArgument };
+            List<ArgumentSyntax> Arguments = [InputArgument];
             ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(Arguments));
             ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(MemberAccessExpression, ArgumentList);
             ExpressionStatementSyntax ExpressionStatement = SyntaxFactory.ExpressionStatement(CallExpression);
@@ -456,7 +461,7 @@ public partial class ContractGenerator
     private static string ToNameWithoutAttribute<T>()
     {
         string LongName = typeof(T).Name;
-        return LongName.Substring(0, LongName.Length - nameof(Attribute).Length);
+        return LongName[..^nameof(Attribute).Length];
     }
 
     private static string ToIdentifierLocalName(string text)
@@ -464,7 +469,7 @@ public partial class ContractGenerator
         Contract.Assert(text.Length > 0);
 
         char FirstLetter = text.First();
-        string OtherLetters = text.Substring(1);
+        string OtherLetters = text[1..];
 
         if (char.IsLower(FirstLetter))
             return $"{char.ToUpper(FirstLetter, CultureInfo.InvariantCulture)}{OtherLetters}";

@@ -66,10 +66,10 @@ public partial class ContractGenerator
         LiteralExpressionSyntax ToolVersionExpression = SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, ToolVersionToken);
         AttributeArgumentSyntax ToolVersionAttributeArgument = SyntaxFactory.AttributeArgument(ToolVersionExpression);
 
-        AttributeArgumentListSyntax ArgumentList = SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(new List<AttributeArgumentSyntax>() { ToolNameAttributeArgument, ToolVersionAttributeArgument }));
+        AttributeArgumentListSyntax ArgumentList = SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList([ToolNameAttributeArgument, ToolVersionAttributeArgument]));
         AttributeSyntax Attribute = SyntaxFactory.Attribute(AttributeName, ArgumentList);
-        AttributeListSyntax AttributeList = SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(new List<AttributeSyntax>() { Attribute }));
-        SyntaxList<AttributeListSyntax> Attributes = SyntaxFactory.List(new List<AttributeListSyntax>() { AttributeList });
+        AttributeListSyntax AttributeList = SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList([Attribute]));
+        SyntaxList<AttributeListSyntax> Attributes = SyntaxFactory.List([AttributeList]);
 
         return Attributes;
     }
@@ -87,19 +87,18 @@ public partial class ContractGenerator
 
     private static SyntaxTokenList GenerateContractModifiers(ContractModel model, MethodDeclarationSyntax methodDeclaration, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia, out bool isAsync)
     {
-        List<SyntaxToken> ModifierTokens = new();
+        List<SyntaxToken> ModifierTokens = [];
 
-        if (model.Attributes.Find(m => m.Name == nameof(AccessAttribute)) is AttributeModel AccessAttributeModel)
-            ModifierTokens = GenerateContractExplicitModifiers(AccessAttributeModel, leadingTrivia, trailingTrivia, out isAsync);
-        else
-            ModifierTokens = GenerateContractDefaultModifiers(methodDeclaration, leadingTrivia, trailingTrivia, out isAsync);
+        ModifierTokens = model.Attributes.Find(m => m.Name == nameof(AccessAttribute)) is AttributeModel AccessAttributeModel
+            ? GenerateContractExplicitModifiers(AccessAttributeModel, leadingTrivia, trailingTrivia, out isAsync)
+            : GenerateContractDefaultModifiers(methodDeclaration, leadingTrivia, trailingTrivia, out isAsync);
 
         return SyntaxFactory.TokenList(ModifierTokens);
     }
 
     private static List<SyntaxToken> GenerateContractExplicitModifiers(AttributeModel accessAttributeModel, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia, out bool isAsync)
     {
-        List<SyntaxToken> ModifierTokens = new();
+        List<SyntaxToken> ModifierTokens = [];
         isAsync = false;
 
         for (int i = 0; i < accessAttributeModel.Arguments.Count; i++)
@@ -108,10 +107,7 @@ public partial class ContractGenerator
             string ArgumentValue = ArgumentModel.Value;
             SyntaxToken ModifierToken = SyntaxFactory.Identifier(ArgumentValue);
 
-            if (i == 0)
-                ModifierToken = ModifierToken.WithLeadingTrivia(leadingTrivia);
-            else
-                ModifierToken = ModifierToken.WithLeadingTrivia(SyntaxFactory.Space);
+            ModifierToken = i == 0 ? ModifierToken.WithLeadingTrivia(leadingTrivia) : ModifierToken.WithLeadingTrivia(SyntaxFactory.Space);
 
             if (i + 1 == accessAttributeModel.Arguments.Count)
                 ModifierToken = ModifierToken.WithTrailingTrivia(trailingTrivia);
@@ -127,7 +123,7 @@ public partial class ContractGenerator
 
     private static List<SyntaxToken> GenerateContractDefaultModifiers(MethodDeclarationSyntax methodDeclaration, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia, out bool isAsync)
     {
-        List<SyntaxToken> ModifierTokens = new();
+        List<SyntaxToken> ModifierTokens = [];
         isAsync = false;
 
         SyntaxToken PublicModifierToken = SyntaxFactory.Identifier("public");
@@ -135,7 +131,7 @@ public partial class ContractGenerator
         ModifierTokens.Add(PublicModifierToken);
 
         // If the method is static and/or async, add the same static modifier to the generated code.
-        foreach (var Modifier in methodDeclaration.Modifiers)
+        foreach (SyntaxToken Modifier in methodDeclaration.Modifiers)
         {
             string ModifierText = Modifier.Text;
 
@@ -158,21 +154,21 @@ public partial class ContractGenerator
 
     private static SyntaxTriviaList GetLeadingTriviaWithLineEnd(string tab)
     {
-        List<SyntaxTrivia> Trivias = new()
-        {
+        List<SyntaxTrivia> Trivias =
+        [
             SyntaxFactory.EndOfLine("\n"),
             SyntaxFactory.Whitespace(tab),
-        };
+        ];
 
         return SyntaxFactory.TriviaList(Trivias);
     }
 
     private static SyntaxTriviaList GetLeadingTriviaWithoutLineEnd(string tab)
     {
-        List<SyntaxTrivia> Trivias = new()
-        {
+        List<SyntaxTrivia> Trivias =
+        [
             SyntaxFactory.Whitespace(tab),
-        };
+        ];
 
         return SyntaxFactory.TriviaList(Trivias);
     }
@@ -193,12 +189,14 @@ public partial class ContractGenerator
         SeparatedSyntaxList<ParameterSyntax> Parameters = ParameterList.Parameters;
         SeparatedSyntaxList<ParameterSyntax> UpdatedParameters = Parameters;
 
-        foreach (var Parameter in UpdatedParameters)
+        foreach (ParameterSyntax Parameter in UpdatedParameters)
+        {
             if (ModifiedParameterTypeOrName(model, Parameter, out ParameterSyntax UpdatedParameter))
             {
                 UpdatedParameters = UpdatedParameters.Replace(Parameter, UpdatedParameter);
                 updatedParameterList = updatedParameterList.WithParameters(UpdatedParameters);
             }
+        }
 
         return updatedParameterList != ParameterList;
     }
@@ -208,6 +206,7 @@ public partial class ContractGenerator
         updatedParameter = parameter;
 
         foreach (AttributeModel Attribute in model.Attributes)
+        {
             if (AttributeHasTypeOrName(Attribute, out string ParameterName, out string Type, out string Name) && ParameterName == parameter.Identifier.Text)
             {
                 if (Type != string.Empty)
@@ -222,6 +221,7 @@ public partial class ContractGenerator
                     updatedParameter = updatedParameter.WithIdentifier(UpdatedIdentifier);
                 }
             }
+        }
 
         return updatedParameter != parameter;
     }
@@ -253,8 +253,7 @@ public partial class ContractGenerator
         SyntaxToken OpenBraceToken = SyntaxFactory.Token(SyntaxKind.OpenBraceToken);
         OpenBraceToken = OpenBraceToken.WithLeadingTrivia(tabTriviaWithoutLineEnd);
 
-        List<SyntaxTrivia> TrivialList = new(tabTrivia);
-        TrivialList.Add(SyntaxFactory.Whitespace(tab));
+        List<SyntaxTrivia> TrivialList = [.. tabTrivia, SyntaxFactory.Whitespace(tab)];
         SyntaxTriviaList TabStatementTrivia = SyntaxFactory.TriviaList(TrivialList);
 
         List<SyntaxTrivia> TrivialListExtraLineEnd = new(tabTrivia);

@@ -5,13 +5,13 @@ extern alias Analyzers;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA2003InitializeWithAttributeNotAllowedInClassWithExplicitConstructors>;
 
-[TestClass]
-public partial class MCA2003UnitTests
+[TestFixture]
+internal partial class MCA2003UnitTests
 {
-    [TestMethod]
+    [Test]
     public async Task ClassHasExplicitConstructors_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -29,7 +29,7 @@ internal class Test
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task ClassHasDefaultConstructorOnly_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -43,7 +43,7 @@ internal class Test
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task RecordHasExplicitConstructors_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -61,7 +61,7 @@ internal record Test
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task RecordHasDefaultConstructorOnly_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -75,10 +75,10 @@ internal record Test
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task Struct_NoDiagnostic()
     {
-        var DescriptorCS0592 = new DiagnosticDescriptor(
+        DiagnosticDescriptor DescriptorCS0592 = new(
             "CS0592",
             "title",
             "Attribute 'InitializeWith' is not valid on this declaration type. It is only valid on 'class, constructor' declarations.",
@@ -87,7 +87,7 @@ internal record Test
             true
             );
 
-        var Expected = new DiagnosticResult(DescriptorCS0592);
+        DiagnosticResult Expected = new(DescriptorCS0592);
         Expected = Expected.WithLocation("/0/Test0.cs", 6, 2);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
@@ -105,7 +105,7 @@ internal struct Test
 ", Expected).ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task OtherAttribute_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(Prologs.NoContract, @"
@@ -131,7 +131,7 @@ internal class Test
 ").ConfigureAwait(false);
     }
 
-    [TestMethod]
+    [Test]
     public async Task AttributeOnConstructor_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

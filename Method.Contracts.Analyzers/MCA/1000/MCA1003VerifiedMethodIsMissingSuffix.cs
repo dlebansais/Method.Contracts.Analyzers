@@ -36,7 +36,7 @@ public class MCA1003VerifiedMethodIsMissingSuffix : DiagnosticAnalyzer
     /// <summary>
     /// Gets the list of supported diagnostic.
     /// </summary>
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return [Rule]; } }
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
     /// <summary>
     /// Initializes the rule analyzer.
@@ -79,7 +79,7 @@ public class MCA1003VerifiedMethodIsMissingSuffix : DiagnosticAnalyzer
                 return;
         }
 
-        var Text = methodDeclaration.Identifier.ValueText;
+        string Text = methodDeclaration.Identifier.ValueText;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, methodDeclaration.Identifier.GetLocation(), Text, VerifiedSuffix));
     }

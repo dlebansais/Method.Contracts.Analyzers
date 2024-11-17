@@ -34,7 +34,7 @@ public class MCA2002InitializeWithAttributeArgumentMustBeValidMethodName : Diagn
     /// <summary>
     /// Gets the list of supported diagnostic.
     /// </summary>
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return [Rule]; } }
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
     /// <summary>
     /// Initializes the rule analyzer.
@@ -79,8 +79,10 @@ public class MCA2002InitializeWithAttributeArgumentMustBeValidMethodName : Diagn
 
         int InitializerCount = 0;
         foreach (MemberDeclarationSyntax Member in Members)
+        {
             if (Member is MethodDeclarationSyntax MethodDeclaration && MethodDeclaration.Identifier.Text == MethodName)
                 InitializerCount++;
+        }
 
         // No diagnostic if the argument is a valid method name with only one overload.
         if (InitializerCount == 1)

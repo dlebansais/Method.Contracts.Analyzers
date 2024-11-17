@@ -14,5 +14,8 @@ public record AttributeValidityCheckResult(AttributeGeneration Result, Collectio
     /// Creates the invalid attribute result.
     /// </summary>
     /// <param name="positionOfFirstInvalidArgument">The 0-based position of the invalid argument. -1 if no argument.</param>
-    public static AttributeValidityCheckResult Invalid(int positionOfFirstInvalidArgument) => new(AttributeGeneration.Invalid, [], positionOfFirstInvalidArgument);
+    public static AttributeValidityCheckResult Invalid(int positionOfFirstInvalidArgument)
+    {
+        return new(AttributeGeneration.Invalid, [], positionOfFirstInvalidArgument);
+    }
 }
