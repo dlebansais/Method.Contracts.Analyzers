@@ -23,10 +23,10 @@ internal static partial class CSharpAnalyzerVerifier<TAnalyzer>
         {
             SolutionTransforms.Add((solution, projectId) =>
             {
-                CompilationOptions? compilationOptions = solution.GetProject(projectId)?.CompilationOptions;
-                compilationOptions = compilationOptions?.WithSpecificDiagnosticOptions(compilationOptions.SpecificDiagnosticOptions.SetItems(CSharpVerifierHelper.NullableWarnings));
-                compilationOptions = compilationOptions?.WithPlatform(Platform.X64);
-                solution = solution.WithProjectCompilationOptions(projectId, compilationOptions ?? throw new NullReferenceException());
+                CompilationOptions compilationOptions = solution.GetProject(projectId)!.CompilationOptions!;
+                compilationOptions = compilationOptions.WithSpecificDiagnosticOptions(compilationOptions.SpecificDiagnosticOptions.SetItems(CSharpVerifierHelper.NullableWarnings));
+                compilationOptions = compilationOptions.WithPlatform(Platform.X64);
+                solution = solution.WithProjectCompilationOptions(projectId, compilationOptions);
 
                 string RuntimePath = GetRuntimePath();
                 List<MetadataReference> DefaultReferences =
@@ -44,12 +44,9 @@ internal static partial class CSharpAnalyzerVerifier<TAnalyzer>
 
                 solution = solution.WithProjectMetadataReferences(projectId, DefaultReferences);
 
-                if (Version != LanguageVersion.Default)
-                {
-                    CSharpParseOptions? ParseOptions = (CSharpParseOptions?)solution.GetProject(projectId)?.ParseOptions;
-                    ParseOptions = ParseOptions?.WithLanguageVersion(Version);
-                    solution = solution.WithProjectParseOptions(projectId, ParseOptions ?? throw new NullReferenceException());
-                }
+                CSharpParseOptions ParseOptions = (CSharpParseOptions?)solution.GetProject(projectId)!.ParseOptions!;
+                ParseOptions = ParseOptions.WithLanguageVersion(Version);
+                solution = solution.WithProjectParseOptions(projectId, ParseOptions);
 
                 return solution;
             });
