@@ -200,6 +200,13 @@ Note that `public` is the default access when the `Access` attribute is not pres
 
 If there is no `Access` attribute and the method is `static` or `async`, the generated code is also `static` (or `async`, respectively). Otherwise, you have to specify it explicitly.
 
+## Properties
+
+Since C# 13 properties can be `partial`. This generator supports verified properties in a way similar to methods, with the following differences:
+
++ `RequireNotNull` is not suppported. Instead, it is added implicitely if the property type is a reference type and not nullable.
++ `Require` and `Require` can use `value` in the expression text.
+
 ## Configuration
 
 You can configure the generator with the following settings:
