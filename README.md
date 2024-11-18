@@ -167,7 +167,7 @@ There can be multiple occurrences of the `Ensure` attribute for the same method.
 
 If there is an error in the expression (for example, a syntax error), this can only be caught in the generated code.
 
-You can use the special name `Result` in expression that test the returned value.
+You can use the special name `Result` in expressions that test the returned value.
 
 ### Debug only
 

@@ -53,6 +53,12 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Reference Include="Method.Contracts">
+            <HintPath>..\..\..\Method.Contracts\Method.Contracts\bin\x64\$(Configuration)\$(TargetFramework)\Method.Contracts.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\Helper\Helper.csproj" Aliases="Helper" />
         <ProjectReference Include="..\..\Method.Contracts.Analyzers\Method.Contracts.Analyzers.csproj" Aliases="Analyzers" />
     </ItemGroup>

@@ -32,8 +32,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Method.Contracts-Debug" Version="1.7.1" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-        <PackageReference Include="Method.Contracts" Version="1.7.1" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
+        <Reference Include="Method.Contracts">
+            <HintPath>..\..\..\Method.Contracts\Method.Contracts\bin\x64\$(Configuration)\$(TargetFramework)\Method.Contracts.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
     <ItemGroup>

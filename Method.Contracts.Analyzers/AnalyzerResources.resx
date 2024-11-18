@@ -345,4 +345,40 @@
     <value>Only use Contract.Unused with parameters</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="MCA1017AnalyzerDescription" xml:space="preserve">
+    <value>Verified property must be private.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1017AnalyzerMessageFormat" xml:space="preserve">
+    <value>'{0}' must be private</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1017AnalyzerTitle" xml:space="preserve">
+    <value>Verified property must be private</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
+  <data name="MCA1018AnalyzerDescription" xml:space="preserve">
+    <value>Verified property must be within a class, struct or record, and within a namespace.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1018AnalyzerMessageFormat" xml:space="preserve">
+    <value>'{0}' must be within type</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1018AnalyzerTitle" xml:space="preserve">
+    <value>Verified property must be within type</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
+  <data name="MCA1019AnalyzerDescription" xml:space="preserve">
+    <value>Verified property is missing the 'verified' suffix.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1019AnalyzerMessageFormat" xml:space="preserve">
+    <value>'{0}' is missing the '{1}' suffix</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1019AnalyzerTitle" xml:space="preserve">
+    <value>Verified property is missing verified suffix</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
 </root>

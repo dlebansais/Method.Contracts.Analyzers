@@ -59,38 +59,38 @@ public partial class ContractGenerator
     }
 
     /// <summary>
-    /// Checks whether a method contains at least one attribute we support and returns its name.
+    /// Checks whether a method or property contains at least one attribute we support and returns its name.
     /// All attributes we support must be valid.
     /// </summary>
     /// <param name="context">The analysis context. Can be <see langword="null"/> if no context is available.</param>
-    /// <param name="methodDeclaration">The method declaration.</param>
+    /// <param name="memberDeclaration">The member declaration.</param>
     /// <returns><see langword="null"/> if any of the attributes we support is invalid, or none was found; Otherwise, the name of the first attribute.</returns>
-    public static string? GetFirstSupportedAttribute(SyntaxNodeAnalysisContext? context, MethodDeclarationSyntax methodDeclaration)
+    public static string? GetFirstSupportedAttribute(SyntaxNodeAnalysisContext? context, MemberDeclarationSyntax memberDeclaration)
     {
-        Contract.RequireNotNull(methodDeclaration, out MethodDeclarationSyntax MethodDeclaration);
+        Contract.RequireNotNull(memberDeclaration, out MemberDeclarationSyntax MemberDeclaration);
 
         // Get a list of all supported attributes for this method.
-        List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMethodSupportedAttributes(context, MethodDeclaration, SupportedAttributeTypes);
+        List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMethodSupportedAttributes(context, MemberDeclaration, SupportedAttributeTypes);
         List<string> AttributeNames = [];
-        bool IsDebugGeneration = MethodDeclaration.SyntaxTree.Options.PreprocessorSymbolNames.Contains("DEBUG");
+        bool IsDebugGeneration = MemberDeclaration.SyntaxTree.Options.PreprocessorSymbolNames.Contains("DEBUG");
 
         foreach (AttributeSyntax Attribute in MethodAttributes)
         {
-            if (!IsValidAttribute(Attribute, MethodDeclaration, IsDebugGeneration, AttributeNames))
+            if (!IsValidAttribute(Attribute, MemberDeclaration, IsDebugGeneration, AttributeNames))
                 return null;
         }
 
         return AttributeNames.Count > 0 ? AttributeNames.First() : null;
     }
 
-    private static bool IsValidAttribute(AttributeSyntax attribute, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration, List<string> attributeNames)
+    private static bool IsValidAttribute(AttributeSyntax attribute, MemberDeclarationSyntax memberDeclaration, bool isDebugGeneration, List<string> attributeNames)
     {
         if (attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
         {
             string AttributeName = GeneratorHelper.ToAttributeName(attribute);
             IReadOnlyList<AttributeArgumentSyntax> AttributeArguments = AttributeArgumentList.Arguments;
 
-            Dictionary<string, Func<MethodDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, AttributeValidityCheckResult>> ValidityVerifierTable = new()
+            Dictionary<string, Func<MemberDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, AttributeValidityCheckResult>> ValidityVerifierTable = new()
             {
                 { nameof(AccessAttribute), IsValidAccessAttribute },
                 { nameof(RequireNotNullAttribute), IsValidRequireNotNullAttribute },
@@ -99,8 +99,8 @@ public partial class ContractGenerator
             };
 
             Contract.Assert(ValidityVerifierTable.ContainsKey(AttributeName));
-            Func<MethodDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, AttributeValidityCheckResult> ValidityVerifier = ValidityVerifierTable[AttributeName];
-            AttributeValidityCheckResult CheckResult = ValidityVerifier(methodDeclaration, AttributeArguments);
+            Func<MemberDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, AttributeValidityCheckResult> ValidityVerifier = ValidityVerifierTable[AttributeName];
+            AttributeValidityCheckResult CheckResult = ValidityVerifier(memberDeclaration, AttributeArguments);
             AttributeGeneration AttributeGeneration = CheckResult.Result;
 
             if (AttributeGeneration == AttributeGeneration.Invalid)
@@ -115,9 +115,9 @@ public partial class ContractGenerator
     /// <summary>
     /// Checks whether a list of arguments to <see cref="AccessAttribute"/> are valid.
     /// </summary>
-    /// <param name="methodDeclaration">The method with the attribute.</param>
+    /// <param name="memberDeclaration">The method or property with the attribute.</param>
     /// <param name="attributeArguments">The list of arguments.</param>
-    public static AttributeValidityCheckResult IsValidAccessAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    public static AttributeValidityCheckResult IsValidAccessAttribute(MemberDeclarationSyntax memberDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
         if (!IsValidStringOnlyAttribute(attributeArguments, out Collection<string> ArgumentValues, out int PositionOfFirstInvalidArgument))
             return AttributeValidityCheckResult.Invalid(PositionOfFirstInvalidArgument);
@@ -134,16 +134,19 @@ public partial class ContractGenerator
     /// <summary>
     /// Checks whether a list of arguments to <see cref="RequireNotNullAttribute"/> are valid.
     /// </summary>
-    /// <param name="methodDeclaration">The method with the attribute.</param>
+    /// <param name="memberDeclaration">The method or property with the attribute.</param>
     /// <param name="attributeArguments">The list of arguments.</param>
-    public static AttributeValidityCheckResult IsValidRequireNotNullAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    public static AttributeValidityCheckResult IsValidRequireNotNullAttribute(MemberDeclarationSyntax memberDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
         Contract.RequireNotNull(attributeArguments, out IReadOnlyList<AttributeArgumentSyntax> AttributeArguments);
 
+        if (memberDeclaration is not MethodDeclarationSyntax MethodDeclaration)
+            return AttributeValidityCheckResult.Invalid(-1);
+
         if (IsRequireNotNullAttributeWithAliasTypeOrName(AttributeArguments))
-            return IsValidRequireNotNullAttributeWithAliasTypeOrName(methodDeclaration, AttributeArguments);
+            return IsValidRequireNotNullAttributeWithAliasTypeOrName(MethodDeclaration, AttributeArguments);
         else if (AttributeArguments.Count > 0)
-            return IsValidRequireNotNullAttributeNoAlias(methodDeclaration, AttributeArguments);
+            return IsValidRequireNotNullAttributeNoAlias(MethodDeclaration, AttributeArguments);
         else
             return AttributeValidityCheckResult.Invalid(-1);
     }
@@ -272,9 +275,9 @@ public partial class ContractGenerator
     /// <summary>
     /// Checks whether a list of arguments to <see cref="RequireAttribute"/> are valid.
     /// </summary>
-    /// <param name="methodDeclaration">The method with the attribute.</param>
+    /// <param name="memberDeclaration">The method or property with the attribute.</param>
     /// <param name="attributeArguments">The list of arguments.</param>
-    public static AttributeValidityCheckResult IsValidRequireAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    public static AttributeValidityCheckResult IsValidRequireAttribute(MemberDeclarationSyntax memberDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
         Contract.RequireNotNull(attributeArguments, out IReadOnlyList<AttributeArgumentSyntax> AttributeArguments);
 
@@ -284,9 +287,9 @@ public partial class ContractGenerator
     /// <summary>
     /// Checks whether a list of arguments to <see cref="EnsureAttribute"/> are valid.
     /// </summary>
-    /// <param name="methodDeclaration">The method with the attribute.</param>
+    /// <param name="memberDeclaration">The method or property with the attribute.</param>
     /// <param name="attributeArguments">The list of arguments.</param>
-    public static AttributeValidityCheckResult IsValidEnsureAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    public static AttributeValidityCheckResult IsValidEnsureAttribute(MemberDeclarationSyntax memberDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
         Contract.RequireNotNull(attributeArguments, out IReadOnlyList<AttributeArgumentSyntax> AttributeArguments);
 

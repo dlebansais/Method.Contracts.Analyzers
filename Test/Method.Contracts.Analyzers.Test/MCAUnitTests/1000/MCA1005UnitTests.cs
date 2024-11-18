@@ -87,12 +87,12 @@ internal partial class Program
     }
 
     [Test]
-    public async Task AttributeOnProperty_NoDiagnostic()
+    public async Task AttributeOnConstructor_NoDiagnostic()
     {
         DiagnosticDescriptor DescriptorCS0592 = new(
             "CS0592",
             "title",
-            "Attribute 'Access' is not valid on this declaration type. It is only valid on 'method' declarations.",
+            "Attribute 'Access' is not valid on this declaration type. It is only valid on 'method, property, indexer' declarations.",
             "description",
             DiagnosticSeverity.Error,
             true
@@ -105,7 +105,9 @@ internal partial class Program
 internal partial class Program
 {
     [Access(""public"")]
-    public int Foo { get; set; }
+    public Program()
+    {
+    }
 }
 ", Expected).ConfigureAwait(false);
     }

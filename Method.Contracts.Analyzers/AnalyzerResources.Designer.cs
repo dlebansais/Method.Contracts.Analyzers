@@ -493,6 +493,87 @@ namespace Contracts.Analyzers {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Verified property must be private..
+        /// </summary>
+        internal static string MCA1017AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1017AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; must be private.
+        /// </summary>
+        internal static string MCA1017AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1017AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Verified property must be private.
+        /// </summary>
+        internal static string MCA1017AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1017AnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Verified property must be within a class, struct or record, and within a namespace..
+        /// </summary>
+        internal static string MCA1018AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1018AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; must be within type.
+        /// </summary>
+        internal static string MCA1018AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1018AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Verified property must be within type.
+        /// </summary>
+        internal static string MCA1018AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1018AnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Verified property is missing the &apos;verified&apos; suffix..
+        /// </summary>
+        internal static string MCA1019AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1019AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; is missing the &apos;{1}&apos; suffix.
+        /// </summary>
+        internal static string MCA1019AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1019AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Verified property is missing verified suffix.
+        /// </summary>
+        internal static string MCA1019AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1019AnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Object must be initialized with a call to the specified method..
         /// </summary>
         internal static string MCA2001AnalyzerDescription {
