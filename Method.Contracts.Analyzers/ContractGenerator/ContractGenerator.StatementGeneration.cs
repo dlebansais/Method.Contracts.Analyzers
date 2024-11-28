@@ -101,12 +101,12 @@ public partial class ContractGenerator
     {
         if (IsCommandMethod(methodDeclaration, isAsync))
         {
-            callStatement = GenerateCommandStatement(model.ShortMethodName, methodDeclaration.ParameterList, aliasNameReplacementTable, isAsync);
+            callStatement = GenerateCommandStatement(model.ShortName, methodDeclaration.ParameterList, aliasNameReplacementTable, isAsync);
             returnStatement = null;
         }
         else
         {
-            callStatement = GenerateQueryStatement(model.ShortMethodName, methodDeclaration.ParameterList, aliasNameReplacementTable, isAsync);
+            callStatement = GenerateMethodQueryStatement(model.ShortName, methodDeclaration.ParameterList, aliasNameReplacementTable, isAsync);
             returnStatement = GenerateReturnStatement();
         }
 
@@ -170,7 +170,7 @@ public partial class ContractGenerator
             FirstEnsure = true;
         }
 
-        List<StatementSyntax> AttributeStatements = GenerateAttributeStatements(attributeModel, methodDeclaration, isDebugGeneration);
+        List<StatementSyntax> AttributeStatements = GenerateMethodAttributeStatements(attributeModel, methodDeclaration, isDebugGeneration);
 
         foreach (StatementSyntax Statement in AttributeStatements)
         {
@@ -238,10 +238,10 @@ public partial class ContractGenerator
         return ExpressionStatement;
     }
 
-    private static LocalDeclarationStatementSyntax GenerateQueryStatement(string methodName,
-                                                                          ParameterListSyntax parameterList,
-                                                                          Dictionary<string, string> aliasNameReplacementTable,
-                                                                          bool isAsync)
+    private static LocalDeclarationStatementSyntax GenerateMethodQueryStatement(string methodName,
+                                                                                ParameterListSyntax parameterList,
+                                                                                Dictionary<string, string> aliasNameReplacementTable,
+                                                                                bool isAsync)
     {
         string VerifiedSuffix = Settings.VerifiedSuffix;
         ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(methodName + VerifiedSuffix);
@@ -303,7 +303,7 @@ public partial class ContractGenerator
         return ReturnStatement;
     }
 
-    private static List<StatementSyntax> GenerateAttributeStatements(AttributeModel attributeModel, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration)
+    private static List<StatementSyntax> GenerateMethodAttributeStatements(AttributeModel attributeModel, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration)
     {
         Dictionary<string, Func<List<AttributeArgumentModel>, MethodDeclarationSyntax, bool, List<StatementSyntax>>> GeneratorTable = new()
         {
@@ -403,10 +403,20 @@ public partial class ContractGenerator
 
     private static List<StatementSyntax> GenerateRequireStatement(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration)
     {
+        return GenerateRequireStatement(attributeArguments, isDebugGeneration);
+    }
+
+    private static List<StatementSyntax> GenerateRequireStatement(List<AttributeArgumentModel> attributeArguments, bool isDebugGeneration)
+    {
         return GenerateRequireOrEnsureStatement(attributeArguments, isDebugGeneration, "Require");
     }
 
     private static List<StatementSyntax> GenerateEnsureStatement(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration)
+    {
+        return GenerateEnsureStatement(attributeArguments, isDebugGeneration);
+    }
+
+    private static List<StatementSyntax> GenerateEnsureStatement(List<AttributeArgumentModel> attributeArguments, bool isDebugGeneration)
     {
         return GenerateRequireOrEnsureStatement(attributeArguments, isDebugGeneration, "Ensure");
     }

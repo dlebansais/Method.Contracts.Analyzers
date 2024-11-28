@@ -20,35 +20,46 @@ public partial class ContractGenerator
     private static bool KeepNodeForPipeline<T>(SyntaxNode syntaxNode, CancellationToken cancellationToken)
         where T : Attribute
     {
-        // Only accept methods.
-        if (syntaxNode is not MethodDeclarationSyntax MethodDeclaration)
+        // Only accept methods and properties.
+        MethodDeclarationSyntax? MethodDeclaration = syntaxNode as MethodDeclarationSyntax;
+        PropertyDeclarationSyntax? PropertyDeclaration = syntaxNode as PropertyDeclarationSyntax;
+        if (MethodDeclaration is null && PropertyDeclaration is null)
             return false;
 
         // The suffix can't be empty: if invalid in user settings, it's the default suffix.
         string VerifiedSuffix = Settings.VerifiedSuffix;
         Contract.Assert(VerifiedSuffix != string.Empty);
 
-        // Only accept methods with the 'Verified' suffix in their name.
-        string MethodName = MethodDeclaration.Identifier.Text;
+        // Only accept methods and properties with the 'Verified' suffix in their name.
+        string MethodName = string.Empty;
+        if (MethodDeclaration is not null)
+            MethodName = MethodDeclaration.Identifier.Text;
+        if (PropertyDeclaration is not null)
+            MethodName = PropertyDeclaration.Identifier.Text;
+
         if (!GeneratorHelper.StringEndsWith(MethodName, VerifiedSuffix))
             return false;
 
-        // Do not accept methods that are the suffix and nothing else.
+        // Do not accept methods or properties that are the suffix and nothing else.
         if (MethodName == VerifiedSuffix)
             return false;
 
-        // Ignore methods that are not in a class and a namespace.
-        if ((MethodDeclaration.FirstAncestorOrSelf<ClassDeclarationSyntax>() is null &&
-             MethodDeclaration.FirstAncestorOrSelf<StructDeclarationSyntax>() is null &&
-             MethodDeclaration.FirstAncestorOrSelf<RecordDeclarationSyntax>() is null) ||
-            MethodDeclaration.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>() is null)
+        // Ignore methods and properties that are not in a class and a namespace.
+        if ((syntaxNode.FirstAncestorOrSelf<ClassDeclarationSyntax>() is null &&
+             syntaxNode.FirstAncestorOrSelf<StructDeclarationSyntax>() is null &&
+             syntaxNode.FirstAncestorOrSelf<RecordDeclarationSyntax>() is null) ||
+            syntaxNode.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>() is null)
         {
             return false;
         }
 
         // Because we set context to null, this check let pass attributes with the same name but from another assembly or namespace.
         // That's ok, we'll catch them later.
-        string? FirstAttributeName = GetFirstSupportedAttribute(context: null, MethodDeclaration);
+        string? FirstAttributeName = null;
+        if (MethodDeclaration is not null)
+            FirstAttributeName = GetFirstSupportedAttribute(context: null, MethodDeclaration);
+        if (PropertyDeclaration is not null)
+            FirstAttributeName = GetFirstSupportedAttribute(context: null, PropertyDeclaration);
 
         // One of these attributes has to be the first, and we only return true for this one.
         // This way, multiple calls with different T return true exactly once.
@@ -70,7 +81,7 @@ public partial class ContractGenerator
         Contract.RequireNotNull(memberDeclaration, out MemberDeclarationSyntax MemberDeclaration);
 
         // Get a list of all supported attributes for this method.
-        List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMethodSupportedAttributes(context, MemberDeclaration, SupportedAttributeTypes);
+        List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMemberSupportedAttributes(context, MemberDeclaration, SupportedAttributeTypes);
         List<string> AttributeNames = [];
         bool IsDebugGeneration = MemberDeclaration.SyntaxTree.Options.PreprocessorSymbolNames.Contains("DEBUG");
 

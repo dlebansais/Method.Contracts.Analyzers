@@ -202,10 +202,10 @@ If there is no `Access` attribute and the method is `static` or `async`, the gen
 
 ## Properties
 
-Since C# 13 properties can be `partial`. This generator supports verified properties in a way similar to methods, with the following differences:
+Properties can be `partial` since C# 13. This generator supports verified properties in a way similar to methods, with the following differences:
 
 + `RequireNotNull` is not suppported. Instead, it is added implicitely if the property type is a reference type and not nullable.
-+ `Require` and `Require` can use `value` in the expression text.
++ `Require` and `Require` can use `value` in the expression text. If the property type is a non-nullable reference type, you can instead use `Value` (with capital V) to indicate the non-null value after the check for null is made. This identifier is configurable (see below).
 
 ## Configuration
 
@@ -214,6 +214,7 @@ You can configure the generator with the following settings:
 + `VerifierSuffix`: specifies which suffix a method should have to support contract attributes. The default value is `Verified` (see `TryParseFooVerified` above in sample code).
 + `TabLength`: the number of whitespace for a tab in generated code. The default value is 4.
 + `ReturnIdentifier`: the name of the identifier that can be used in `Ensure` expressions to indicate the value returned by the method. The default is `Result`.
++ `ValueIdentifier`: the name of the identifier that can be used in `Require` expressions to indicate the non-null input to the property. The default is `Value`.
 + `DisabledWarnings`: a comma-separated list of warnings to disable in the generated code with `#pragma warning disable`.
 
 To change a setting, modify the `.csproj` file of your project as follow (*Demo* is just an example):

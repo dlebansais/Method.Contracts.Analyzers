@@ -23,12 +23,12 @@ public partial class ContractGenerator
                 {{Model.UsingsAfterNamespace}}
                 partial {{Model.DeclarationTokens}} {{Model.FullClassName}}
                 {
-                {{Model.Documentation}}{{Model.GeneratedMethodDeclaration}}
+                {{Model.Documentation}}{{Model.GeneratedMethodDeclaration}}{{Model.GeneratedPropertyDeclaration}}
                 }
                 """;
             SourceText = AnalyzerTools.Replace(SourceText, "\r\n", "\n");
 
-            context.AddSource($"{Model.ClassName}_{Model.ShortMethodName}{Model.UniqueOverloadIdentifier}.g.cs", Microsoft.CodeAnalysis.Text.SourceText.From(SourceText, Encoding.UTF8));
+            context.AddSource($"{Model.ClassName}_{Model.ShortName}{Model.UniqueOverloadIdentifier}.g.cs", Microsoft.CodeAnalysis.Text.SourceText.From(SourceText, Encoding.UTF8));
         }
     }
 }

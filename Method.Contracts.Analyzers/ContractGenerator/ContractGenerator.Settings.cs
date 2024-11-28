@@ -41,6 +41,16 @@ public partial class ContractGenerator
     public const string DefaultResultIdentifier = "Result";
 
     /// <summary>
+    /// The key in .csproj for the name of the value identifier in generated queries.
+    /// </summary>
+    public const string ValueIdentifierKey = "ValueIdentifier";
+
+    /// <summary>
+    /// The default value for the name of the value identifier in generated queries.
+    /// </summary>
+    public const string DefaultValueIdentifier = "Value";
+
+    /// <summary>
     /// The key in .csproj for the comma-separated list of disabled warnings in generated code.
     /// </summary>
     public const string DisabledWarningsKey = "DisabledWarnings";
@@ -49,8 +59,9 @@ public partial class ContractGenerator
     private static readonly GeneratorSettingsEntry VerifiedSuffixSetting = new(BuildKey: VerifiedSuffixKey, DefaultValue: DefaultVerifiedSuffix);
     private static readonly GeneratorSettingsEntry TabLengthSetting = new(BuildKey: TabLengthKey, DefaultValue: $"{DefaultTabLength}");
     private static readonly GeneratorSettingsEntry ResultIdentifierSetting = new(BuildKey: ResultIdentifierKey, DefaultValue: DefaultResultIdentifier);
+    private static readonly GeneratorSettingsEntry ValueIdentifierSetting = new(BuildKey: ValueIdentifierKey, DefaultValue: DefaultValueIdentifier);
     private static readonly GeneratorSettingsEntry DisabledWarningsSetting = new(BuildKey: DisabledWarningsKey, DefaultValue: string.Empty);
-    private static GeneratorSettings Settings = new(VerifiedSuffix: DefaultVerifiedSuffix, TabLength: DefaultTabLength, ResultIdentifier: DefaultResultIdentifier, DisabledWarnings: string.Empty);
+    private static GeneratorSettings Settings = new(VerifiedSuffix: DefaultVerifiedSuffix, TabLength: DefaultTabLength, ResultIdentifier: DefaultResultIdentifier, ValueIdentifier: DefaultValueIdentifier, DisabledWarnings: string.Empty);
 
     /// <summary>
     /// Reads settings.
@@ -62,6 +73,7 @@ public partial class ContractGenerator
         string VerifiedSuffix = VerifiedSuffixSetting.ReadAsString(options, out _);
         int TabLength = TabLengthSetting.ReadAsInt(options, out _);
         string ResultIdentifier = ResultIdentifierSetting.ReadAsString(options, out _);
+        string ValueIdentifier = ValueIdentifierSetting.ReadAsString(options, out _);
         string DisabledWarnings = DisabledWarningsSetting.ReadAsString(options, out _);
 
         Settings = Settings with
@@ -69,6 +81,7 @@ public partial class ContractGenerator
             VerifiedSuffix = VerifiedSuffix,
             TabLength = TabLength,
             ResultIdentifier = ResultIdentifier,
+            ValueIdentifier = ValueIdentifier,
             DisabledWarnings = DisabledWarnings,
         };
 

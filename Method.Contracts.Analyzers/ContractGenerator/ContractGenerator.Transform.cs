@@ -18,19 +18,25 @@ public partial class ContractGenerator
     private static ContractModel TransformContractAttributes(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
     {
         SyntaxNode TargetNode = context.TargetNode;
-        MethodDeclarationSyntax MethodDeclaration = Contract.AssertOfType<MethodDeclarationSyntax>(TargetNode);
+        MemberDeclarationSyntax MemberDeclaration = Contract.AssertOfType<MemberDeclarationSyntax>(TargetNode);
 
-        ContractModel Model = GetModelWithoutContract(context, MethodDeclaration);
-        Model = Model with { Attributes = GetModelContract(MethodDeclaration) };
-        Model = Model with { Documentation = GetMethodDocumentation(Model, MethodDeclaration) };
+        ContractModel Model = GetModelWithoutContract(context, MemberDeclaration);
+        Model = Model with { Attributes = GetModelContract(MemberDeclaration) };
+        Model = Model with { Documentation = GetMemberDocumentation(Model, MemberDeclaration) };
         Model = Model with { GeneratedMethodDeclaration = GetGeneratedMethodDeclaration(Model, context, out bool IsAsync) };
+        Model = Model with { GeneratedPropertyDeclaration = GetGeneratedPropertyDeclaration(Model, context) };
         (string UsingsBeforeNamespace, string UsingsAfterNamespace) = GetUsings(context, IsAsync);
-        Model = Model with { UsingsBeforeNamespace = UsingsBeforeNamespace, UsingsAfterNamespace = UsingsAfterNamespace, IsAsync = IsAsync };
+        Model = Model with
+        {
+            UsingsBeforeNamespace = UsingsBeforeNamespace,
+            UsingsAfterNamespace = UsingsAfterNamespace,
+            IsAsync = IsAsync,
+        };
 
         return Model;
     }
 
-    private static ContractModel GetModelWithoutContract(GeneratorAttributeSyntaxContext context, MethodDeclarationSyntax methodDeclaration)
+    private static ContractModel GetModelWithoutContract(GeneratorAttributeSyntaxContext context, MemberDeclarationSyntax memberDeclaration)
     {
         INamedTypeSymbol ContainingClass = Contract.AssertNotNull(context.TargetSymbol.ContainingType);
         INamespaceSymbol ContainingNamespace = Contract.AssertNotNull(ContainingClass.ContainingNamespace);
@@ -40,7 +46,7 @@ public partial class ContractGenerator
         string? DeclarationTokens = null;
         string? FullClassName = null;
 
-        if (methodDeclaration.FirstAncestorOrSelf<ClassDeclarationSyntax>() is ClassDeclarationSyntax ClassDeclaration)
+        if (memberDeclaration.FirstAncestorOrSelf<ClassDeclarationSyntax>() is ClassDeclarationSyntax ClassDeclaration)
         {
             DeclarationTokens = "class";
             FullClassName = ClassName;
@@ -56,7 +62,7 @@ public partial class ContractGenerator
             }
         }
 
-        if (methodDeclaration.FirstAncestorOrSelf<StructDeclarationSyntax>() is StructDeclarationSyntax StructDeclaration)
+        if (memberDeclaration.FirstAncestorOrSelf<StructDeclarationSyntax>() is StructDeclarationSyntax StructDeclaration)
         {
             DeclarationTokens = "struct";
             FullClassName = ClassName;
@@ -72,7 +78,7 @@ public partial class ContractGenerator
             }
         }
 
-        if (methodDeclaration.FirstAncestorOrSelf<RecordDeclarationSyntax>() is RecordDeclarationSyntax RecordDeclaration)
+        if (memberDeclaration.FirstAncestorOrSelf<RecordDeclarationSyntax>() is RecordDeclarationSyntax RecordDeclaration)
         {
             DeclarationTokens = RecordDeclaration.ClassOrStructKeyword.IsKind(SyntaxKind.StructKeyword) ? "record struct" : "record";
             FullClassName = ClassName;
@@ -93,7 +99,7 @@ public partial class ContractGenerator
 
         Contract.Assert(GeneratorHelper.StringEndsWith(SymbolName, VerifiedSuffix));
         Contract.Assert(SymbolName.Length > VerifiedSuffix.Length);
-        string ShortMethodName = SymbolName[..^VerifiedSuffix.Length];
+        string ShortName = SymbolName[..^VerifiedSuffix.Length];
 
         return new ContractModel(
             Namespace: Namespace,
@@ -102,12 +108,21 @@ public partial class ContractGenerator
             ClassName: ClassName,
             DeclarationTokens: Contract.AssertNotNull(DeclarationTokens),
             FullClassName: Contract.AssertNotNull(FullClassName),
-            ShortMethodName: ShortMethodName,
-            UniqueOverloadIdentifier: GetUniqueOverloadIdentifier(methodDeclaration),
+            ShortName: ShortName,
+            UniqueOverloadIdentifier: GetUniqueOverloadIdentifier(memberDeclaration),
             Documentation: string.Empty,
             Attributes: [],
             GeneratedMethodDeclaration: string.Empty,
+            GeneratedPropertyDeclaration: string.Empty,
             IsAsync: false);
+    }
+
+    private static string GetUniqueOverloadIdentifier(MemberDeclarationSyntax memberDeclaration)
+    {
+        if (memberDeclaration is MethodDeclarationSyntax MethodDeclaration)
+            return GetUniqueOverloadIdentifier(MethodDeclaration);
+        else
+            return "_get";
     }
 
     private static string GetUniqueOverloadIdentifier(MethodDeclarationSyntax methodDeclaration)
@@ -130,13 +145,13 @@ public partial class ContractGenerator
         return Result;
     }
 
-    private static string GetMethodDocumentation(ContractModel model, MethodDeclarationSyntax methodDeclaration)
+    private static string GetMemberDocumentation(ContractModel model, MemberDeclarationSyntax memberDeclaration)
     {
         string Documentation = string.Empty;
 
-        if (methodDeclaration.HasLeadingTrivia)
+        if (memberDeclaration.HasLeadingTrivia)
         {
-            SyntaxTriviaList LeadingTrivia = methodDeclaration.GetLeadingTrivia();
+            SyntaxTriviaList LeadingTrivia = memberDeclaration.GetLeadingTrivia();
 
             List<SyntaxTrivia> SupportedTrivias = [];
             foreach (SyntaxTrivia trivia in LeadingTrivia)
@@ -182,7 +197,10 @@ public partial class ContractGenerator
             }
         }
 
-        Dictionary<string, string> ParameterNameReplacementTable = GetParameterNameReplacementTable(model, methodDeclaration);
+        Dictionary<string, string> ParameterNameReplacementTable = memberDeclaration is MethodDeclarationSyntax MethodDeclaration
+            ? GetParameterNameReplacementTable(model, MethodDeclaration)
+            : [];
+
         foreach (KeyValuePair<string, string> Entry in ParameterNameReplacementTable)
         {
             string OldParameterName = $"<param name=\"{Entry.Key}\">";
@@ -265,12 +283,12 @@ public partial class ContractGenerator
         return false;
     }
 
-    private static List<AttributeModel> GetModelContract(MethodDeclarationSyntax methodDeclaration)
+    private static List<AttributeModel> GetModelContract(MemberDeclarationSyntax memberDeclaration)
     {
         List<AttributeModel> Result = [];
-        List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMethodSupportedAttributes(context: null, methodDeclaration, SupportedAttributeTypes);
+        List<AttributeSyntax> MemberAttributes = GeneratorHelper.GetMemberSupportedAttributes(context: null, memberDeclaration, SupportedAttributeTypes);
 
-        Dictionary<string, Func<MethodDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, List<AttributeArgumentModel>>> AttributeTransformTable = new()
+        Dictionary<string, Func<MemberDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, List<AttributeArgumentModel>>> AttributeTransformTable = new()
         {
             { nameof(AccessAttribute), TransformAccessAttribute },
             { nameof(RequireNotNullAttribute), TransformRequireNotNullAttribute },
@@ -278,7 +296,7 @@ public partial class ContractGenerator
             { nameof(EnsureAttribute), TransformEnsureAttribute },
         };
 
-        foreach (AttributeSyntax Attribute in MethodAttributes)
+        foreach (AttributeSyntax Attribute in MemberAttributes)
         {
             if (Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
             {
@@ -286,8 +304,8 @@ public partial class ContractGenerator
                 IReadOnlyList<AttributeArgumentSyntax> AttributeArguments = AttributeArgumentList.Arguments;
 
                 Contract.Assert(AttributeTransformTable.ContainsKey(AttributeName));
-                Func<MethodDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, List<AttributeArgumentModel>> AttributeTransform = AttributeTransformTable[AttributeName];
-                List<AttributeArgumentModel> Arguments = AttributeTransform(methodDeclaration, AttributeArguments);
+                Func<MemberDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, List<AttributeArgumentModel>> AttributeTransform = AttributeTransformTable[AttributeName];
+                List<AttributeArgumentModel> Arguments = AttributeTransform(memberDeclaration, AttributeArguments);
 
                 AttributeModel Model = new(AttributeName, Arguments);
 
@@ -298,15 +316,18 @@ public partial class ContractGenerator
         return Result;
     }
 
-    private static List<AttributeArgumentModel> TransformAccessAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static List<AttributeArgumentModel> TransformAccessAttribute(MemberDeclarationSyntax memberDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
         return TransformStringOnlyAttribute(attributeArguments);
     }
 
-    private static List<AttributeArgumentModel> TransformRequireNotNullAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static List<AttributeArgumentModel> TransformRequireNotNullAttribute(MemberDeclarationSyntax memberDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
+        Contract.Assert(memberDeclaration is MethodDeclarationSyntax);
+        MethodDeclarationSyntax MethodDeclarationSyntax = (MethodDeclarationSyntax)memberDeclaration;
+
         if (IsRequireNotNullAttributeWithAliasTypeOrName(attributeArguments))
-            return TransformRequireNotNullAttributeWithAlias(methodDeclaration, attributeArguments);
+            return TransformRequireNotNullAttributeWithAlias(MethodDeclarationSyntax, attributeArguments);
         else
             return TransformRequireNotNullAttributeNoAlias(attributeArguments);
     }
@@ -381,12 +402,12 @@ public partial class ContractGenerator
         return Result;
     }
 
-    private static List<AttributeArgumentModel> TransformRequireAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static List<AttributeArgumentModel> TransformRequireAttribute(MemberDeclarationSyntax memberDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
         return TransformRequireOrEnsureAttribute(attributeArguments);
     }
 
-    private static List<AttributeArgumentModel> TransformEnsureAttribute(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
+    private static List<AttributeArgumentModel> TransformEnsureAttribute(MemberDeclarationSyntax memberDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
         return TransformRequireOrEnsureAttribute(attributeArguments);
     }

@@ -166,7 +166,7 @@ internal static class GeneratorHelper
     /// <param name="context">The analysis context. Can be <see langword="null"/> if no context is available.</param>
     /// <param name="memberDeclaration">The method or property.</param>
     /// <param name="supportedAttributeTypes">The list of supported attributes.</param>
-    public static List<AttributeSyntax> GetMethodSupportedAttributes(SyntaxNodeAnalysisContext? context, MemberDeclarationSyntax memberDeclaration, Collection<Type> supportedAttributeTypes)
+    public static List<AttributeSyntax> GetMemberSupportedAttributes(SyntaxNodeAnalysisContext? context, MemberDeclarationSyntax memberDeclaration, Collection<Type> supportedAttributeTypes)
     {
         List<AttributeSyntax> Result = [];
 

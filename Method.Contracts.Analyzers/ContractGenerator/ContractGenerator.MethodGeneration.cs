@@ -17,7 +17,11 @@ public partial class ContractGenerator
     private static string GetGeneratedMethodDeclaration(ContractModel model, GeneratorAttributeSyntaxContext context, out bool isAsync)
     {
         SyntaxNode TargetNode = context.TargetNode;
-        MethodDeclarationSyntax MethodDeclaration = Contract.AssertOfType<MethodDeclarationSyntax>(TargetNode);
+        if (TargetNode is not MethodDeclarationSyntax MethodDeclaration)
+        {
+            isAsync = false;
+            return string.Empty;
+        }
 
         bool IsDebugGeneration = MethodDeclaration.SyntaxTree.Options.PreprocessorSymbolNames.Contains("DEBUG");
 
@@ -30,7 +34,7 @@ public partial class ContractGenerator
         SyntaxList<AttributeListSyntax> CodeAttributes = GenerateCodeAttributes();
         MethodDeclaration = MethodDeclaration.WithAttributeLists(CodeAttributes);
 
-        SyntaxToken ShortIdentifier = SyntaxFactory.Identifier(model.ShortMethodName);
+        SyntaxToken ShortIdentifier = SyntaxFactory.Identifier(model.ShortName);
         MethodDeclaration = MethodDeclaration.WithIdentifier(ShortIdentifier);
 
         SyntaxTokenList Modifiers = GenerateContractModifiers(model, MethodDeclaration, LeadingTrivia, TrailingTrivia, out isAsync);
@@ -44,7 +48,7 @@ public partial class ContractGenerator
 
         if (isAsync && IsTaskType(MethodDeclaration.ReturnType))
             MethodDeclaration = MethodDeclaration.WithReturnType(SyntaxFactory.IdentifierName("Task").WithTrailingTrivia(SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "))));
-        else if (SimplifyReturnTypeLeadingTrivia) // This case apply to methods with zero modifier that become public.
+        else if (SimplifyReturnTypeLeadingTrivia) // This case applies to methods with zero modifier that become public.
             MethodDeclaration = MethodDeclaration.WithReturnType(MethodDeclaration.ReturnType.WithLeadingTrivia(WhitespaceTrivia));
 
         MethodDeclaration = MethodDeclaration.WithLeadingTrivia(LeadingTriviaWithoutLineEnd);
@@ -85,13 +89,13 @@ public partial class ContractGenerator
         return Assembly.GetExecutingAssembly().GetName().Version.ToString();
     }
 
-    private static SyntaxTokenList GenerateContractModifiers(ContractModel model, MethodDeclarationSyntax methodDeclaration, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia, out bool isAsync)
+    private static SyntaxTokenList GenerateContractModifiers(ContractModel model, MemberDeclarationSyntax memberDeclaration, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia, out bool isAsync)
     {
         List<SyntaxToken> ModifierTokens = [];
 
         ModifierTokens = model.Attributes.Find(m => m.Name == nameof(AccessAttribute)) is AttributeModel AccessAttributeModel
             ? GenerateContractExplicitModifiers(AccessAttributeModel, leadingTrivia, trailingTrivia, out isAsync)
-            : GenerateContractDefaultModifiers(methodDeclaration, leadingTrivia, trailingTrivia, out isAsync);
+            : GenerateContractDefaultModifiers(memberDeclaration, leadingTrivia, trailingTrivia, out isAsync);
 
         return SyntaxFactory.TokenList(ModifierTokens);
     }
@@ -121,7 +125,7 @@ public partial class ContractGenerator
         return ModifierTokens;
     }
 
-    private static List<SyntaxToken> GenerateContractDefaultModifiers(MethodDeclarationSyntax methodDeclaration, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia, out bool isAsync)
+    private static List<SyntaxToken> GenerateContractDefaultModifiers(MemberDeclarationSyntax memberDeclaration, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia, out bool isAsync)
     {
         List<SyntaxToken> ModifierTokens = [];
         isAsync = false;
@@ -131,7 +135,7 @@ public partial class ContractGenerator
         ModifierTokens.Add(PublicModifierToken);
 
         // If the method is static and/or async, add the same static modifier to the generated code.
-        foreach (SyntaxToken Modifier in methodDeclaration.Modifiers)
+        foreach (SyntaxToken Modifier in memberDeclaration.Modifiers)
         {
             string ModifierText = Modifier.Text;
 
@@ -146,7 +150,7 @@ public partial class ContractGenerator
             }
         }
 
-        int LastItemIndex = methodDeclaration.Modifiers.Count - 1;
+        int LastItemIndex = memberDeclaration.Modifiers.Count - 1;
         ModifierTokens[LastItemIndex] = ModifierTokens[LastItemIndex].WithTrailingTrivia(trailingTrivia);
 
         return ModifierTokens;
@@ -173,10 +177,10 @@ public partial class ContractGenerator
         return SyntaxFactory.TriviaList(Trivias);
     }
 
-    private static SyntaxTriviaList? GetModifiersTrailingTrivia(MethodDeclarationSyntax methodDeclaration)
+    private static SyntaxTriviaList? GetModifiersTrailingTrivia(MemberDeclarationSyntax memberDeclaration)
     {
-        if (methodDeclaration.Modifiers.Count > 0)
-            return methodDeclaration.Modifiers.Last().TrailingTrivia;
+        if (memberDeclaration.Modifiers.Count > 0)
+            return memberDeclaration.Modifiers.Last().TrailingTrivia;
         else
             return null;
     }
