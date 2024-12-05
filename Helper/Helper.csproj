@@ -74,12 +74,9 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" />
-    </ItemGroup>
 
-    <ItemGroup>
-      <Reference Include="Method.Contracts">
-        <HintPath>..\..\Method.Contracts\Method.Contracts\bin\x64\$(Configuration)\$(TargetFramework)\Method.Contracts.dll</HintPath>
-      </Reference>
+        <PackageReference Include="Method.Contracts-Debug" Version="1.8.0" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+        <PackageReference Include="Method.Contracts" Version="1.8.0" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
     </ItemGroup>
 
 </Project>

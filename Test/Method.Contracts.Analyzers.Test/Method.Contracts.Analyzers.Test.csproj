@@ -46,16 +46,12 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.MSTest" Version="1.1.2" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing.MSTest" Version="1.1.2" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing.MSTest" Version="1.1.2" />
+        <PackageReference Include="Method.Contracts-Debug" Version="1.8.0" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+        <PackageReference Include="Method.Contracts" Version="1.8.0" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
 
         <!-- System.Formats.Asn1 is added to mitigate vulnerability. -->
         <!-- Remove as soon as one of the packages above no longer depends on the vulnerable version -->
         <PackageReference Include="System.Formats.Asn1" Version="8.0.1" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Reference Include="Method.Contracts">
-            <HintPath>..\..\..\Method.Contracts\Method.Contracts\bin\x64\$(Configuration)\$(TargetFramework)\Method.Contracts.dll</HintPath>
-        </Reference>
     </ItemGroup>
 
     <ItemGroup>

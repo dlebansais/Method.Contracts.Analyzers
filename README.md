@@ -324,6 +324,9 @@ If a base class contains one or more constructors with the `InitializeWith` attr
 | [MCA1014](doc/MCA1014.md) | `Ensure` attribute has too many arguments.                                  |
 | [MCA1015](doc/MCA1015.md) | Set parameter as unused before return.                                      |
 | [MCA1016](doc/MCA1016.md) | Only use `Contract.Unused` with parameters.                                 |
+| [MCA1017](doc/MCA1017.md) | Verified property must be private.                                          |
+| [MCA1018](doc/MCA1018.md) | Verified property must be within type.                                      |
+| [MCA1019](doc/MCA1019.md) | Verified property is missing suffix.                                        |
 
 ### Initialization
 
