@@ -159,10 +159,7 @@ internal static class AnalyzerTools
             return false;
         }
 
-        if (!IsInvocationOfContractUnused(context, InvocationExpression, out argumentIdentifierName))
-            return false;
-
-        return true;
+        return IsInvocationOfContractUnused(context, InvocationExpression, out argumentIdentifierName);
     }
 
     /// <summary>

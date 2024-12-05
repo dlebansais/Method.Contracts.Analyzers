@@ -63,17 +63,10 @@ public class MCA1018VerifiedPropertyMustBeWithinType : DiagnosticAnalyzer
 
     private static bool IsPropertyWithinType(PropertyDeclarationSyntax propertyDeclaration)
     {
-        if (propertyDeclaration.FirstAncestorOrSelf<ClassDeclarationSyntax>() is null &&
-            propertyDeclaration.FirstAncestorOrSelf<StructDeclarationSyntax>() is null &&
-            propertyDeclaration.FirstAncestorOrSelf<RecordDeclarationSyntax>() is null)
-        {
-            return false;
-        }
-
-        if (propertyDeclaration.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>() is null)
-            return false;
-
-        return true;
+        return (propertyDeclaration.FirstAncestorOrSelf<ClassDeclarationSyntax>() is not null ||
+                propertyDeclaration.FirstAncestorOrSelf<StructDeclarationSyntax>() is not null ||
+                propertyDeclaration.FirstAncestorOrSelf<RecordDeclarationSyntax>() is not null) &&
+               propertyDeclaration.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>() is not null;
     }
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, PropertyDeclarationSyntax propertyDeclaration, IAnalysisAssertion[] analysisAssertions)

@@ -119,10 +119,7 @@ public partial class ContractGenerator
 
     private static string GetUniqueOverloadIdentifier(MemberDeclarationSyntax memberDeclaration)
     {
-        if (memberDeclaration is MethodDeclarationSyntax MethodDeclaration)
-            return GetUniqueOverloadIdentifier(MethodDeclaration);
-        else
-            return "_get";
+        return memberDeclaration is MethodDeclarationSyntax MethodDeclaration ? GetUniqueOverloadIdentifier(MethodDeclaration) : "_get";
     }
 
     private static string GetUniqueOverloadIdentifier(MethodDeclarationSyntax methodDeclaration)
@@ -230,10 +227,7 @@ public partial class ContractGenerator
 
         SyntaxTrivia FirstTrivia = trivias.First();
 
-        if (!FirstTrivia.IsKind(SyntaxKind.WhitespaceTrivia))
-            return false;
-
-        return true;
+        return FirstTrivia.IsKind(SyntaxKind.WhitespaceTrivia);
     }
 
     private static int CountStartingEndOfLineTrivias(List<SyntaxTrivia> trivias)
@@ -326,10 +320,9 @@ public partial class ContractGenerator
         Contract.Assert(memberDeclaration is MethodDeclarationSyntax);
         MethodDeclarationSyntax MethodDeclarationSyntax = (MethodDeclarationSyntax)memberDeclaration;
 
-        if (IsRequireNotNullAttributeWithAliasTypeOrName(attributeArguments))
-            return TransformRequireNotNullAttributeWithAlias(MethodDeclarationSyntax, attributeArguments);
-        else
-            return TransformRequireNotNullAttributeNoAlias(attributeArguments);
+        return IsRequireNotNullAttributeWithAliasTypeOrName(attributeArguments)
+            ? TransformRequireNotNullAttributeWithAlias(MethodDeclarationSyntax, attributeArguments)
+            : TransformRequireNotNullAttributeNoAlias(attributeArguments);
     }
 
     private static List<AttributeArgumentModel> TransformRequireNotNullAttributeWithAlias(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
@@ -414,10 +407,9 @@ public partial class ContractGenerator
 
     private static List<AttributeArgumentModel> TransformRequireOrEnsureAttribute(IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        if (IsRequireOrEnsureAttributeWithDebugOnly(attributeArguments))
-            return TransformRequireOrEnsureAttributeWithDebugOnly(attributeArguments);
-        else
-            return TransformStringOnlyAttribute(attributeArguments);
+        return IsRequireOrEnsureAttributeWithDebugOnly(attributeArguments)
+            ? TransformRequireOrEnsureAttributeWithDebugOnly(attributeArguments)
+            : TransformStringOnlyAttribute(attributeArguments);
     }
 
     private static List<AttributeArgumentModel> TransformRequireOrEnsureAttributeWithDebugOnly(IReadOnlyList<AttributeArgumentSyntax> attributeArguments)

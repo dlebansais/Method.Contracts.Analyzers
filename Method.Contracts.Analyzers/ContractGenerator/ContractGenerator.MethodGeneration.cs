@@ -179,10 +179,7 @@ public partial class ContractGenerator
 
     private static SyntaxTriviaList? GetModifiersTrailingTrivia(MemberDeclarationSyntax memberDeclaration)
     {
-        if (memberDeclaration.Modifiers.Count > 0)
-            return memberDeclaration.Modifiers.Last().TrailingTrivia;
-        else
-            return null;
+        return memberDeclaration.Modifiers.Count > 0 ? memberDeclaration.Modifiers.Last().TrailingTrivia : null;
     }
 
     private static bool HasUpdatedParameterList(ContractModel model, MethodDeclarationSyntax methodDeclaration, out ParameterListSyntax updatedParameterList)

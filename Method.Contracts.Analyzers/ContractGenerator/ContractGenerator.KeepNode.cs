@@ -63,10 +63,7 @@ public partial class ContractGenerator
 
         // One of these attributes has to be the first, and we only return true for this one.
         // This way, multiple calls with different T return true exactly once.
-        if (FirstAttributeName is null || FirstAttributeName != typeof(T).Name)
-            return false;
-
-        return true;
+        return FirstAttributeName is not null && FirstAttributeName == typeof(T).Name;
     }
 
     /// <summary>
@@ -151,15 +148,13 @@ public partial class ContractGenerator
     {
         Contract.RequireNotNull(attributeArguments, out IReadOnlyList<AttributeArgumentSyntax> AttributeArguments);
 
-        if (memberDeclaration is not MethodDeclarationSyntax MethodDeclaration)
-            return AttributeValidityCheckResult.Invalid(-1);
-
-        if (IsRequireNotNullAttributeWithAliasTypeOrName(AttributeArguments))
-            return IsValidRequireNotNullAttributeWithAliasTypeOrName(MethodDeclaration, AttributeArguments);
-        else if (AttributeArguments.Count > 0)
-            return IsValidRequireNotNullAttributeNoAlias(MethodDeclaration, AttributeArguments);
-        else
-            return AttributeValidityCheckResult.Invalid(-1);
+        return memberDeclaration is not MethodDeclarationSyntax MethodDeclaration
+            ? AttributeValidityCheckResult.Invalid(-1)
+            : IsRequireNotNullAttributeWithAliasTypeOrName(AttributeArguments)
+                ? IsValidRequireNotNullAttributeWithAliasTypeOrName(MethodDeclaration, AttributeArguments)
+                : AttributeArguments.Count > 0
+                    ? IsValidRequireNotNullAttributeNoAlias(MethodDeclaration, AttributeArguments)
+                    : AttributeValidityCheckResult.Invalid(-1);
     }
 
     /// <summary>
@@ -309,21 +304,13 @@ public partial class ContractGenerator
 
     private static AttributeValidityCheckResult IsValidRequireOrEnsureAttribute(IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
-        if (IsRequireOrEnsureAttributeWithDebugOnly(attributeArguments))
-        {
-            return IsValidRequireOrEnsureAttributeWithDebugOnly(attributeArguments);
-        }
-        else if (attributeArguments.Count > 0)
-        {
-            if (IsValidStringOnlyAttribute(attributeArguments, out Collection<string> ArgumentValues, out int PositionOfFirstInvalidArgument))
-                return new AttributeValidityCheckResult(AttributeGeneration.Valid, ArgumentValues, -1);
-            else
-                return AttributeValidityCheckResult.Invalid(PositionOfFirstInvalidArgument);
-        }
-        else
-        {
-            return AttributeValidityCheckResult.Invalid(-1);
-        }
+        return IsRequireOrEnsureAttributeWithDebugOnly(attributeArguments)
+            ? IsValidRequireOrEnsureAttributeWithDebugOnly(attributeArguments)
+            : attributeArguments.Count > 0
+                ? IsValidStringOnlyAttribute(attributeArguments, out Collection<string> ArgumentValues, out int PositionOfFirstInvalidArgument)
+                    ? new AttributeValidityCheckResult(AttributeGeneration.Valid, ArgumentValues, -1)
+                    : AttributeValidityCheckResult.Invalid(PositionOfFirstInvalidArgument)
+                : AttributeValidityCheckResult.Invalid(-1);
     }
 
     /// <summary>

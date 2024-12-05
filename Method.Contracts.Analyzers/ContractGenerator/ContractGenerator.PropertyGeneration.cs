@@ -73,10 +73,7 @@ public partial class ContractGenerator
 
         // If the type is directly nullable, null is always a possible value.
         bool IsAnnotated = propertyDeclaration.Type is NullableTypeSyntax;
-        if (IsAnnotated)
-            return false;
-
-        return true;
+        return !IsAnnotated;
     }
 
     private static bool IsPropertyPrivate(ContractModel model)
@@ -284,12 +281,10 @@ public partial class ContractGenerator
 
     private static List<StatementSyntax> GeneratePropertyAttributeStatements(AttributeModel attributeModel, bool isDebugGeneration, bool isGetter)
     {
-        if (attributeModel.Name is nameof(EnsureAttribute) && isGetter)
-            return GenerateEnsureStatement(attributeModel.Arguments, isDebugGeneration);
-
-        if (attributeModel.Name is nameof(RequireAttribute) && !isGetter)
-            return GenerateRequireStatement(attributeModel.Arguments, isDebugGeneration);
-
-        return [];
+        return attributeModel.Name is nameof(EnsureAttribute) && isGetter
+            ? GenerateEnsureStatement(attributeModel.Arguments, isDebugGeneration)
+            : attributeModel.Name is nameof(RequireAttribute) && !isGetter
+                ? GenerateRequireStatement(attributeModel.Arguments, isDebugGeneration)
+                : [];
     }
 }

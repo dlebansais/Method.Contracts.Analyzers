@@ -63,17 +63,10 @@ public class MCA1002VerifiedMethodMustBeWithinType : DiagnosticAnalyzer
 
     private static bool IsMethodWithinType(MethodDeclarationSyntax methodDeclaration)
     {
-        if (methodDeclaration.FirstAncestorOrSelf<ClassDeclarationSyntax>() is null &&
-            methodDeclaration.FirstAncestorOrSelf<StructDeclarationSyntax>() is null &&
-            methodDeclaration.FirstAncestorOrSelf<RecordDeclarationSyntax>() is null)
-        {
-            return false;
-        }
-
-        if (methodDeclaration.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>() is null)
-            return false;
-
-        return true;
+        return (methodDeclaration.FirstAncestorOrSelf<ClassDeclarationSyntax>() is not null ||
+                methodDeclaration.FirstAncestorOrSelf<StructDeclarationSyntax>() is not null ||
+                methodDeclaration.FirstAncestorOrSelf<RecordDeclarationSyntax>() is not null) &&
+               methodDeclaration.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>() is not null;
     }
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, IAnalysisAssertion[] analysisAssertions)

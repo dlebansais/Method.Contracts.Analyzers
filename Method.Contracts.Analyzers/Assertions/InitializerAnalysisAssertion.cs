@@ -33,23 +33,15 @@ internal class InitializerAnalysisAssertion : IAnalysisAssertion
         IMethodSymbol ConstructorSymbol = Contract.AssertNotNull(ObjectCreationOperation.Constructor);
 
         ITypeSymbol TypeSymbol = Contract.AssertNotNull(TypeInfo.Type);
-        if (TypeSymbol.TypeKind != TypeKind.Class)
-            return false;
-
-        return HasInitializeWithAttribute(context, ConstructorSymbol);
+        return TypeSymbol.TypeKind == TypeKind.Class && HasInitializeWithAttribute(context, ConstructorSymbol);
     }
 
     private bool HasInitializeWithAttribute(SyntaxNodeAnalysisContext context, IMethodSymbol constructorSymbol)
     {
         ITypeSymbol ClassSymbol = constructorSymbol.ContainingType;
 
-        if (HasInitializeWithAttribute(context, constructorSymbol.GetAttributes(), ClassSymbol))
-            return true;
-
-        if (HasInitializeWithAttribute(context, ClassSymbol.GetAttributes(), ClassSymbol))
-            return true;
-
-        return false;
+        return HasInitializeWithAttribute(context, constructorSymbol.GetAttributes(), ClassSymbol) ||
+               HasInitializeWithAttribute(context, ClassSymbol.GetAttributes(), ClassSymbol);
     }
 
     private bool HasInitializeWithAttribute(SyntaxNodeAnalysisContext context, IEnumerable<AttributeData> attributes, ITypeSymbol classSymbol)

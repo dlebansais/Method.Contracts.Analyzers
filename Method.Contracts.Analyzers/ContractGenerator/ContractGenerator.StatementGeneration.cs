@@ -146,13 +146,7 @@ public partial class ContractGenerator
 
     private static bool IsVoidType(TypeSyntax returnType)
     {
-        if (returnType is not PredefinedTypeSyntax PredefinedType)
-            return false;
-
-        if (!PredefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword))
-            return false;
-
-        return true;
+        return returnType is PredefinedTypeSyntax PredefinedType && PredefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword);
     }
 
     private static void AddAttributeStatements(MethodDeclarationSyntax methodDeclaration,
@@ -318,10 +312,9 @@ public partial class ContractGenerator
 
     private static List<StatementSyntax> GenerateRequireNotNullStatement(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration)
     {
-        if (attributeArguments.Count > 1 && attributeArguments.Any(argument => argument.Name != string.Empty))
-            return GenerateRequireNotNullStatementWithAlias(attributeArguments, methodDeclaration);
-        else
-            return GenerateMultipleRequireNotNullStatement(attributeArguments, methodDeclaration);
+        return attributeArguments.Count > 1 && attributeArguments.Any(argument => argument.Name != string.Empty)
+            ? GenerateRequireNotNullStatementWithAlias(attributeArguments, methodDeclaration)
+            : GenerateMultipleRequireNotNullStatement(attributeArguments, methodDeclaration);
     }
 
     private static List<StatementSyntax> GenerateRequireNotNullStatementWithAlias(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration)
@@ -423,10 +416,9 @@ public partial class ContractGenerator
 
     private static List<StatementSyntax> GenerateRequireOrEnsureStatement(List<AttributeArgumentModel> attributeArguments, bool isDebugGeneration, string contractMethodName)
     {
-        if (attributeArguments.Count > 1 && attributeArguments.Any(argument => argument.Name != string.Empty))
-            return GenerateRequireOrEnsureStatementWithDebugOnly(attributeArguments, isDebugGeneration, contractMethodName);
-        else
-            return GenerateMultipleRequireOrEnsureStatement(attributeArguments, contractMethodName);
+        return attributeArguments.Count > 1 && attributeArguments.Any(argument => argument.Name != string.Empty)
+            ? GenerateRequireOrEnsureStatementWithDebugOnly(attributeArguments, isDebugGeneration, contractMethodName)
+            : GenerateMultipleRequireOrEnsureStatement(attributeArguments, contractMethodName);
     }
 
     private static List<StatementSyntax> GenerateRequireOrEnsureStatementWithDebugOnly(List<AttributeArgumentModel> attributeArguments, bool isDebugGeneration, string contractMethodName)
@@ -481,9 +473,6 @@ public partial class ContractGenerator
         char FirstLetter = text.First();
         string OtherLetters = text[1..];
 
-        if (char.IsLower(FirstLetter))
-            return $"{char.ToUpper(FirstLetter, CultureInfo.InvariantCulture)}{OtherLetters}";
-        else
-            return $"_{text}";
+        return char.IsLower(FirstLetter) ? $"{char.ToUpper(FirstLetter, CultureInfo.InvariantCulture)}{OtherLetters}" : $"_{text}";
     }
 }

@@ -61,13 +61,8 @@ public class MCA2003InitializeWithAttributeNotAllowedInClassWithExplicitConstruc
 
     private static bool IsClassAttribute(SyntaxNodeAnalysisContext context, AttributeSyntax attribute)
     {
-        if (!AnalyzerTools.IsExpectedAttribute<InitializeWithAttribute>(context, attribute))
-            return false;
-
-        if (attribute.FirstAncestorOrSelf<ConstructorDeclarationSyntax>() is not null)
-            return false;
-
-        return true;
+        return AnalyzerTools.IsExpectedAttribute<InitializeWithAttribute>(context, attribute) &&
+               attribute.FirstAncestorOrSelf<ConstructorDeclarationSyntax>() is null;
     }
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeSyntax attribute, IAnalysisAssertion[] analysisAssertions)
