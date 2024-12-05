@@ -11,6 +11,7 @@
         <Authors>David Le Bansais</Authors>
 
         <NeutralLanguage>en-US</NeutralLanguage>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <ContractSourceGenerator_VerifiedSuffix>DemoVerified</ContractSourceGenerator_VerifiedSuffix>
         <ContractSourceGenerator_TabLength>8</ContractSourceGenerator_TabLength>

@@ -1,10 +1,5 @@
 ﻿[*.cs]
 
-#### Special
-contract_generator.called_method.suffix = DemoVerified
-contract_generator.tab_length = 2
-contract_generator.called_method.result_identifier = DemoResult
-
 #### CA
 
 # CA1031: Do not catch general exception types
@@ -140,9 +135,6 @@ dotnet_diagnostic.IDE0041.severity = warning
 
 # IDE0044: Add readonly modifier
 dotnet_diagnostic.IDE0044.severity = warning
-
-# IDE0046: Use conditional expression for return
-dotnet_diagnostic.IDE0046.severity = silent
 
 # IDE0048: Add parentheses for clarity
 dotnet_diagnostic.IDE0048.severity = warning
