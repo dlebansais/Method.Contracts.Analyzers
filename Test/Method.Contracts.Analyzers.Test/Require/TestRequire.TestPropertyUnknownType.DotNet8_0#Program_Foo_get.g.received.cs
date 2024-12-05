@@ -1,4 +1,4 @@
-﻿//HintName: Program_HelloFrom_3311014053_371857150.g.cs
+﻿//HintName: Program_Foo_get.g.cs
 #nullable enable
 
 namespace Contracts.TestSuite;
@@ -10,8 +10,14 @@ using Contracts;
 partial class Program
 {
     [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.7.2.23")]
-    public static void HelloFrom(string text, out)
+    public static Bar[] Foo
     {
-        HelloFromVerified(text, out );
+        get => FooVerified;
+        set
+        {
+            Contract.Require(value > 0);
+
+            FooVerified = value;
+        }
     }
 }

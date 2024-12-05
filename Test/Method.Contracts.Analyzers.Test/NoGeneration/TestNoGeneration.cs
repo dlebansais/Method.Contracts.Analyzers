@@ -23,7 +23,7 @@ public class SimpleTest
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        Microsoft.CodeAnalysis.GeneratorDriver Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
@@ -69,7 +69,7 @@ public class SimpleTest
     }
 
     [Test]
-    public async Task TestProperty()
+    public async Task TestIndexer()
     {
         // The source code to test
         const string Source = @"
@@ -77,8 +77,14 @@ namespace Contracts.TestSuite;
 
 public class SimpleTest
 {
+    private string[] arr = new string[100];
+
     [Access(""public"")]
-    public int Foo { get; set; }
+    public string this[int i]
+    {
+        get => arr[i];
+        set => arr[i] = value;
+    }
 }
 ";
 
@@ -1557,6 +1563,34 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source, setDebug: false);
+        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestCustomRequireNotNullAttribute()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+internal class RequireNotNullAttribute : Attribute
+{
+    public RequireNotNullAttribute(string value) { Value = value; }
+    public string Value { get; set; }
+}
+
+public class SimpleTest
+{
+    [Access(""public"")]
+    [RequireNotNull(""s"")]
+    private int FooVerified { get; set; }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);

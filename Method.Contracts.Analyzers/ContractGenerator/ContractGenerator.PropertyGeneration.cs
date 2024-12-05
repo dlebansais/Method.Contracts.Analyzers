@@ -50,7 +50,7 @@ public partial class ContractGenerator
 
     private static bool CheckNotNullPropertyType(ContractModel model, GeneratorAttributeSyntaxContext context, PropertyDeclarationSyntax propertyDeclaration)
     {
-        // Ignore private properties, the author want null checking that can make it explicit.
+        // Ignore private properties, the author that want null checking can make it explicit.
         if (IsPropertyPrivate(model))
             return false;
 
@@ -67,7 +67,13 @@ public partial class ContractGenerator
 
         // If the type is not a reference type, value cannot be null. If we don't known, play safe and don't check for null.
         TypeInfo PropertyTypeInfo = context.SemanticModel.GetTypeInfo(propertyDeclaration.Type);
-        bool IsReferenceType = PropertyTypeInfo.Type is ITypeSymbol PropertyTypeSymbol && !PropertyTypeSymbol.IsValueType;
+
+        bool IsReferenceType = false;
+        if (PropertyTypeInfo.Type is IArrayTypeSymbol)
+            IsReferenceType = true;
+        if (PropertyTypeInfo.Type is INamedTypeSymbol PropertyTypeSymbol && !PropertyTypeSymbol.IsValueType)
+            IsReferenceType = true;
+
         if (!IsReferenceType)
             return false;
 
