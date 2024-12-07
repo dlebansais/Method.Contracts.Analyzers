@@ -2,7 +2,7 @@
 
 A code generator companion for [Method.Contracts](https://github.com/dlebansais/Method.Contracts).
 
-[![Build status](https://ci.appveyor.com/api/projects/status/hh3eks1b9v66mx2f?svg=true)](https://ci.appveyor.com/project/dlebansais/method-contracts-analyzers) [![CodeFactor](https://www.codefactor.io/repository/github/dlebansais/method.contracts.analyzers/badge)](https://www.codefactor.io/repository/github/dlebansais/method.contracts.analyzers) [![NuGet](https://img.shields.io/nuget/v/Method.Contracts.Analyzers.svg)](https://www.nuget.org/packages/Method.Contracts.Analyzers)
+[![Build status](https://ci.appveyor.com/api/projects/status/hh3eks1b9v66mx2f?svg=true)](https://ci.appveyor.com/project/dlebansais/method-contracts-analyzers) [![codecov](https://codecov.io/gh/dlebansais/Method.Contracts.Analyzers/graph/badge.svg?token=1IM2kfUJxN)](https://codecov.io/gh/dlebansais/Method.Contracts.Analyzers) [![CodeFactor](https://www.codefactor.io/repository/github/dlebansais/method.contracts.analyzers/badge)](https://www.codefactor.io/repository/github/dlebansais/method.contracts.analyzers) [![NuGet](https://img.shields.io/nuget/v/Method.Contracts.Analyzers.svg)](https://www.nuget.org/packages/Method.Contracts.Analyzers)
 
 This assembly applies to projects using **C# 8 or higher** and with **Nullable** enabled.
 
