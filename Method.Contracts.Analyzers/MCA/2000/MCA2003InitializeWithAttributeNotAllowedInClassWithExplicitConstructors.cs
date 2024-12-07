@@ -79,10 +79,8 @@ public class MCA2003InitializeWithAttributeNotAllowedInClassWithExplicitConstruc
 
         int ConstructorCount = 0;
         foreach (MemberDeclarationSyntax Member in Members)
-        {
             if (Member is ConstructorDeclarationSyntax)
                 ConstructorCount++;
-        }
 
         // No diagnostic if no explicit constructors.
         if (ConstructorCount == 0)

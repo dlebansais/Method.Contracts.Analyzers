@@ -39,10 +39,8 @@ internal static class GeneratorHelper
         string[] Lines = usings.Split('\n');
 
         foreach (string Line in Lines)
-        {
             if (Line == "using global::System;" || StringStartsWith(Line, "using global::System."))
                 return true;
-        }
 
         return false;
     }
@@ -61,10 +59,8 @@ internal static class GeneratorHelper
         string[] Lines = usings.Split('\n');
 
         foreach (string Line in Lines)
-        {
             if (IsUsingDirective(Line, out string Directive))
                 Namespaces.Add(Directive);
-        }
 
         Namespaces.Sort(SortWithSystemFirst);
         Namespaces = Namespaces.Distinct().ToList();
@@ -202,9 +198,7 @@ internal static class GeneratorHelper
                     string AttributeName = ToAttributeName(Attribute);
 
                     if (supportedAttributeTypes.ToList().ConvertAll(item => item.Name).Contains(AttributeName))
-                    {
                         Result.Add(Attribute);
-                    }
                 }
             }
         }

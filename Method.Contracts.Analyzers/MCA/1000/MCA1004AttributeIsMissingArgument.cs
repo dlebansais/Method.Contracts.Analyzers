@@ -64,10 +64,8 @@ public class MCA1004AttributeIsMissingArgument : DiagnosticAnalyzer
     private static bool IsContractAttribute(SyntaxNodeAnalysisContext context, AttributeSyntax attribute)
     {
         foreach (Type AttributeType in ContractGenerator.SupportedAttributeTypes)
-        {
             if (AnalyzerTools.IsExpectedAttribute(context, AttributeType, attribute))
                 return true;
-        }
 
         return false;
     }

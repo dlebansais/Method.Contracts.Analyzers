@@ -58,10 +58,8 @@ internal static partial class CSharpAnalyzerVerifier<TAnalyzer>
             string RuntimeDirectory = string.Empty;
 
             foreach (string FolderPath in GetRuntimeDirectories(RuntimeDirectoryBase))
-            {
                 if (IsValidRuntimeDirectory(FolderPath))
                     RuntimeDirectory = FolderPath;
-            }
 
             string RuntimePath = RuntimeDirectory + @"\{0}.dll";
 
@@ -91,10 +89,8 @@ internal static partial class CSharpAnalyzerVerifier<TAnalyzer>
 
             string[] Parts = FolderName.Substring(Prefix.Length).Split('.');
             foreach (string Part in Parts)
-            {
                 if (!int.TryParse(Part, out _))
                     return false;
-            }
 
             return true;
         }

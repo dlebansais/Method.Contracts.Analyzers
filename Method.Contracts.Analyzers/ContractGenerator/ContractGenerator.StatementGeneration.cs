@@ -30,10 +30,8 @@ public partial class ContractGenerator
 
         int CallStatementIndex = -1;
         foreach (AttributeModel AttributeModel in model.Attributes)
-        {
             if (AttributeModel.Name != nameof(AccessAttribute))
                 AddAttributeStatements(methodDeclaration, isDebugGeneration, tabStatementTrivia, tabStatementExtraLineEndTrivia, Statements, AttributeModel, ref CallStatementIndex);
-        }
 
         if (CallStatementIndex < 0)
             CallStatementIndex = Statements.Count;
@@ -167,7 +165,6 @@ public partial class ContractGenerator
         List<StatementSyntax> AttributeStatements = GenerateMethodAttributeStatements(attributeModel, methodDeclaration, isDebugGeneration);
 
         foreach (StatementSyntax Statement in AttributeStatements)
-        {
             if (FirstEnsure)
             {
                 FirstEnsure = false;
@@ -177,7 +174,6 @@ public partial class ContractGenerator
             {
                 statements.Add(Statement.WithLeadingTrivia(tabStatementTrivia));
             }
-        }
     }
 
     private static ExpressionStatementSyntax GenerateCommandStatement(string methodName,
@@ -336,18 +332,14 @@ public partial class ContractGenerator
     private static void GetModifiedIdentifiers(List<AttributeArgumentModel> attributeArguments, ref string parameterName, out string aliasName)
     {
         foreach (AttributeArgumentModel argument in attributeArguments)
-        {
             if (argument.Name == nameof(RequireNotNullAttribute.Name))
                 parameterName = argument.Value;
-        }
 
         aliasName = ToIdentifierLocalName(parameterName);
 
         foreach (AttributeArgumentModel argument in attributeArguments)
-        {
             if (argument.Name == nameof(RequireNotNullAttribute.AliasName))
                 aliasName = argument.Value;
-        }
     }
 
     private static List<StatementSyntax> GenerateMultipleRequireNotNullStatement(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration)

@@ -71,13 +71,11 @@ public class MCA1019VerifiedPropertyIsMissingSuffix : DiagnosticAnalyzer
         Contract.Assert(VerifiedSuffix != string.Empty);
 
         // Only accept properties with the 'Verified' suffix in their name.
+        // Do not accept properties that are the suffix and nothing else.
         string PropertyName = propertyDeclaration.Identifier.Text;
         if (GeneratorHelper.StringEndsWith(PropertyName, VerifiedSuffix))
-        {
-            // Do not accept properties that are the suffix and nothing else.
             if (PropertyName != VerifiedSuffix)
                 return;
-        }
 
         string Text = propertyDeclaration.Identifier.ValueText;
 

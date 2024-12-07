@@ -54,14 +54,12 @@ internal class InitializerAnalysisAssertion : IAnalysisAssertion
             INamedTypeSymbol AttributeClass = Contract.AssertNotNull(Attribute.AttributeClass);
 
             if (AnalyzerTools.IsExpectedAttribute<InitializeWithAttribute>(context, AttributeClass))
-            {
                 if (TryGetInitializers(classSymbol, Attribute, out List<IMethodSymbol> Initializers))
                 {
                     InitializerMethodSymbols.Clear();
                     InitializerMethodSymbols.AddRange(Initializers);
                     return true;
                 }
-            }
         }
 
         return false;
@@ -85,10 +83,8 @@ internal class InitializerAnalysisAssertion : IAnalysisAssertion
         ImmutableArray<ISymbol> Members = ClassSymbol.GetMembers();
 
         foreach (ISymbol Member in Members)
-        {
             if (Member is IMethodSymbol MethodSymbol && MethodSymbol.Name == ArgumentValue)
                 InitializerOverloads.Add(MethodSymbol);
-        }
 
         if (InitializerOverloads.Count == 0)
         {

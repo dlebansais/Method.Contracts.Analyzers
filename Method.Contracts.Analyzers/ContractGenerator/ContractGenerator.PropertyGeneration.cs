@@ -89,10 +89,8 @@ public partial class ContractGenerator
             return false;
 
         foreach (AttributeArgumentModel ArgumentModel in AttributeModel.Arguments)
-        {
             if (ArgumentModel.Value is "public" or "protected" or "internal")
                 return false;
-        }
 
         // No access modifier means the C# default, which is private.
         return true;
@@ -198,10 +196,8 @@ public partial class ContractGenerator
 
         bool IsFirstAttributeStatement = true;
         foreach (AttributeModel AttributeModel in model.Attributes)
-        {
             if (AttributeModel.Name != nameof(AccessAttribute))
                 AddAttributeStatements(isDebugGeneration, isGetter, ref IsFirstAttributeStatement, tabStatementTrivia, tabStatementExtraLineEndTrivia, Statements, AttributeModel);
-        }
 
         if (isGetter)
         {

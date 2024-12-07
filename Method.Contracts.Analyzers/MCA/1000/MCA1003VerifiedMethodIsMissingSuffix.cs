@@ -71,13 +71,11 @@ public class MCA1003VerifiedMethodIsMissingSuffix : DiagnosticAnalyzer
         Contract.Assert(VerifiedSuffix != string.Empty);
 
         // Only accept methods with the 'Verified' suffix in their name.
+        // Do not accept methods that are the suffix and nothing else.
         string MethodName = methodDeclaration.Identifier.Text;
         if (GeneratorHelper.StringEndsWith(MethodName, VerifiedSuffix))
-        {
-            // Do not accept methods that are the suffix and nothing else.
             if (MethodName != VerifiedSuffix)
                 return;
-        }
 
         string Text = methodDeclaration.Identifier.ValueText;
 

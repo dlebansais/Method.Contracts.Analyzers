@@ -152,10 +152,8 @@ public partial class ContractGenerator
 
             List<SyntaxTrivia> SupportedTrivias = [];
             foreach (SyntaxTrivia trivia in LeadingTrivia)
-            {
                 if (IsSupportedTrivia(trivia))
                     SupportedTrivias.Add(trivia);
-            }
 
             // Trim consecutive end of lines until there is only at most one at the beginning.
             bool HadEndOfLine = false;
@@ -175,23 +173,19 @@ public partial class ContractGenerator
             // Remove successive whitespace trivias.
             int i = 0;
             while (i + 1 < SupportedTrivias.Count)
-            {
                 if (SupportedTrivias[i].IsKind(SyntaxKind.WhitespaceTrivia) && SupportedTrivias[i + 1].IsKind(SyntaxKind.WhitespaceTrivia))
                     SupportedTrivias.RemoveAt(i);
                 else
                     i++;
-            }
 
             LeadingTrivia = SyntaxFactory.TriviaList(SupportedTrivias);
 
             foreach (SyntaxTrivia Trivia in LeadingTrivia)
-            {
                 if (Trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia))
                 {
                     Documentation = LeadingTrivia.ToString().Trim('\r').Trim('\n').TrimEnd(' ');
                     break;
                 }
-            }
         }
 
         Dictionary<string, string> ParameterNameReplacementTable = memberDeclaration is MethodDeclarationSyntax MethodDeclaration
@@ -255,10 +249,8 @@ public partial class ContractGenerator
         SeparatedSyntaxList<ParameterSyntax> Parameters = ParameterList.Parameters;
 
         foreach (ParameterSyntax Parameter in Parameters)
-        {
             if (IsParameterNameReplaced(model, Parameter, out string ParameterName, out string ReplacementName))
                 Result.Add(ParameterName, ReplacementName);
-        }
 
         return Result;
     }
@@ -269,10 +261,8 @@ public partial class ContractGenerator
         replacementName = string.Empty;
 
         foreach (AttributeModel Attribute in model.Attributes)
-        {
             if (AttributeHasTypeOrName(Attribute, out parameterName, out _, out replacementName) && parameterName == parameter.Identifier.Text && replacementName != string.Empty)
                 return true;
-        }
 
         return false;
     }
@@ -291,7 +281,6 @@ public partial class ContractGenerator
         };
 
         foreach (AttributeSyntax Attribute in MemberAttributes)
-        {
             if (Attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
             {
                 string AttributeName = GeneratorHelper.ToAttributeName(Attribute);
@@ -305,7 +294,6 @@ public partial class ContractGenerator
 
                 Result.Add(Model);
             }
-        }
 
         return Result;
     }

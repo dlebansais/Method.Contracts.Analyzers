@@ -83,10 +83,8 @@ public partial class ContractGenerator
         bool IsDebugGeneration = MemberDeclaration.SyntaxTree.Options.PreprocessorSymbolNames.Contains("DEBUG");
 
         foreach (AttributeSyntax Attribute in MethodAttributes)
-        {
             if (!IsValidAttribute(Attribute, MemberDeclaration, IsDebugGeneration, AttributeNames))
                 return null;
-        }
 
         return AttributeNames.Count > 0 ? AttributeNames.First() : null;
     }
@@ -131,10 +129,8 @@ public partial class ContractGenerator
             return AttributeValidityCheckResult.Invalid(PositionOfFirstInvalidArgument);
 
         for (int i = 0; i < ArgumentValues.Count; i++)
-        {
             if (!IsValidModifier(ArgumentValues[i]))
                 return AttributeValidityCheckResult.Invalid(i);
-        }
 
         return new AttributeValidityCheckResult(AttributeGeneration.Valid, ArgumentValues, -1);
     }
@@ -202,10 +198,8 @@ public partial class ContractGenerator
         Contract.Assert(attributeArguments.Count > 1);
 
         for (int i = 1; i < attributeArguments.Count; i++)
-        {
             if (!IsValidArgumentWithAliasTypeOrName(attributeArguments[i], ref Type, ref Name, ref AliasName))
                 return AttributeValidityCheckResult.Invalid(0);
-        }
 
         // At this step there is at least one valid argument that is either Type, Name or AliasName.
         Contract.Assert(Type != string.Empty || Name != string.Empty || AliasName != string.Empty);
@@ -353,10 +347,8 @@ public partial class ContractGenerator
         Contract.Assert(attributeArguments.Count > 1);
 
         for (int i = 1; i < attributeArguments.Count; i++)
-        {
             if (!IsValidDebugOnlyArgument(attributeArguments[i], ref IsDebugOnly))
                 return AttributeValidityCheckResult.Invalid(0);
-        }
 
         // At this step the DebugOnly argument must have been processed.
         Contract.Assert(IsDebugOnly.HasValue);

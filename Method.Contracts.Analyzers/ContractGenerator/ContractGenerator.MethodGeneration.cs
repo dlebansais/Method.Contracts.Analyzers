@@ -191,13 +191,11 @@ public partial class ContractGenerator
         SeparatedSyntaxList<ParameterSyntax> UpdatedParameters = Parameters;
 
         foreach (ParameterSyntax Parameter in UpdatedParameters)
-        {
             if (ModifiedParameterTypeOrName(model, Parameter, out ParameterSyntax UpdatedParameter))
             {
                 UpdatedParameters = UpdatedParameters.Replace(Parameter, UpdatedParameter);
                 updatedParameterList = updatedParameterList.WithParameters(UpdatedParameters);
             }
-        }
 
         return updatedParameterList != ParameterList;
     }
@@ -207,7 +205,6 @@ public partial class ContractGenerator
         updatedParameter = parameter;
 
         foreach (AttributeModel Attribute in model.Attributes)
-        {
             if (AttributeHasTypeOrName(Attribute, out string ParameterName, out string Type, out string Name) && ParameterName == parameter.Identifier.Text)
             {
                 if (Type != string.Empty)
@@ -222,7 +219,6 @@ public partial class ContractGenerator
                     updatedParameter = updatedParameter.WithIdentifier(UpdatedIdentifier);
                 }
             }
-        }
 
         return updatedParameter != parameter;
     }

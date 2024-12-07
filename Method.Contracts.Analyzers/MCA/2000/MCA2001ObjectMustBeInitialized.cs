@@ -90,20 +90,12 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
     private static bool GetCreatedObjectAndFollowUpStatements(SyntaxNodeAnalysisContext context, BaseObjectCreationExpressionSyntax objectCreationExpression, out ISymbol createdSymbol, out StatementSyntax nextStatement)
     {
         if (objectCreationExpression.Parent is EqualsValueClauseSyntax EqualsValueClause)
-        {
             if (EqualsValueClause.Parent is VariableDeclaratorSyntax VariableDeclarator)
-            {
                 return CheckVariableDeclarator(context, VariableDeclarator, out createdSymbol, out nextStatement);
-            }
-        }
 
         if (objectCreationExpression.Parent is AssignmentExpressionSyntax AssignmentExpression)
-        {
             if (AssignmentExpression.Left is IdentifierNameSyntax IdentifierName)
-            {
                 return CheckAssignmentExpression(context, IdentifierName, AssignmentExpression, out createdSymbol, out nextStatement);
-            }
-        }
 
         Contract.Unused(out createdSymbol);
         Contract.Unused(out nextStatement);
@@ -116,13 +108,11 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
         VariableDeclarationSyntax VariableDeclaration = Contract.AssertNotNull(variableDeclarator.Parent as VariableDeclarationSyntax);
 
         if (VariableDeclaration.Parent is LocalDeclarationStatementSyntax LocalDeclarationStatement)
-        {
             if (CheckDestinationAndNextStatement(LocalDeclarationStatement, out nextStatement))
             {
                 createdSymbol = DeclaredSymbol;
                 return true;
             }
-        }
 
         Contract.Unused(out createdSymbol);
         Contract.Unused(out nextStatement);
@@ -135,13 +125,11 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
         ISymbol AssignedSymbol = Contract.AssertNotNull(AssignedSymbolInfo.Symbol);
 
         if (assignmentExpression.Parent is ExpressionStatementSyntax ExpressionStatement)
-        {
             if (CheckDestinationAndNextStatement(ExpressionStatement, out nextStatement))
             {
                 createdSymbol = AssignedSymbol;
                 return true;
             }
-        }
 
         Contract.Unused(out createdSymbol);
         Contract.Unused(out nextStatement);
@@ -192,38 +180,31 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
             if (Expression is AwaitExpressionSyntax AwaitExpression)
                 Expression = AwaitExpression.Expression;
 
-            if (Expression is InvocationExpressionSyntax InvocationExpression)
+            if (Expression is InvocationExpressionSyntax InvocationExpression && InvocationExpression.Expression is MemberAccessExpressionSyntax MemberAccessExpression)
             {
-                if (InvocationExpression.Expression is MemberAccessExpressionSyntax MemberAccessExpression)
+                ISymbol? ExpressionSymbol = null;
+                IMethodSymbol? MethodSymbol = null;
+
+                if (MemberAccessExpression.Expression is IdentifierNameSyntax ObjectIdentifierName)
                 {
-                    ISymbol? ExpressionSymbol = null;
-                    IMethodSymbol? MethodSymbol = null;
+                    SymbolInfo IdentifierNameInfo = context.SemanticModel.GetSymbolInfo(ObjectIdentifierName);
+                    if (IdentifierNameInfo.Symbol is ISymbol ObjectSymbol)
+                        ExpressionSymbol = ObjectSymbol;
+                }
 
-                    if (MemberAccessExpression.Expression is IdentifierNameSyntax ObjectIdentifierName)
-                    {
-                        SymbolInfo IdentifierNameInfo = context.SemanticModel.GetSymbolInfo(ObjectIdentifierName);
-                        if (IdentifierNameInfo.Symbol is ISymbol ObjectSymbol)
-                        {
-                            ExpressionSymbol = ObjectSymbol;
-                        }
-                    }
+                if (MemberAccessExpression.Name is IdentifierNameSyntax IdentifierName)
+                {
+                    SymbolInfo IdentifierNameInfo = context.SemanticModel.GetSymbolInfo(IdentifierName);
+                    if (IdentifierNameInfo.Symbol is IMethodSymbol CalledMethodNameSymbol)
+                        MethodSymbol = CalledMethodNameSymbol;
+                }
 
-                    if (MemberAccessExpression.Name is IdentifierNameSyntax IdentifierName)
-                    {
-                        SymbolInfo IdentifierNameInfo = context.SemanticModel.GetSymbolInfo(IdentifierName);
-                        if (IdentifierNameInfo.Symbol is IMethodSymbol CalledMethodNameSymbol)
-                        {
-                            MethodSymbol = CalledMethodNameSymbol;
-                        }
-                    }
-
-                    if (ExpressionSymbol is not null &&
-                        MethodSymbol is not null &&
-                        SymbolEqualityComparer.Default.Equals(ExpressionSymbol, createdSymbol) &&
-                        SymbolEqualityComparer.Default.Equals(MethodSymbol, initializerMethodSymbol))
-                    {
-                        return true;
-                    }
+                if (ExpressionSymbol is not null &&
+                    MethodSymbol is not null &&
+                    SymbolEqualityComparer.Default.Equals(ExpressionSymbol, createdSymbol) &&
+                    SymbolEqualityComparer.Default.Equals(MethodSymbol, initializerMethodSymbol))
+                {
+                    return true;
                 }
             }
         }
