@@ -26,10 +26,7 @@ internal static class AnalyzerTools
     /// Gets the help link for a diagnostic id.
     /// </summary>
     /// <param name="diagnosticId">The diagnostic id.</param>
-    public static string GetHelpLink(string diagnosticId)
-    {
-        return $"https://github.com/dlebansais/Method.Contracts.Analyzers/blob/master/doc/{diagnosticId}.md";
-    }
+    public static string GetHelpLink(string diagnosticId) => $"https://github.com/dlebansais/Method.Contracts.Analyzers/blob/master/doc/{diagnosticId}.md";
 
     /// <summary>
     /// Asserts that the analyzed node is of the expected type and satisfies requirements, then executes <paramref name="continueAction"/>.
@@ -66,15 +63,9 @@ internal static class AnalyzerTools
         return FirstDirectiveText is not null && FirstDirectiveText.StartsWith(CoverageDirectivePrefix, StringComparison.Ordinal);
     }
 
-    private static bool TrueForAll(this IAnalysisAssertion[] analysisAssertions, SyntaxNodeAnalysisContext context)
-    {
-        return Array.TrueForAll(analysisAssertions, analysisAssertion => IsTrue(analysisAssertion, context));
-    }
+    private static bool TrueForAll(this IAnalysisAssertion[] analysisAssertions, SyntaxNodeAnalysisContext context) => Array.TrueForAll(analysisAssertions, analysisAssertion => IsTrue(analysisAssertion, context));
 
-    private static bool IsTrue(this IAnalysisAssertion analysisAssertion, SyntaxNodeAnalysisContext context)
-    {
-        return analysisAssertion.IsTrue(context);
-    }
+    private static bool IsTrue(this IAnalysisAssertion analysisAssertion, SyntaxNodeAnalysisContext context) => analysisAssertion.IsTrue(context);
 
     /// <summary>
     /// Checks whether an attribute is of the expected type.
@@ -83,10 +74,7 @@ internal static class AnalyzerTools
     /// <param name="context">The context.</param>
     /// <param name="attribute">The attribute.</param>
     public static bool IsExpectedAttribute<T>(SyntaxNodeAnalysisContext context, AttributeSyntax? attribute)
-        where T : Attribute
-    {
-        return IsExpectedAttribute(context, typeof(T), attribute);
-    }
+        where T : Attribute => IsExpectedAttribute(context, typeof(T), attribute);
 
     /// <summary>
     /// Checks whether a type symbol is the expected type.
@@ -95,10 +83,7 @@ internal static class AnalyzerTools
     /// <param name="context">The context.</param>
     /// <param name="typeSymbol">The attribute.</param>
     public static bool IsExpectedAttribute<T>(SyntaxNodeAnalysisContext context, ITypeSymbol? typeSymbol)
-        where T : Attribute
-    {
-        return IsExpectedAttribute(context, typeof(T), typeSymbol);
-    }
+        where T : Attribute => IsExpectedAttribute(context, typeof(T), typeSymbol);
 
     /// <summary>
     /// Checks whether an attribute is of the expected type.
@@ -130,14 +115,12 @@ internal static class AnalyzerTools
     /// <param name="s">The string with substrings to replace.</param>
     /// <param name="oldString">The string to replace.</param>
     /// <param name="newString">The new string.</param>
-    public static string Replace(string s, string oldString, string newString)
-    {
+    public static string Replace(string s, string oldString, string newString) =>
 #if NETSTANDARD2_1_OR_GREATER
-        return s.Replace(oldString, newString, StringComparison.Ordinal);
+        s.Replace(oldString, newString, StringComparison.Ordinal);
 #else
-        return s.Replace(oldString, newString);
+        s.Replace(oldString, newString);
 #endif
-    }
 
     /// <summary>
     /// Checks whether a statement is a call to Contract.Unused().

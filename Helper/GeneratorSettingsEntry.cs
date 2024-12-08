@@ -21,10 +21,7 @@ internal record GeneratorSettingsEntry(string BuildKey, string DefaultValue)
     private const string BuilProperty = "build_property";
     private const string ContractSourceGenerator = "ContractSourceGenerator";
 
-    private static string ProjectKey(string key)
-    {
-        return $"{BuilProperty}.{ContractSourceGenerator}_{key}";
-    }
+    private static string ProjectKey(string key) => $"{BuilProperty}.{ContractSourceGenerator}_{key}";
 
     /// <summary>
     /// Reads the setting as a string, always returning a valid value, using the default value if necessary.

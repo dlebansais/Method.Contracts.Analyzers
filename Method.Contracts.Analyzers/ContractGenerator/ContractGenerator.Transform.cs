@@ -117,10 +117,7 @@ public partial class ContractGenerator
             IsAsync: false);
     }
 
-    private static string GetUniqueOverloadIdentifier(MemberDeclarationSyntax memberDeclaration)
-    {
-        return memberDeclaration is MethodDeclarationSyntax MethodDeclaration ? GetUniqueOverloadIdentifier(MethodDeclaration) : "_get";
-    }
+    private static string GetUniqueOverloadIdentifier(MemberDeclarationSyntax memberDeclaration) => memberDeclaration is MethodDeclarationSyntax MethodDeclaration ? GetUniqueOverloadIdentifier(MethodDeclaration) : "_get";
 
     private static string GetUniqueOverloadIdentifier(MethodDeclarationSyntax methodDeclaration)
     {
@@ -298,10 +295,7 @@ public partial class ContractGenerator
         return Result;
     }
 
-    private static List<AttributeArgumentModel> TransformAccessAttribute(MemberDeclarationSyntax memberDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
-    {
-        return TransformStringOnlyAttribute(attributeArguments);
-    }
+    private static List<AttributeArgumentModel> TransformAccessAttribute(MemberDeclarationSyntax memberDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments) => TransformStringOnlyAttribute(attributeArguments);
 
     private static List<AttributeArgumentModel> TransformRequireNotNullAttribute(MemberDeclarationSyntax memberDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {
@@ -383,15 +377,9 @@ public partial class ContractGenerator
         return Result;
     }
 
-    private static List<AttributeArgumentModel> TransformRequireAttribute(MemberDeclarationSyntax memberDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
-    {
-        return TransformRequireOrEnsureAttribute(attributeArguments);
-    }
+    private static List<AttributeArgumentModel> TransformRequireAttribute(MemberDeclarationSyntax memberDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments) => TransformRequireOrEnsureAttribute(attributeArguments);
 
-    private static List<AttributeArgumentModel> TransformEnsureAttribute(MemberDeclarationSyntax memberDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
-    {
-        return TransformRequireOrEnsureAttribute(attributeArguments);
-    }
+    private static List<AttributeArgumentModel> TransformEnsureAttribute(MemberDeclarationSyntax memberDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments) => TransformRequireOrEnsureAttribute(attributeArguments);
 
     private static List<AttributeArgumentModel> TransformRequireOrEnsureAttribute(IReadOnlyList<AttributeArgumentSyntax> attributeArguments)
     {

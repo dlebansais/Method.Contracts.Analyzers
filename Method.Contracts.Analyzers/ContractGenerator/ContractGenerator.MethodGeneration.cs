@@ -84,10 +84,7 @@ public partial class ContractGenerator
         return ExecutingAssemblyName.Name.ToString();
     }
 
-    private static string GetToolVersion()
-    {
-        return Assembly.GetExecutingAssembly().GetName().Version.ToString();
-    }
+    private static string GetToolVersion() => Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
     private static SyntaxTokenList GenerateContractModifiers(ContractModel model, MemberDeclarationSyntax memberDeclaration, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia, out bool isAsync)
     {
@@ -177,10 +174,7 @@ public partial class ContractGenerator
         return SyntaxFactory.TriviaList(Trivias);
     }
 
-    private static SyntaxTriviaList? GetModifiersTrailingTrivia(MemberDeclarationSyntax memberDeclaration)
-    {
-        return memberDeclaration.Modifiers.Count > 0 ? memberDeclaration.Modifiers.Last().TrailingTrivia : null;
-    }
+    private static SyntaxTriviaList? GetModifiersTrailingTrivia(MemberDeclarationSyntax memberDeclaration) => memberDeclaration.Modifiers.Count > 0 ? memberDeclaration.Modifiers.Last().TrailingTrivia : null;
 
     private static bool HasUpdatedParameterList(ContractModel model, MethodDeclarationSyntax methodDeclaration, out ParameterListSyntax updatedParameterList)
     {

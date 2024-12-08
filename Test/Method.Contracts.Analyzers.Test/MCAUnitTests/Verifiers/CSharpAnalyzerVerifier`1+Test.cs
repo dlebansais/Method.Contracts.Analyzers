@@ -75,10 +75,7 @@ internal static partial class CSharpAnalyzerVerifier<TAnalyzer>
             return DirectoryList;
         }
 
-        private static int CompareIgnoreCase(string s1, string s2)
-        {
-            return string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase);
-        }
+        private static int CompareIgnoreCase(string s1, string s2) => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase);
 
         private static bool IsValidRuntimeDirectory(string folderPath)
         {

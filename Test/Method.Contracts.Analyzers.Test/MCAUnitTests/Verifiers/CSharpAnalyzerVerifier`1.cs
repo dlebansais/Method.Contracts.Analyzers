@@ -12,16 +12,10 @@ internal static partial class CSharpAnalyzerVerifier<TAnalyzer>
     where TAnalyzer : DiagnosticAnalyzer, new()
 {
     /// <inheritdoc cref="AnalyzerVerifier{TAnalyzer, TTest, TVerifier}.VerifyAnalyzerAsync(string, DiagnosticResult[])"/>
-    public static async Task VerifyAnalyzerAsync(string source, params DiagnosticResult[] expected)
-    {
-        await VerifyAnalyzerAsync(Prologs.Default, source, expected).ConfigureAwait(true);
-    }
+    public static async Task VerifyAnalyzerAsync(string source, params DiagnosticResult[] expected) => await VerifyAnalyzerAsync(Prologs.Default, source, expected).ConfigureAwait(true);
 
     /// <inheritdoc cref="AnalyzerVerifier{TAnalyzer, TTest, TVerifier}.VerifyAnalyzerAsync(string, DiagnosticResult[])"/>
-    public static async Task VerifyAnalyzerAsync(string prolog, string source, params DiagnosticResult[] expected)
-    {
-        await VerifyAnalyzerAsync(prolog, source, LanguageVersion.Default, expected).ConfigureAwait(true);
-    }
+    public static async Task VerifyAnalyzerAsync(string prolog, string source, params DiagnosticResult[] expected) => await VerifyAnalyzerAsync(prolog, source, LanguageVersion.Default, expected).ConfigureAwait(true);
 
     /// <inheritdoc cref="AnalyzerVerifier{TAnalyzer, TTest, TVerifier}.VerifyAnalyzerAsync(string, DiagnosticResult[])"/>
     public static async Task VerifyAnalyzerAsync(string prolog, string source, LanguageVersion languageVersion = LanguageVersion.Default, params DiagnosticResult[] expected)

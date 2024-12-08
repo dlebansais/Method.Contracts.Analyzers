@@ -113,10 +113,7 @@ public partial class ContractGenerator
             : callStatement.WithLeadingTrivia(tabStatementTrivia);
     }
 
-    private static bool IsCommandMethod(MethodDeclarationSyntax methodDeclaration, bool isAsync)
-    {
-        return (isAsync && IsTaskType(methodDeclaration.ReturnType)) || (!isAsync && IsVoidType(methodDeclaration.ReturnType));
-    }
+    private static bool IsCommandMethod(MethodDeclarationSyntax methodDeclaration, bool isAsync) => (isAsync && IsTaskType(methodDeclaration.ReturnType)) || (!isAsync && IsVoidType(methodDeclaration.ReturnType));
 
     private static bool IsTaskType(TypeSyntax returnType)
     {
@@ -142,10 +139,7 @@ public partial class ContractGenerator
         return ReturnIdentifierWithNamespace is "Task" or "System.Threading.Tasks.Task";
     }
 
-    private static bool IsVoidType(TypeSyntax returnType)
-    {
-        return returnType is PredefinedTypeSyntax PredefinedType && PredefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword);
-    }
+    private static bool IsVoidType(TypeSyntax returnType) => returnType is PredefinedTypeSyntax PredefinedType && PredefinedType.Keyword.IsKind(SyntaxKind.VoidKeyword);
 
     private static void AddAttributeStatements(MethodDeclarationSyntax methodDeclaration,
                                                bool isDebugGeneration,
@@ -386,25 +380,13 @@ public partial class ContractGenerator
         return ExpressionStatement;
     }
 
-    private static List<StatementSyntax> GenerateRequireStatement(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration)
-    {
-        return GenerateRequireStatement(attributeArguments, isDebugGeneration);
-    }
+    private static List<StatementSyntax> GenerateRequireStatement(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration) => GenerateRequireStatement(attributeArguments, isDebugGeneration);
 
-    private static List<StatementSyntax> GenerateRequireStatement(List<AttributeArgumentModel> attributeArguments, bool isDebugGeneration)
-    {
-        return GenerateRequireOrEnsureStatement(attributeArguments, isDebugGeneration, "Require");
-    }
+    private static List<StatementSyntax> GenerateRequireStatement(List<AttributeArgumentModel> attributeArguments, bool isDebugGeneration) => GenerateRequireOrEnsureStatement(attributeArguments, isDebugGeneration, "Require");
 
-    private static List<StatementSyntax> GenerateEnsureStatement(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration)
-    {
-        return GenerateEnsureStatement(attributeArguments, isDebugGeneration);
-    }
+    private static List<StatementSyntax> GenerateEnsureStatement(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration) => GenerateEnsureStatement(attributeArguments, isDebugGeneration);
 
-    private static List<StatementSyntax> GenerateEnsureStatement(List<AttributeArgumentModel> attributeArguments, bool isDebugGeneration)
-    {
-        return GenerateRequireOrEnsureStatement(attributeArguments, isDebugGeneration, "Ensure");
-    }
+    private static List<StatementSyntax> GenerateEnsureStatement(List<AttributeArgumentModel> attributeArguments, bool isDebugGeneration) => GenerateRequireOrEnsureStatement(attributeArguments, isDebugGeneration, "Ensure");
 
     private static List<StatementSyntax> GenerateRequireOrEnsureStatement(List<AttributeArgumentModel> attributeArguments, bool isDebugGeneration, string contractMethodName)
     {

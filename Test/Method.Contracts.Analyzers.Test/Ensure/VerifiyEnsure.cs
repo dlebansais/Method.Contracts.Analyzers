@@ -7,9 +7,7 @@ using VerifyTests;
 
 internal static class VerifyEnsure
 {
-    public static async Task<VerifyResult> Verify(GeneratorDriver driver)
-    {
+    public static async Task<VerifyResult> Verify(GeneratorDriver driver) =>
         // Use verify to snapshot test the source generator output.
-        return await Verifier.Verify(driver);
-    }
+        await Verifier.Verify(driver);
 }

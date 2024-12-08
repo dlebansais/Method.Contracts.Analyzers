@@ -56,10 +56,7 @@ public partial class ContractGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(settings.Combine(pipeline.Collect()), OutputContractMethod);
     }
 
-    private static string GetFullyQualifiedMetadataName<T>()
-    {
-        return $"{ContractsNamespace}.{typeof(T).Name}";
-    }
+    private static string GetFullyQualifiedMetadataName<T>() => $"{ContractsNamespace}.{typeof(T).Name}";
 
     private static bool GetParameterType(string argumentName, MethodDeclarationSyntax methodDeclaration, out TypeSyntax parameterType)
     {

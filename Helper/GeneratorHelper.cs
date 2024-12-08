@@ -19,10 +19,7 @@ internal static class GeneratorHelper
     /// <param name="text">The string to compare to the empty string.</param>
     /// <param name="prefix">The prefix.</param>
     /// <param name="suffix">The suffix.</param>
-    public static string AddPrefixAndSuffixIfNotEmpty(string text, string prefix, string suffix)
-    {
-        return text == string.Empty ? string.Empty : $"{prefix}{text}{suffix}";
-    }
+    public static string AddPrefixAndSuffixIfNotEmpty(string text, string prefix, string suffix) => text == string.Empty ? string.Empty : $"{prefix}{text}{suffix}";
 
     private const string UsingDirectivePrefix = "using ";
 
@@ -108,30 +105,21 @@ internal static class GeneratorHelper
 #endif
     }
 
-    private static bool IsSystemUsing(string usingNamespace)
-    {
-        return usingNamespace == "System" || StringStartsWith(usingNamespace, "System.") || usingNamespace == "global::System" || StringStartsWith(usingNamespace, "global::System.");
-    }
+    private static bool IsSystemUsing(string usingNamespace) => usingNamespace == "System" || StringStartsWith(usingNamespace, "System.") || usingNamespace == "global::System" || StringStartsWith(usingNamespace, "global::System.");
 
     /// <summary>
     /// Returns whether the string <paramref name="s"/> starts with the prefix <paramref name="prefix"/>, performing a <see cref="StringComparison.Ordinal"/> comparison.
     /// </summary>
     /// <param name="s">The string.</param>
     /// <param name="prefix">The prefix.</param>
-    public static bool StringStartsWith(string s, string prefix)
-    {
-        return s.StartsWith(prefix, StringComparison.Ordinal);
-    }
+    public static bool StringStartsWith(string s, string prefix) => s.StartsWith(prefix, StringComparison.Ordinal);
 
     /// <summary>
     /// Returns whether the string <paramref name="s"/> ends with the suffix <paramref name="suffix"/>, performing a <see cref="StringComparison.Ordinal"/> comparison.
     /// </summary>
     /// <param name="s">The string.</param>
     /// <param name="suffix">The suffix.</param>
-    public static bool StringEndsWith(string s, string suffix)
-    {
-        return s.EndsWith(suffix, StringComparison.Ordinal);
-    }
+    public static bool StringEndsWith(string s, string suffix) => s.EndsWith(suffix, StringComparison.Ordinal);
 
     /// <summary>
     /// Returns a hash code for a string that is stable from one execution to the other.
@@ -210,8 +198,5 @@ internal static class GeneratorHelper
     /// Returns the full name of an attribute.
     /// </summary>
     /// <param name="attribute">The attribute.</param>
-    public static string ToAttributeName(AttributeSyntax attribute)
-    {
-        return $"{attribute.Name.GetText()}{nameof(Attribute)}";
-    }
+    public static string ToAttributeName(AttributeSyntax attribute) => $"{attribute.Name.GetText()}{nameof(Attribute)}";
 }
