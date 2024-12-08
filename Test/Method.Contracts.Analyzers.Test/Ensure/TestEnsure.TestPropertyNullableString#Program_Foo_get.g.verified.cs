@@ -9,7 +9,7 @@ using Contracts;
 
 partial class Program
 {
-    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.8.0.25")]
+    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.8.0.26")]
     public static string? Foo
     {
         get

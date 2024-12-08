@@ -24,7 +24,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -44,7 +44,7 @@ public void FooVerified()
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -63,7 +63,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -90,7 +90,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -113,7 +113,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -136,7 +136,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -159,7 +159,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -182,7 +182,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -205,7 +205,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -228,7 +228,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -251,7 +251,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -274,7 +274,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -297,7 +297,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -320,7 +320,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -343,7 +343,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -368,7 +368,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -393,7 +393,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -418,7 +418,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -443,7 +443,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -468,7 +468,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -493,7 +493,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -518,7 +518,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -543,7 +543,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -566,7 +566,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -589,7 +589,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -612,7 +612,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -635,7 +635,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -658,7 +658,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -681,7 +681,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -704,7 +704,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -727,7 +727,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -751,7 +751,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -785,7 +785,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -819,7 +819,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -853,7 +853,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -887,7 +887,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -921,7 +921,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -955,7 +955,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -989,7 +989,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1023,7 +1023,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1057,7 +1057,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1091,7 +1091,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1125,7 +1125,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1159,7 +1159,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1193,7 +1193,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1227,7 +1227,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1261,7 +1261,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1295,7 +1295,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1329,7 +1329,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1363,7 +1363,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1397,7 +1397,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1431,7 +1431,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1464,7 +1464,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source, setDebug: false);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1497,7 +1497,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source, setDebug: false);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1530,7 +1530,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source, setDebug: false);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1563,7 +1563,7 @@ internal partial class Program
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source, setDebug: false);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
@@ -1591,7 +1591,7 @@ public class SimpleTest
 
         // Pass the source code to the helper and snapshot test the output.
         GeneratorDriver Driver = TestHelper.GetDriver(Source);
-        VerifyResult Result = await VerifiyNoGeneration.Verify(Driver).ConfigureAwait(false);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(0).Items);
     }
