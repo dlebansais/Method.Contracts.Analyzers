@@ -381,4 +381,16 @@
     <value>Verified property is missing verified suffix</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="MCA1020AnalyzerDescription" xml:space="preserve">
+    <value>The Dictionary is missing an entry.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1020AnalyzerMessageFormat" xml:space="preserve">
+    <value>The Dictionary is missing an entry</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1020AnalyzerTitle" xml:space="preserve">
+    <value>Missing dictionary entry</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
 </root>

@@ -1,6 +1,5 @@
 ﻿namespace Contracts.Analyzers;
 
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -9,19 +8,19 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
-/// Analyzer for rule MCA1015: Set parameter as unused before return.
+/// Analyzer for rule MCA1020: Missing Dictionary Entry.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MCA1015SetParameterAsUnusedBeforeReturn : DiagnosticAnalyzer
+public class MCA1020MissingDictionaryEntry : DiagnosticAnalyzer
 {
     /// <summary>
     /// Diagnostic ID for this rule.
     /// </summary>
-    public const string DiagnosticId = "MCA1015";
+    public const string DiagnosticId = "MCA1020";
 
-    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(AnalyzerResources.MCA1015AnalyzerTitle), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
-    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(AnalyzerResources.MCA1015AnalyzerMessageFormat), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
-    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(AnalyzerResources.MCA1015AnalyzerDescription), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(AnalyzerResources.MCA1020AnalyzerTitle), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(AnalyzerResources.MCA1020AnalyzerMessageFormat), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
+    private static readonly LocalizableString Description = new LocalizableResourceString(nameof(AnalyzerResources.MCA1020AnalyzerDescription), AnalyzerResources.ResourceManager, typeof(AnalyzerResources));
     private const string Category = "Usage";
 
     private static readonly DiagnosticDescriptor Rule = new(DiagnosticId,
@@ -58,25 +57,38 @@ public class MCA1015SetParameterAsUnusedBeforeReturn : DiagnosticAnalyzer
             context,
             LanguageVersion.CSharp7,
             AnalyzeVerifiedNode,
-            new ContractUnusedInvocationAssertion());
+            new ContractMapInvocationAssertion());
     }
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax objectCreationExpression, IAnalysisAssertion[] analysisAssertions)
     {
         // If we reached this step, there is an argument name.
         Contract.Assert(analysisAssertions.Length == 1);
-        ContractUnusedInvocationAssertion Assertion = Contract.AssertNotNull(analysisAssertions.First() as ContractUnusedInvocationAssertion);
-        IdentifierNameSyntax ArgumentIdentifierName = Contract.AssertNotNull(Assertion.ArgumentIdentifierName);
-        StatementSyntax InvocationStatement = Contract.AssertNotNull(Assertion.InvocationStatement);
-        string ArgumentName = ArgumentIdentifierName.Identifier.Text;
+        ContractMapInvocationAssertion Assertion = Contract.AssertNotNull(analysisAssertions.First() as ContractMapInvocationAssertion);
+        ExpressionSyntax KeyExpression = Contract.AssertNotNull(Assertion.KeyExpression);
+        ExpressionSyntax DictionaryExpression = Contract.AssertNotNull(Assertion.DictionaryExpression);
 
-        List<StatementSyntax> RemainingStatements = AnalyzerTools.FindSubsequentStatements(InvocationStatement);
-        bool IsFollowedByOtherStatement = RemainingStatements.Any(statement => !AnalyzerTools.IsInvocationOfContract(context, statement, nameof(Contract.Unused), out _));
+        SymbolInfo KeySymbolInfo = context.SemanticModel.GetSymbolInfo(KeyExpression);
+        ISymbol KeySymbol = Contract.AssertNotNull(KeySymbolInfo.Symbol);
+        INamedTypeSymbol KeyType = KeySymbol.ContainingType;
+        int KeyCount = KeyType.MemberNames.Count();
 
-        // No diagnostic if the statement is only followed by other invocations of Contract.Unused() or a return.
-        if (!IsFollowedByOtherStatement)
+        if (DictionaryExpression is not ObjectCreationExpressionSyntax ObjectCreationExpression)
             return;
 
-        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), ArgumentName));
+        if (ObjectCreationExpression.ArgumentList is ArgumentListSyntax ArgumentList)
+        {
+            if (ArgumentList.Arguments.Count != 0)
+                return;
+        }
+
+        if (ObjectCreationExpression.Initializer is not InitializerExpressionSyntax InitializerExpression)
+            return;
+
+        int EntryCount = InitializerExpression.Expressions.Count;
+        if (KeyCount == EntryCount)
+            return;
+
+        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation()));
     }
 }

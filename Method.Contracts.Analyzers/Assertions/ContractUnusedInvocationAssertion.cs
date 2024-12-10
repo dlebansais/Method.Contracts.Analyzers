@@ -1,5 +1,8 @@
 ﻿namespace Contracts.Analyzers;
 
+using System.Collections.Generic;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -26,7 +29,15 @@ internal class ContractUnusedInvocationAssertion : IAnalysisAssertion
         if (InvocationExpression.Parent is not ExpressionStatementSyntax ExpressionStatement)
             return false;
 
-        if (!AnalyzerTools.IsInvocationOfContractUnused(context, ExpressionStatement, out IdentifierNameSyntax IdentifierName))
+        if (!AnalyzerTools.IsInvocationOfContract(context, InvocationExpression, nameof(Contract.Unused), out List<ArgumentSyntax> Arguments))
+            return false;
+
+        // If NameSymbol is the right symbol, there is exactly one argument and it's 'out' something.
+        Contract.Assert(Arguments.Count == 1);
+        ArgumentSyntax Argument = Arguments[0];
+        Contract.Assert(Argument.RefKindKeyword.IsKind(SyntaxKind.OutKeyword));
+
+        if (Argument.Expression is not IdentifierNameSyntax IdentifierName)
             return false;
 
         InvocationStatement = ExpressionStatement;

@@ -1,4 +1,4 @@
-﻿## Release 1.8.0
+﻿## Release 1.9.0
 
 ### New Rules
 
@@ -23,6 +23,7 @@ MCA1016 |  Usage   |  Warning | MCA1016SetParameterAsUnusedBeforeReturn, [Docume
 MCA1017 |  Usage   |  Warning | MCA1017VerifiedPropertyMustBePrivate, [Documentation](doc/MCA1017.md)
 MCA1018 |  Usage   |  Warning | MCA1018VerifiedPropertyMustBeWithinType, [Documentation](doc/MCA1018.md)
 MCA1019 |  Usage   |  Warning | MCA1019VerifiedPropertyIsMissingSuffix, [Documentation](doc/MCA1019.md)
+MCA1020 |  Usage   |  Warning | MCA1020MissingDictionaryEntry, [Documentation](doc/MCA1020.md)
 MCA2001 |  Usage   |  Warning | MCA2001ObjectMustBeInitialized, [Documentation](doc/MCA2001.md)
 MCA2002 |  Usage   |   Error  | MCA2002InitializeWithAttributeArgumentMustBeValidMethodName, [Documentation](doc/MCA2002.md)
 MCA2003 |  Usage   |   Error  | MCA2003InitializeWithAttributeNotAllowedInClassWithExplicitConstructors, [Documentation](doc/MCA2003.md)

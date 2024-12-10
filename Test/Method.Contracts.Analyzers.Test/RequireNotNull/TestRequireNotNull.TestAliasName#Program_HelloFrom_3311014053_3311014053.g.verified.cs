@@ -14,7 +14,7 @@ partial class Program
     /// </summary>
     /// <param name="text">Test parameter 1.</param>
     /// <param name="textPlus">Test parameter 2, a copy of <paramref name="text"/>.</param>
-    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.8.0.26")]
+    [GeneratedCodeAttribute("Method.Contracts.Analyzers","1.9.0.27")]
     public static void HelloFrom(string text, out string textPlus)
     {
         Contract.RequireNotNull(text, out string Foo);

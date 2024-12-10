@@ -123,83 +123,74 @@ internal static class AnalyzerTools
 #endif
 
     /// <summary>
-    /// Checks whether a statement is a call to Contract.Unused().
+    /// Checks whether a statement is a call to some method of the Contract class.
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="statement">The statement to check.</param>
-    /// <param name="argumentIdentifierName">The out argument upon return.</param>
-    public static bool IsInvocationOfContractUnused(SyntaxNodeAnalysisContext context, StatementSyntax statement, out IdentifierNameSyntax argumentIdentifierName)
+    /// <param name="methodName">The method name to check.</param>
+    /// <param name="arguments">The method arguments upon return.</param>
+    public static bool IsInvocationOfContract(SyntaxNodeAnalysisContext context, StatementSyntax statement, string methodName, out List<ArgumentSyntax> arguments)
     {
         if (statement is not ExpressionStatementSyntax ExpressionStatement)
         {
-            Contract.Unused(out argumentIdentifierName);
+            Contract.Unused(out arguments);
             return false;
         }
 
         if (ExpressionStatement.Expression is not InvocationExpressionSyntax InvocationExpression)
         {
-            Contract.Unused(out argumentIdentifierName);
+            Contract.Unused(out arguments);
             return false;
         }
 
-        return IsInvocationOfContractUnused(context, InvocationExpression, out argumentIdentifierName);
+        return IsInvocationOfContract(context, InvocationExpression, methodName, out arguments);
     }
 
     /// <summary>
-    /// Checks whether an invocation expression is a call to Contract.Unused().
+    /// Checks whether an invocation expression is a call to some method of the Contract class.
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="invocationExpression">The expression to check.</param>
-    /// <param name="argumentIdentifierName">The out argument upon return.</param>
-    public static bool IsInvocationOfContractUnused(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax invocationExpression, out IdentifierNameSyntax argumentIdentifierName)
+    /// <param name="methodName">The method name to check.</param>
+    /// <param name="arguments">The method arguments upon return.</param>
+    public static bool IsInvocationOfContract(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax invocationExpression, string methodName, out List<ArgumentSyntax> arguments)
     {
         if (invocationExpression.Expression is not MemberAccessExpressionSyntax MemberAccessExpression)
         {
-            Contract.Unused(out argumentIdentifierName);
+            Contract.Unused(out arguments);
             return false;
         }
 
         SymbolInfo ClassSymbolInfo = context.SemanticModel.GetSymbolInfo(MemberAccessExpression.Expression);
         if (ClassSymbolInfo.Symbol is not ITypeSymbol ClassSymbol)
         {
-            Contract.Unused(out argumentIdentifierName);
+            Contract.Unused(out arguments);
             return false;
         }
 
         ITypeSymbol ContractTypeSymbol = Contract.AssertNotNull(context.Compilation.GetTypeByMetadataName(typeof(Contract).FullName));
         if (!SymbolEqualityComparer.Default.Equals(ClassSymbol, ContractTypeSymbol))
         {
-            Contract.Unused(out argumentIdentifierName);
+            Contract.Unused(out arguments);
             return false;
         }
 
         SymbolInfo NameSymbolInfo = context.SemanticModel.GetSymbolInfo(MemberAccessExpression.Name);
         if (NameSymbolInfo.Symbol is not ISymbol NameSymbol)
         {
-            Contract.Unused(out argumentIdentifierName);
+            Contract.Unused(out arguments);
             return false;
         }
 
-        IEnumerable<ISymbol> UnusedMethodSymbols = ContractTypeSymbol.GetMembers().Where(member => member.Name == "Unused");
-        bool IsUnusedMethodSymbol = UnusedMethodSymbols.Any(symbol => SymbolEqualityComparer.Default.Equals(NameSymbol.OriginalDefinition, symbol));
-        if (!IsUnusedMethodSymbol)
+        IEnumerable<ISymbol> MatchingMethodSymbols = ContractTypeSymbol.GetMembers().Where(member => member.Name == methodName);
+        bool IsMethodSymbolMatching = MatchingMethodSymbols.Any(symbol => SymbolEqualityComparer.Default.Equals(NameSymbol.OriginalDefinition, symbol));
+        if (!IsMethodSymbolMatching)
         {
-            Contract.Unused(out argumentIdentifierName);
+            Contract.Unused(out arguments);
             return false;
         }
 
-        // If NameSymbol is the right symbol, there is exactly one argument and it's 'out' something.
-        Contract.Assert(invocationExpression.ArgumentList.Arguments.Count == 1);
-        ArgumentSyntax Argument = invocationExpression.ArgumentList.Arguments[0];
-        Contract.Assert(Argument.RefKindKeyword.IsKind(SyntaxKind.OutKeyword));
-
-        if (Argument.Expression is not IdentifierNameSyntax IdentifierName)
-        {
-            Contract.Unused(out argumentIdentifierName);
-            return false;
-        }
-
-        argumentIdentifierName = IdentifierName;
+        arguments = [.. invocationExpression.ArgumentList.Arguments];
         return true;
     }
 

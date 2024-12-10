@@ -327,6 +327,7 @@ If a base class contains one or more constructors with the `InitializeWith` attr
 | [MCA1017](doc/MCA1017.md) | Verified property must be private.                                          |
 | [MCA1018](doc/MCA1018.md) | Verified property must be within type.                                      |
 | [MCA1019](doc/MCA1019.md) | Verified property is missing suffix.                                        |
+| [MCA1020](doc/MCA1020.md) | Missing Dictionary Entry.                                                   |
 
 ### Initialization
 

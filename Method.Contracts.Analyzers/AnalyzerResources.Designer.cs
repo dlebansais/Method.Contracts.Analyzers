@@ -574,6 +574,33 @@ namespace Contracts.Analyzers {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The Dictionary is missing an entry..
+        /// </summary>
+        internal static string MCA1020AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1020AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The Dictionary is missing an entry.
+        /// </summary>
+        internal static string MCA1020AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1020AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Missing dictionary entry.
+        /// </summary>
+        internal static string MCA1020AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1020AnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Object must be initialized with a call to the specified method..
         /// </summary>
         internal static string MCA2001AnalyzerDescription {
