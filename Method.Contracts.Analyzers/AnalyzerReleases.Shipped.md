@@ -24,6 +24,7 @@ MCA1017 |  Usage   |  Warning | MCA1017VerifiedPropertyMustBePrivate, [Documenta
 MCA1018 |  Usage   |  Warning | MCA1018VerifiedPropertyMustBeWithinType, [Documentation](doc/MCA1018.md)
 MCA1019 |  Usage   |  Warning | MCA1019VerifiedPropertyIsMissingSuffix, [Documentation](doc/MCA1019.md)
 MCA1020 |  Usage   |  Warning | MCA1020MissingDictionaryEntry, [Documentation](doc/MCA1020.md)
+MCA1021 |  Usage   |  Warning | MCA1021OnlyUseContractMapWithInSiteDictionary, [Documentation](doc/MCA1021.md)
 MCA2001 |  Usage   |  Warning | MCA2001ObjectMustBeInitialized, [Documentation](doc/MCA2001.md)
 MCA2002 |  Usage   |   Error  | MCA2002InitializeWithAttributeArgumentMustBeValidMethodName, [Documentation](doc/MCA2002.md)
 MCA2003 |  Usage   |   Error  | MCA2003InitializeWithAttributeNotAllowedInClassWithExplicitConstructors, [Documentation](doc/MCA2003.md)

@@ -393,4 +393,16 @@
     <value>Missing dictionary entry</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="MCA1021AnalyzerDescription" xml:space="preserve">
+    <value>Only use in-site dictionary as the second argument of Contract.Map.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1021AnalyzerMessageFormat" xml:space="preserve">
+    <value>Only use in-site dictionary as the second argument of Contract.Map</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1021AnalyzerTitle" xml:space="preserve">
+    <value>Use in-site dictionary</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
 </root>

@@ -601,6 +601,33 @@ namespace Contracts.Analyzers {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Only use in-site dictionary as the second argument of Contract.Map..
+        /// </summary>
+        internal static string MCA1021AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1021AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only use in-site dictionary as the second argument of Contract.Map.
+        /// </summary>
+        internal static string MCA1021AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1021AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use in-site dictionary.
+        /// </summary>
+        internal static string MCA1021AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1021AnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Object must be initialized with a call to the specified method..
         /// </summary>
         internal static string MCA2001AnalyzerDescription {

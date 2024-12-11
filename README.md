@@ -328,6 +328,7 @@ If a base class contains one or more constructors with the `InitializeWith` attr
 | [MCA1018](doc/MCA1018.md) | Verified property must be within type.                                      |
 | [MCA1019](doc/MCA1019.md) | Verified property is missing suffix.                                        |
 | [MCA1020](doc/MCA1020.md) | Missing Dictionary Entry.                                                   |
+| [MCA1021](doc/MCA1021.md) | Only use Contract.Map with in-site dictionary.                              |
 
 ### Initialization
 
