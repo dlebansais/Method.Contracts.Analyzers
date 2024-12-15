@@ -41,7 +41,7 @@ public partial class ContractGenerator
         MethodDeclaration = MethodDeclaration.WithModifiers(Modifiers);
 
         BlockSyntax MethodBody = GenerateBody(model, MethodDeclaration, IsDebugGeneration, LeadingTrivia, LeadingTriviaWithoutLineEnd, isAsync, Tab);
-        MethodDeclaration = MethodDeclaration.WithExpressionBody(null).WithBody(MethodBody);
+        MethodDeclaration = MethodDeclaration.WithExpressionBody(null).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.None)).WithBody(MethodBody);
 
         if (HasUpdatedParameterList(model, MethodDeclaration, out ParameterListSyntax ParameterList))
             MethodDeclaration = MethodDeclaration.WithParameterList(ParameterList);
