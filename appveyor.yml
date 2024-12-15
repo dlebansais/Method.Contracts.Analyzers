@@ -29,11 +29,6 @@ matrix:
 before_build:
   - nuget restore %APPVEYOR_PROJECT_NAME%.sln
   - nuget install GitCommitId -DependencyVersion Highest -OutputDirectory packages
-  - dir C:\Users\appveyor\.nuget\packages
-  - dir C:\Users\appveyor\.nuget\packages\Method.Contracts-Debug
-  - dir C:\Users\appveyor\.nuget\packages\Method.Contracts-Debug\1.9.1
-  - dir C:\Users\appveyor\.nuget\packages\Method.Contracts-Debug\1.9.1\lib
-  - dir C:\Users\appveyor\.nuget\packages\Method.Contracts-Debug\1.9.1\lib\net481
 
 configuration:
   - Debug

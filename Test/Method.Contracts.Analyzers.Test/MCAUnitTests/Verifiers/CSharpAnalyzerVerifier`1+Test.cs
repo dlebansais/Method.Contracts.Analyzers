@@ -27,24 +27,14 @@ internal static partial class CSharpAnalyzerVerifier<TAnalyzer>
                 compilationOptions = compilationOptions.WithSpecificDiagnosticOptions(compilationOptions.SpecificDiagnosticOptions.SetItems(CSharpVerifierHelper.NullableWarnings));
                 compilationOptions = compilationOptions.WithPlatform(Platform.X64);
                 solution = solution.WithProjectCompilationOptions(projectId, compilationOptions);
+
+                string ContractAssemblyPath = GetContractAssemblyPath();
                 string RuntimePath = GetRuntimePath();
-
-#if DEBUG
-                const string ContractAssembly = "Method.Contracts-Debug";
-#else
-                const string ContractAssembly = "Method.Contracts";
-#endif
-
-                ISettings settings = Settings.LoadDefaultSettings(null);
-                string nugetPath = SettingsUtility.GetGlobalPackagesFolder(settings);
-                Version AssemblyVersion = typeof(RequireNotNullAttribute).Assembly.GetName().Version!;
-                string AssemblyVersionString = $"{AssemblyVersion.Major}.{AssemblyVersion.Minor}.{AssemblyVersion.Build}";
-                string AssemblyPath = Path.Combine(nugetPath, ContractAssembly, AssemblyVersionString, "lib", "net481", "Method.Contracts.dll");
 
                 List<MetadataReference> DefaultReferences =
                 [
                     //MetadataReference.CreateFromFile(typeof(Binder).GetTypeInfo().Assembly.Location),
-                    MetadataReference.CreateFromFile(AssemblyPath),
+                    MetadataReference.CreateFromFile(ContractAssemblyPath),
                     MetadataReference.CreateFromFile(string.Format(CultureInfo.InvariantCulture, RuntimePath, "mscorlib")),
                     MetadataReference.CreateFromFile(string.Format(CultureInfo.InvariantCulture, RuntimePath, "System")),
                     MetadataReference.CreateFromFile(string.Format(CultureInfo.InvariantCulture, RuntimePath, "System.Core")),
@@ -83,7 +73,7 @@ internal static partial class CSharpAnalyzerVerifier<TAnalyzer>
 
         private static List<string> GetRuntimeDirectories(string runtimeDirectoryBase)
         {
-            string[] Directories = System.IO.Directory.GetDirectories(runtimeDirectoryBase);
+            string[] Directories = Directory.GetDirectories(runtimeDirectoryBase);
             List<string> DirectoryList = [.. Directories];
             DirectoryList.Sort(CompareIgnoreCase);
 
@@ -94,7 +84,7 @@ internal static partial class CSharpAnalyzerVerifier<TAnalyzer>
 
         private static bool IsValidRuntimeDirectory(string folderPath)
         {
-            string FolderName = System.IO.Path.GetFileName(folderPath);
+            string FolderName = Path.GetFileName(folderPath);
             const string Prefix = "v";
 
             Contract.Assert(FolderName.StartsWith(Prefix, StringComparison.Ordinal));
@@ -105,6 +95,28 @@ internal static partial class CSharpAnalyzerVerifier<TAnalyzer>
                     return false;
 
             return true;
+        }
+
+        private static string GetContractAssemblyPath()
+        {
+#if DEBUG
+            string AssemblyPath = GetContractAssemblyPath("Method.Contracts-Debug");
+            if (File.Exists(AssemblyPath))
+                return AssemblyPath;
+#endif
+
+            return GetContractAssemblyPath("Method.Contracts");
+        }
+
+        private static string GetContractAssemblyPath(string assemblyName)
+        {
+            ISettings settings = Settings.LoadDefaultSettings(null);
+            string nugetPath = SettingsUtility.GetGlobalPackagesFolder(settings);
+            Version AssemblyVersion = typeof(RequireNotNullAttribute).Assembly.GetName().Version!;
+            string AssemblyVersionString = $"{AssemblyVersion.Major}.{AssemblyVersion.Minor}.{AssemblyVersion.Build}";
+            string AssemblyPath = Path.Combine(nugetPath, assemblyName, AssemblyVersionString, "lib", "net481", "Method.Contracts.dll");
+
+            return AssemblyPath;
         }
     }
 }
