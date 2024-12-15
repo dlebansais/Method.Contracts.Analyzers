@@ -56,7 +56,7 @@ internal class Test
             );
 
         DiagnosticResult Expected = new(DescriptorCS1503);
-        Expected = Expected.WithLocation("/0/Test0.cs", 8, 21);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 5, 21);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal class Test
@@ -175,7 +175,7 @@ internal class Test
             );
 
         DiagnosticResult Expected = new(DescriptorCS1503);
-        Expected = Expected.WithLocation("/0/Test0.cs", 6, 17);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 3, 17);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 [InitializeWith(0)]
@@ -223,7 +223,7 @@ internal record Test
             );
 
         DiagnosticResult Expected = new(DescriptorCS0592);
-        Expected = Expected.WithLocation("/0/Test0.cs", 6, 2);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 3, 2);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 [InitializeWith(""Initialize"")]

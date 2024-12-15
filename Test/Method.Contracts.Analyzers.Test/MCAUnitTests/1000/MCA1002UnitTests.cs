@@ -114,13 +114,13 @@ internal partial class Program
             );
 
         DiagnosticResult Expected1 = new(DescriptorCS0116);
-        Expected1 = Expected1.WithLocation("/0/Test0.cs", 8, 13);
+        Expected1 = Expected1.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 5, 13);
 
         DiagnosticResult Expected2 = new(DescriptorMCA1002);
-        Expected2 = Expected2.WithLocation("/0/Test0.cs", 12, 1);
+        Expected2 = Expected2.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 9, 1);
 
         DiagnosticResult Expected3 = new(DescriptorCS0116);
-        Expected3 = Expected3.WithLocation("/0/Test0.cs", 13, 6);
+        Expected3 = Expected3.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 10, 6);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 namespace Contracts.TestSuite;

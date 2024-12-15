@@ -78,7 +78,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected = new(DescriptorCS1501);
-        Expected = Expected.WithLocation("/0/Test0.cs", 11, 28);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 8, 28);
 
         await VerifyCS.VerifyAnalyzerAsync(@"using System.Collections.Generic;
 

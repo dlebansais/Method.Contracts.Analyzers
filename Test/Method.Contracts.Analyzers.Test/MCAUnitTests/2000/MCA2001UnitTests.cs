@@ -77,7 +77,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected = new(DescriptorCS8805);
-        Expected = Expected.WithLocation("/0/Test0.cs", 6, 1);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 3, 1);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 Test test = [|new Test()|];
@@ -118,10 +118,10 @@ internal class Test
             );
 
         DiagnosticResult Expected1 = new(DescriptorCS8803);
-        Expected1 = Expected1.WithLocation("/0/Test0.cs", 18, 1);
+        Expected1 = Expected1.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 15, 1);
 
         DiagnosticResult Expected2 = new(DescriptorCS8805);
-        Expected2 = Expected2.WithLocation("/0/Test0.cs", 18, 1);
+        Expected2 = Expected2.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 15, 1);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal class Test
@@ -239,7 +239,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected = new(DescriptorCS0103);
-        Expected = Expected.WithLocation("/0/Test0.cs", 25, 9);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 22, 9);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal class Test
@@ -280,7 +280,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected = new(DescriptorCS0311);
-        Expected = Expected.WithLocation("/0/Test0.cs", 24, 14);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 21, 14);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal class Test
@@ -400,7 +400,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected = new(DescriptorCS8754);
-        Expected = Expected.WithLocation("/0/Test0.cs", 10, 19);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 7, 19);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
@@ -463,10 +463,10 @@ internal partial class Program
             );
 
         DiagnosticResult Expected1 = new(DescriptorCS0144);
-        Expected1 = Expected1.WithLocation("/0/Test0.cs", 14, 20);
+        Expected1 = Expected1.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 11, 20);
 
         DiagnosticResult Expected2 = new(DescriptorCS1061);
-        Expected2 = Expected2.WithLocation("/0/Test0.cs", 15, 14);
+        Expected2 = Expected2.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 12, 14);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal interface ITest
@@ -497,7 +497,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected = new(DescriptorCS1729);
-        Expected = Expected.WithLocation("/0/Test0.cs", 22, 24);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 19, 24);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal class Test
@@ -554,13 +554,13 @@ internal partial class Program
             );
 
         DiagnosticResult Expected1 = new(DescriptorCS0246);
-        Expected1 = Expected1.WithLocation("/0/Test0.cs", 8, 6);
+        Expected1 = Expected1.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 5, 6);
 
         DiagnosticResult Expected2 = new(DescriptorCS0246Attribute);
-        Expected2 = Expected2.WithLocation("/0/Test0.cs", 8, 6);
+        Expected2 = Expected2.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 5, 6);
 
         DiagnosticResult Expected3 = new(DescriptorCS1061);
-        Expected3 = Expected3.WithLocation("/0/Test0.cs", 19, 14);
+        Expected3 = Expected3.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 16, 14);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal class Test
@@ -659,7 +659,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected = new(DescriptorCS7036);
-        Expected = Expected.WithLocation("/0/Test0.cs", 8, 6);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 5, 6);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal class Test
@@ -698,7 +698,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected = new(DescriptorCS1729);
-        Expected = Expected.WithLocation("/0/Test0.cs", 8, 6);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 5, 6);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal class Test
@@ -737,7 +737,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected = new(DescriptorCS1503);
-        Expected = Expected.WithLocation("/0/Test0.cs", 8, 21);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 5, 21);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal class Test
@@ -902,7 +902,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected = new(DescriptorCS1736);
-        Expected = Expected.WithLocation("/0/Test0.cs", 20, 42);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 17, 42);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal class Test
@@ -939,7 +939,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected = new(DescriptorCS8805);
-        Expected = Expected.WithLocation("/0/Test0.cs", 6, 1);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 3, 1);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 Test test = new Test();
@@ -981,10 +981,10 @@ internal class Test
             );
 
         DiagnosticResult Expected1 = new(DescriptorCS1001);
-        Expected1 = Expected1.WithLocation("/0/Test0.cs", 23, 16);
+        Expected1 = Expected1.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 20, 16);
 
         DiagnosticResult Expected2 = new(DescriptorCS0103);
-        Expected2 = Expected2.WithLocation("/0/Test0.cs", 23, 17);
+        Expected2 = Expected2.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 20, 17);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal class Test

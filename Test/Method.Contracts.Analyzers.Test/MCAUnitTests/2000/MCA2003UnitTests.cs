@@ -88,7 +88,7 @@ internal record Test
             );
 
         DiagnosticResult Expected = new(DescriptorCS0592);
-        Expected = Expected.WithLocation("/0/Test0.cs", 6, 2);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 3, 2);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 [InitializeWith(""Initialize"")]

@@ -24,8 +24,11 @@ internal class ContractMapInvocationAssertion : IAnalysisAssertion
     {
         InvocationExpressionSyntax InvocationExpression = (InvocationExpressionSyntax)context.Node;
 
-        if (!AnalyzerTools.IsInvocationOfContract(context, InvocationExpression, nameof(Contract.Map), out List<ArgumentSyntax> Arguments))
+        if (!AnalyzerTools.IsInvocationOfContract(context, InvocationExpression, nameof(Contract.Map), out List<ArgumentSyntax> Arguments) &&
+            !AnalyzerTools.IsInvocationOfContract(context, InvocationExpression, nameof(Contract.MapAsync), out Arguments))
+        {
             return false;
+        }
 
         // If NameSymbol is the right symbol, there are exactly two arguments.
         Contract.Assert(Arguments.Count == 2);

@@ -112,7 +112,7 @@ internal partial class Program
     [Test]
     public async Task UndefinedAttribute_NoDiagnostic()
     {
-        DiagnosticDescriptor DescriptorCS0116 = new(
+        DiagnosticDescriptor DescriptorCS0246_1 = new(
             "CS0246",
             "title",
             "The type or namespace name 'Access' could not be found (are you missing a using directive or an assembly reference?)",
@@ -121,10 +121,10 @@ internal partial class Program
             true
             );
 
-        DiagnosticResult Expected1 = new(DescriptorCS0116);
-        Expected1 = Expected1.WithLocation("/0/Test0.cs", 7, 6);
+        DiagnosticResult Expected1 = new(DescriptorCS0246_1);
+        Expected1 = Expected1.WithLocation("/0/Test0.cs", Prologs.NoContractLineCount + 5, 6);
 
-        DiagnosticDescriptor DescriptorCS0246 = new(
+        DiagnosticDescriptor DescriptorCS0246_2 = new(
             "CS0246",
             "title",
             "The type or namespace name 'AccessAttribute' could not be found (are you missing a using directive or an assembly reference?)",
@@ -133,8 +133,8 @@ internal partial class Program
             true
             );
 
-        DiagnosticResult Expected2 = new(DescriptorCS0246);
-        Expected2 = Expected2.WithLocation("/0/Test0.cs", 7, 6);
+        DiagnosticResult Expected2 = new(DescriptorCS0246_2);
+        Expected2 = Expected2.WithLocation("/0/Test0.cs", Prologs.NoContractLineCount + 5, 6);
 
         await VerifyCS.VerifyAnalyzerAsync(Prologs.NoContract, @"
 internal partial class Program

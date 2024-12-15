@@ -122,7 +122,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected1 = new(DescriptorCS0116);
-        Expected1 = Expected1.WithLocation("/0/Test0.cs", 7, 6);
+        Expected1 = Expected1.WithLocation("/0/Test0.cs", Prologs.NoContractLineCount + 5, 6);
 
         DiagnosticDescriptor DescriptorCS0246 = new(
             "CS0246",
@@ -134,7 +134,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected2 = new(DescriptorCS0246);
-        Expected2 = Expected2.WithLocation("/0/Test0.cs", 7, 6);
+        Expected2 = Expected2.WithLocation("/0/Test0.cs", Prologs.NoContractLineCount + 5, 6);
 
         await VerifyCS.VerifyAnalyzerAsync(Prologs.NoContract, @"
 internal partial class Program

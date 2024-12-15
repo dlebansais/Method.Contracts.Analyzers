@@ -99,7 +99,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected = new(DescriptorCS0592);
-        Expected = Expected.WithLocation("/0/Test0.cs", 10, 6);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.NullableLineCount + 5, 6);
 
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
 internal partial class Program

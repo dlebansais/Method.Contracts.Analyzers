@@ -77,7 +77,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected = new(DescriptorCS1501);
-        Expected = Expected.WithLocation("/0/Test0.cs", 11, 28);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 8, 28);
 
         await VerifyCS.VerifyAnalyzerAsync(@"using System.Collections.Generic;
 
@@ -194,6 +194,194 @@ internal partial class Program
     private static void Foo()
     {
         int Bar = Contract.Map(Color.Red, new System.Collections.Generic.Dictionary<Color, int>());
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task AsyncExtraEnumValue_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    private enum Color
+    {
+        Red,
+        Green,
+        Blue,
+        White,
+    }
+
+    private static async Task Foo()
+    {
+        int Bar = await [|Contract.MapAsync(Color.Red, new System.Collections.Generic.Dictionary<Color, Func<Task<int>>>()
+        {
+            { Color.Red,   async () => await Task.Run(() => 0xFF0000) },
+            { Color.Green, async () => await Task.Run(() => 0x00FF00) },
+            { Color.Blue,  async () => await Task.Run(() => 0x0000FF) },
+        })|];
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task AsyncValidTable_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    private enum Color
+    {
+        Red,
+        Green,
+        Blue,
+    }
+
+    private static async Task Foo()
+    {
+        int Bar = await Contract.MapAsync(Color.Red, new System.Collections.Generic.Dictionary<Color, Func<Task<int>>>()
+        {
+            { Color.Red,   async () => await Task.Run(() => 0xFF0000) },
+            { Color.Green, async () => await Task.Run(() => 0x00FF00) },
+            { Color.Blue,  async () => await Task.Run(() => 0x0000FF) },
+        });
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task AsyncNoArgument_NoDiagnostic()
+    {
+        DiagnosticDescriptor DescriptorCS1501 = new(
+            "CS1501",
+            "title",
+            "No overload for method 'MapAsync' takes 0 arguments",
+            "description",
+            DiagnosticSeverity.Error,
+            true
+            );
+
+        DiagnosticResult Expected = new(DescriptorCS1501);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 8, 34);
+
+        await VerifyCS.VerifyAnalyzerAsync(@"using System.Collections.Generic;
+
+internal partial class Program
+{
+    private static async Task Foo()
+    {
+        int Bar = await Contract.MapAsync();
+    }
+}
+", Expected).ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task AsyncIndirectTable_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    private enum Color
+    {
+        Red,
+        Green,
+        Blue,
+        White,
+    }
+
+    private static async Task Foo()
+    {
+        System.Collections.Generic.Dictionary<Color, Func<Task<int>>> Table = new()
+        {
+            { Color.Red,   async () => await Task.Run(() => 0xFF0000) },
+            { Color.Green, async () => await Task.Run(() => 0x00FF00) },
+            { Color.Blue,  async () => await Task.Run(() => 0x0000FF) },
+        };
+
+        int Bar = await Contract.MapAsync(Color.Red, Table);
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task AsyncDictionaryWithoutArgument_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    private enum Color
+    {
+        Red,
+        Green,
+        Blue,
+        White,
+    }
+
+    private static async Task Foo()
+    {
+        int Bar = await [|Contract.MapAsync(Color.Red, new System.Collections.Generic.Dictionary<Color, Func<Task<int>>>
+        {
+            { Color.Red,   async () => await Task.Run(() => 0xFF0000) },
+            { Color.Green, async () => await Task.Run(() => 0x00FF00) },
+            { Color.Blue,  async () => await Task.Run(() => 0x0000FF) },
+        })|];
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task AsyncDictionaryWithArgument_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    private enum Color
+    {
+        Red,
+        Green,
+        Blue,
+        White,
+    }
+
+    private static async Task Foo()
+    {
+        System.Collections.Generic.Dictionary<Color, Func<Task<int>>> InitTable = new()
+        {
+        };
+
+        int Bar = await Contract.MapAsync(Color.Red, new System.Collections.Generic.Dictionary<Color, Func<Task<int>>>(InitTable)
+        {
+            { Color.Red,   async () => await Task.Run(() => 0xFF0000) },
+            { Color.Green, async () => await Task.Run(() => 0x00FF00) },
+            { Color.Blue,  async () => await Task.Run(() => 0x0000FF) },
+        });
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task AsyncDictionaryWithoutInitializer_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    private enum Color
+    {
+        Red,
+        Green,
+        Blue,
+    }
+
+    private static async Task Foo()
+    {
+        int Bar = await Contract.MapAsync(Color.Red, new System.Collections.Generic.Dictionary<Color, Func<Task<int>>>());
     }
 }
 ").ConfigureAwait(false);

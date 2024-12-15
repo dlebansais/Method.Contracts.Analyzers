@@ -103,7 +103,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected = new(DescriptorCS1016);
-        Expected = Expected.WithLocation("/0/Test0.cs", 9, 49);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 6, 49);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
@@ -131,7 +131,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected = new(DescriptorCS1016);
-        Expected = Expected.WithLocation("/0/Test0.cs", 9, 46);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 6, 46);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
@@ -159,7 +159,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected = new(DescriptorCS1016);
-        Expected = Expected.WithLocation("/0/Test0.cs", 9, 47);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 6, 47);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
@@ -187,7 +187,7 @@ internal partial class Program
             );
 
         DiagnosticResult Expected = new(DescriptorCS1016);
-        Expected = Expected.WithLocation("/0/Test0.cs", 9, 77);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 6, 77);
 
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program

@@ -5,12 +5,14 @@ namespace Contracts.Analyzers.Test;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Reflection;
+using System.IO;
+using Contracts;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
+using NuGet.Configuration;
 
 internal static partial class CSharpAnalyzerVerifier<TAnalyzer>
     where TAnalyzer : DiagnosticAnalyzer, new()
@@ -25,12 +27,24 @@ internal static partial class CSharpAnalyzerVerifier<TAnalyzer>
                 compilationOptions = compilationOptions.WithSpecificDiagnosticOptions(compilationOptions.SpecificDiagnosticOptions.SetItems(CSharpVerifierHelper.NullableWarnings));
                 compilationOptions = compilationOptions.WithPlatform(Platform.X64);
                 solution = solution.WithProjectCompilationOptions(projectId, compilationOptions);
-
                 string RuntimePath = GetRuntimePath();
+
+#if DEBUG
+                const string ContractAssembly = "Method.Contracts-Debug";
+#else
+                const string ContractAssembly = "Method.Contracts";
+#endif
+
+                ISettings settings = Settings.LoadDefaultSettings(null);
+                string nugetPath = SettingsUtility.GetGlobalPackagesFolder(settings);
+                Version AssemblyVersion = typeof(RequireNotNullAttribute).Assembly.GetName().Version!;
+                string AssemblyVersionString = $"{AssemblyVersion.Major}.{AssemblyVersion.Minor}.{AssemblyVersion.Build}";
+                string AssemblyPath = Path.Combine(nugetPath, ContractAssembly, AssemblyVersionString, "lib", "net481", "Method.Contracts.dll");
+
                 List<MetadataReference> DefaultReferences =
                 [
                     //MetadataReference.CreateFromFile(typeof(Binder).GetTypeInfo().Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(AccessAttribute).GetTypeInfo().Assembly.Location),
+                    MetadataReference.CreateFromFile(AssemblyPath),
                     MetadataReference.CreateFromFile(string.Format(CultureInfo.InvariantCulture, RuntimePath, "mscorlib")),
                     MetadataReference.CreateFromFile(string.Format(CultureInfo.InvariantCulture, RuntimePath, "System")),
                     MetadataReference.CreateFromFile(string.Format(CultureInfo.InvariantCulture, RuntimePath, "System.Core")),
