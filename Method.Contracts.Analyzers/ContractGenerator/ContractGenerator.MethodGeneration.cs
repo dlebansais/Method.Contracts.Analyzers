@@ -41,7 +41,7 @@ public partial class ContractGenerator
         MethodDeclaration = MethodDeclaration.WithModifiers(Modifiers);
 
         BlockSyntax MethodBody = GenerateBody(model, MethodDeclaration, IsDebugGeneration, LeadingTrivia, LeadingTriviaWithoutLineEnd, isAsync, Tab);
-        MethodDeclaration = MethodDeclaration.WithBody(MethodBody);
+        MethodDeclaration = MethodDeclaration.WithExpressionBody(null).WithBody(MethodBody);
 
         if (HasUpdatedParameterList(model, MethodDeclaration, out ParameterListSyntax ParameterList))
             MethodDeclaration = MethodDeclaration.WithParameterList(ParameterList);
@@ -241,8 +241,9 @@ public partial class ContractGenerator
 
     private static BlockSyntax GenerateBody(ContractModel model, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration, SyntaxTriviaList tabTrivia, SyntaxTriviaList tabTriviaWithoutLineEnd, bool isAsync, string tab)
     {
+        bool IsExpressionBody = methodDeclaration.ExpressionBody is not null;
         SyntaxToken OpenBraceToken = SyntaxFactory.Token(SyntaxKind.OpenBraceToken);
-        OpenBraceToken = OpenBraceToken.WithLeadingTrivia(tabTriviaWithoutLineEnd);
+        OpenBraceToken = OpenBraceToken.WithLeadingTrivia(IsExpressionBody ? tabTrivia : tabTriviaWithoutLineEnd);
 
         List<SyntaxTrivia> TrivialList = [.. tabTrivia, SyntaxFactory.Whitespace(tab)];
         SyntaxTriviaList TabStatementTrivia = SyntaxFactory.TriviaList(TrivialList);
