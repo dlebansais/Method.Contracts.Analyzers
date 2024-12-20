@@ -7,14 +7,14 @@
         <Platforms>x64</Platforms>
 
         <RootNamespace>Contracts.Analyzers</RootNamespace>
-        <Version>1.9.4</Version>
+        <Version>1.9.5</Version>
         <Authors>David Le Bansais</Authors>
         <Company />
         <Product />
         <Description>A code generator companion for Method.Contracts</Description>
         <Copyright>Copyright © 2024 David Le Bansais</Copyright>
-        <AssemblyVersion>1.9.4.32</AssemblyVersion>
-        <FileVersion>1.9.4.32</FileVersion>
+        <AssemblyVersion>1.9.5.33</AssemblyVersion>
+        <FileVersion>1.9.5.33</FileVersion>
         <RepositoryUrl>https://github.com/dlebansais/Method.Contracts.Analyzers</RepositoryUrl>
         <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 
@@ -109,7 +109,7 @@
             <None Include="$(TargetDir)Helper.dll" />
             <None Include="$(TargetDir)Method.Contracts.dll" />
         </ItemGroup>
-        <Copy SourceFiles="@(None)" DestinationFolder="$(SolutionDir)nuget\lib\analyzers\dotnet\cs\" Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+        <Copy SourceFiles="@(None)" DestinationFolder="$(SolutionDir)nuget\analyzers\dotnet\cs\" Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     </Target>
 
 </Project>
