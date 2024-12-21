@@ -37,8 +37,8 @@
         </PackageReference>
 
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-        <PackageReference Include="MSTest.TestAdapter" Version="3.6.4" />
-        <PackageReference Include="MSTest.TestFramework" Version="3.6.4" />
+        <PackageReference Include="MSTest.TestAdapter" Version="3.7.0" />
+        <PackageReference Include="MSTest.TestFramework" Version="3.7.0" />
         <PackageReference Include="NUnit" Version="4.3.0" />
         <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
         <PackageReference Include="Verify.NUnit" Version="28.6.1" />
@@ -48,8 +48,8 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.MSTest" Version="1.1.2" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing.MSTest" Version="1.1.2" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing.MSTest" Version="1.1.2" />
-        <PackageReference Include="Method.Contracts-Debug" Version="1.9.4" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-        <PackageReference Include="Method.Contracts" Version="1.9.4" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
+        <PackageReference Include="Method.Contracts-Debug" Version="2.0.0" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+        <PackageReference Include="Method.Contracts" Version="2.0.0" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
 
         <!-- System.Formats.Asn1 is added to mitigate vulnerability. -->
         <!-- Remove as soon as one of the packages above no longer depends on the vulnerable version -->
