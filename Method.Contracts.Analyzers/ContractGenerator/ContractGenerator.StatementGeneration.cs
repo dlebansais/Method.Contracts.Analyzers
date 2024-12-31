@@ -200,13 +200,13 @@ public partial class ContractGenerator
 
             ArgumentSyntax Argument =
                 IsRef
-                ? SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.RefKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia))
+                ? SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.RefKeyword), ParameterIdentifier.WithLeadingTrivia(SyntaxFactory.Space))
                 : IsOut
-                  ? SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia))
+                  ? SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), ParameterIdentifier.WithLeadingTrivia(SyntaxFactory.Space))
                   : SyntaxFactory.Argument(ParameterIdentifier);
 
             if (Arguments.Count > 0)
-                Argument = Argument.WithLeadingTrivia(WhitespaceTrivia);
+                Argument = Argument.WithLeadingTrivia(SyntaxFactory.Space);
 
             Arguments.Add(Argument);
         }
@@ -215,7 +215,7 @@ public partial class ContractGenerator
         ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(Invocation, ArgumentList);
 
         if (isAsync)
-            CallExpression = SyntaxFactory.AwaitExpression(CallExpression.WithLeadingTrivia(WhitespaceTrivia));
+            CallExpression = SyntaxFactory.AwaitExpression(CallExpression.WithLeadingTrivia(SyntaxFactory.Space));
 
         ExpressionStatementSyntax ExpressionStatement = SyntaxFactory.ExpressionStatement(CallExpression);
 
@@ -252,27 +252,27 @@ public partial class ContractGenerator
 
             ArgumentSyntax Argument =
                 IsRef
-                ? SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.RefKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia))
+                ? SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.RefKeyword), ParameterIdentifier.WithLeadingTrivia(SyntaxFactory.Space))
                 : IsOut
-                  ? SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), ParameterIdentifier.WithLeadingTrivia(WhitespaceTrivia))
+                  ? SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), ParameterIdentifier.WithLeadingTrivia(SyntaxFactory.Space))
                   : SyntaxFactory.Argument(ParameterIdentifier);
 
             if (Arguments.Count > 0)
-                Argument = Argument.WithLeadingTrivia(WhitespaceTrivia);
+                Argument = Argument.WithLeadingTrivia(SyntaxFactory.Space);
 
             Arguments.Add(Argument);
         }
 
         ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(Arguments));
-        ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(Invocation, ArgumentList).WithLeadingTrivia(WhitespaceTrivia);
+        ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(Invocation, ArgumentList).WithLeadingTrivia(SyntaxFactory.Space);
 
         if (isAsync)
-            CallExpression = SyntaxFactory.AwaitExpression(CallExpression).WithLeadingTrivia(WhitespaceTrivia);
+            CallExpression = SyntaxFactory.AwaitExpression(CallExpression).WithLeadingTrivia(SyntaxFactory.Space);
 
         IdentifierNameSyntax VarIdentifier = SyntaxFactory.IdentifierName("var");
         SyntaxToken ResultIdentifier = SyntaxFactory.Identifier(Settings.ResultIdentifier);
-        EqualsValueClauseSyntax Initializer = SyntaxFactory.EqualsValueClause(CallExpression).WithLeadingTrivia(WhitespaceTrivia);
-        VariableDeclaratorSyntax VariableDeclarator = SyntaxFactory.VariableDeclarator(ResultIdentifier, null, Initializer).WithLeadingTrivia(WhitespaceTrivia);
+        EqualsValueClauseSyntax Initializer = SyntaxFactory.EqualsValueClause(CallExpression).WithLeadingTrivia(SyntaxFactory.Space);
+        VariableDeclaratorSyntax VariableDeclarator = SyntaxFactory.VariableDeclarator(ResultIdentifier, null, Initializer).WithLeadingTrivia(SyntaxFactory.Space);
         VariableDeclarationSyntax Declaration = SyntaxFactory.VariableDeclaration(VarIdentifier, SyntaxFactory.SeparatedList([VariableDeclarator]));
         LocalDeclarationStatementSyntax LocalDeclarationStatement = SyntaxFactory.LocalDeclarationStatement(Declaration);
 
@@ -281,7 +281,7 @@ public partial class ContractGenerator
 
     private static ReturnStatementSyntax GenerateReturnStatement()
     {
-        IdentifierNameSyntax ResultIdentifier = SyntaxFactory.IdentifierName(Settings.ResultIdentifier).WithLeadingTrivia(WhitespaceTrivia);
+        IdentifierNameSyntax ResultIdentifier = SyntaxFactory.IdentifierName(Settings.ResultIdentifier).WithLeadingTrivia(SyntaxFactory.Space);
         ReturnStatementSyntax ReturnStatement = SyntaxFactory.ReturnStatement(ResultIdentifier);
 
         return ReturnStatement;
@@ -361,15 +361,14 @@ public partial class ContractGenerator
         SimpleNameSyntax RequireNotNullName = SyntaxFactory.IdentifierName(ToNameWithoutAttribute<RequireNotNullAttribute>());
         MemberAccessExpressionSyntax MemberAccessExpression = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, ContractName, RequireNotNullName);
 
-        SyntaxTriviaList WhitespaceTrivia = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "));
         IdentifierNameSyntax InputName = SyntaxFactory.IdentifierName(parameterName);
         ArgumentSyntax InputArgument = SyntaxFactory.Argument(InputName);
 
         SyntaxToken VariableName = SyntaxFactory.Identifier(aliasName);
         VariableDesignationSyntax VariableDesignation = SyntaxFactory.SingleVariableDesignation(VariableName);
-        DeclarationExpressionSyntax DeclarationExpression = SyntaxFactory.DeclarationExpression(type, VariableDesignation.WithLeadingTrivia(WhitespaceTrivia));
-        ArgumentSyntax OutputArgument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), DeclarationExpression.WithLeadingTrivia(WhitespaceTrivia));
-        OutputArgument = OutputArgument.WithLeadingTrivia(WhitespaceTrivia);
+        DeclarationExpressionSyntax DeclarationExpression = SyntaxFactory.DeclarationExpression(type, VariableDesignation.WithLeadingTrivia(SyntaxFactory.Space));
+        ArgumentSyntax OutputArgument = SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), DeclarationExpression.WithLeadingTrivia(SyntaxFactory.Space));
+        OutputArgument = OutputArgument.WithLeadingTrivia(SyntaxFactory.Space);
 
         List<ArgumentSyntax> Arguments = [InputArgument, OutputArgument];
         ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(Arguments));

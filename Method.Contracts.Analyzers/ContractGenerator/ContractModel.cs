@@ -16,7 +16,7 @@ using System.Collections.Generic;
 /// <param name="Documentation">The method or property documentation, if any.</param>
 /// <param name="Attributes">The contract as attributes.</param>
 /// <param name="GeneratedMethodDeclaration">The generated method (if the contract applies to a method, otherwise <see cref="string.Empty"/>).</param>
-/// <param name="GeneratedPropertyDeclaration">The generated property(if the contract applies to a property, otherwise <see cref="string.Empty"/>).</param>
+/// <param name="GeneratedPropertyDeclaration">The generated property (if the contract applies to a property, otherwise <see cref="string.Empty"/>).</param>
 /// <param name="IsAsync">Whether the generated method is asynchronous (if the contract applies to a method).</param>
 internal record ContractModel(string Namespace,
                               string UsingsBeforeNamespace,

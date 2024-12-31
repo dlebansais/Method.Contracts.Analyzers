@@ -31,17 +31,17 @@ public partial class ContractGenerator
         Contract.Assert(VerifiedSuffix != string.Empty);
 
         // Only accept methods and properties with the 'Verified' suffix in their name.
-        string MethodName = string.Empty;
+        string MemberName = string.Empty;
         if (MethodDeclaration is not null)
-            MethodName = MethodDeclaration.Identifier.Text;
+            MemberName = MethodDeclaration.Identifier.Text;
         if (PropertyDeclaration is not null)
-            MethodName = PropertyDeclaration.Identifier.Text;
+            MemberName = PropertyDeclaration.Identifier.Text;
 
-        if (!GeneratorHelper.StringEndsWith(MethodName, VerifiedSuffix))
+        if (!GeneratorHelper.StringEndsWith(MemberName, VerifiedSuffix))
             return false;
 
         // Do not accept methods or properties that are the suffix and nothing else.
-        if (MethodName == VerifiedSuffix)
+        if (MemberName == VerifiedSuffix)
             return false;
 
         // Ignore methods and properties that are not in a class and a namespace.
@@ -77,12 +77,12 @@ public partial class ContractGenerator
     {
         Contract.RequireNotNull(memberDeclaration, out MemberDeclarationSyntax MemberDeclaration);
 
-        // Get a list of all supported attributes for this method.
-        List<AttributeSyntax> MethodAttributes = GeneratorHelper.GetMemberSupportedAttributes(context, MemberDeclaration, SupportedAttributeTypes);
+        // Get a list of all supported attributes for this member.
+        List<AttributeSyntax> MemberAttributes = GeneratorHelper.GetMemberSupportedAttributes(context, MemberDeclaration, SupportedAttributeTypes);
         List<string> AttributeNames = [];
         bool IsDebugGeneration = MemberDeclaration.SyntaxTree.Options.PreprocessorSymbolNames.Contains("DEBUG");
 
-        foreach (AttributeSyntax Attribute in MethodAttributes)
+        foreach (AttributeSyntax Attribute in MemberAttributes)
             if (!IsValidAttribute(Attribute, MemberDeclaration, IsDebugGeneration, AttributeNames))
                 return null;
 
@@ -199,7 +199,7 @@ public partial class ContractGenerator
 
         for (int i = 1; i < attributeArguments.Count; i++)
             if (!IsValidArgumentWithAliasTypeOrName(attributeArguments[i], ref Type, ref Name, ref AliasName))
-                return AttributeValidityCheckResult.Invalid(0);
+                return AttributeValidityCheckResult.Invalid(i);
 
         // At this step there is at least one valid argument that is either Type, Name or AliasName.
         Contract.Assert(Type != string.Empty || Name != string.Empty || AliasName != string.Empty);

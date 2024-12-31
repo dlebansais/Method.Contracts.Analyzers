@@ -41,7 +41,7 @@ public partial class ContractGenerator
         PropertyDeclaration = PropertyDeclaration.WithAccessorList(PropertyAccessorList);
 
         if (SimplifyReturnTypeLeadingTrivia) // This case applies to properties with zero modifier that become public.
-            PropertyDeclaration = PropertyDeclaration.WithType(PropertyDeclaration.Type.WithLeadingTrivia(WhitespaceTrivia));
+            PropertyDeclaration = PropertyDeclaration.WithType(PropertyDeclaration.Type.WithLeadingTrivia(SyntaxFactory.Space));
 
         PropertyDeclaration = PropertyDeclaration.WithLeadingTrivia(LeadingTriviaWithoutLineEnd);
 
@@ -137,8 +137,8 @@ public partial class ContractGenerator
         else
         {
             string VerifiedSuffix = Settings.VerifiedSuffix;
-            ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(model.ShortName + VerifiedSuffix).WithLeadingTrivia(WhitespaceTrivia);
-            ArrowExpressionClauseSyntax ExpressionBody = SyntaxFactory.ArrowExpressionClause(Invocation).WithLeadingTrivia(WhitespaceTrivia);
+            ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(model.ShortName + VerifiedSuffix).WithLeadingTrivia(SyntaxFactory.Space);
+            ArrowExpressionClauseSyntax ExpressionBody = SyntaxFactory.ArrowExpressionClause(Invocation).WithLeadingTrivia(SyntaxFactory.Space);
             Getter = SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration).WithExpressionBody(ExpressionBody).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
         }
 
@@ -151,7 +151,7 @@ public partial class ContractGenerator
         else
         {
             AssignmentExpressionSyntax AssignmentExpression = GeneratePropertyAssignment(model.ShortName, "value");
-            ArrowExpressionClauseSyntax ExpressionBody = SyntaxFactory.ArrowExpressionClause(AssignmentExpression).WithLeadingTrivia(WhitespaceTrivia);
+            ArrowExpressionClauseSyntax ExpressionBody = SyntaxFactory.ArrowExpressionClause(AssignmentExpression).WithLeadingTrivia(SyntaxFactory.Space);
             Setter = SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration).WithExpressionBody(ExpressionBody).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
         }
 
@@ -174,12 +174,12 @@ public partial class ContractGenerator
             ArgumentSyntax InputArgument = SyntaxFactory.Argument(InputName);
             List<ArgumentSyntax> Arguments = [InputArgument];
             ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(Arguments));
-            ExpressionSyntax GetValueExpression = SyntaxFactory.InvocationExpression(MemberAccessExpression, ArgumentList).WithLeadingTrivia(WhitespaceTrivia);
+            ExpressionSyntax GetValueExpression = SyntaxFactory.InvocationExpression(MemberAccessExpression, ArgumentList).WithLeadingTrivia(SyntaxFactory.Space);
 
             IdentifierNameSyntax VarIdentifier = SyntaxFactory.IdentifierName("var");
             SyntaxToken NotNullValueIdentifier = SyntaxFactory.Identifier(Settings.ValueIdentifier);
-            EqualsValueClauseSyntax Initializer = SyntaxFactory.EqualsValueClause(GetValueExpression).WithLeadingTrivia(WhitespaceTrivia);
-            VariableDeclaratorSyntax VariableDeclarator = SyntaxFactory.VariableDeclarator(NotNullValueIdentifier, null, Initializer).WithLeadingTrivia(WhitespaceTrivia);
+            EqualsValueClauseSyntax Initializer = SyntaxFactory.EqualsValueClause(GetValueExpression).WithLeadingTrivia(SyntaxFactory.Space);
+            VariableDeclaratorSyntax VariableDeclarator = SyntaxFactory.VariableDeclarator(NotNullValueIdentifier, null, Initializer).WithLeadingTrivia(SyntaxFactory.Space);
             VariableDeclarationSyntax Declaration = SyntaxFactory.VariableDeclaration(VarIdentifier, SyntaxFactory.SeparatedList([VariableDeclarator]));
             LocalDeclarationStatementSyntax LocalDeclarationStatement = SyntaxFactory.LocalDeclarationStatement(Declaration);
 
@@ -229,11 +229,11 @@ public partial class ContractGenerator
     private static LocalDeclarationStatementSyntax GeneratePropertyQueryStatement(string propertyName, SyntaxTriviaList leadingTrivia)
     {
         string VerifiedSuffix = Settings.VerifiedSuffix;
-        ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(propertyName + VerifiedSuffix).WithLeadingTrivia(WhitespaceTrivia);
+        ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(propertyName + VerifiedSuffix).WithLeadingTrivia(SyntaxFactory.Space);
         IdentifierNameSyntax VarIdentifier = SyntaxFactory.IdentifierName("var");
         SyntaxToken ResultIdentifier = SyntaxFactory.Identifier(Settings.ResultIdentifier);
-        EqualsValueClauseSyntax Initializer = SyntaxFactory.EqualsValueClause(Invocation).WithLeadingTrivia(WhitespaceTrivia);
-        VariableDeclaratorSyntax VariableDeclarator = SyntaxFactory.VariableDeclarator(ResultIdentifier, null, Initializer).WithLeadingTrivia(WhitespaceTrivia);
+        EqualsValueClauseSyntax Initializer = SyntaxFactory.EqualsValueClause(Invocation).WithLeadingTrivia(SyntaxFactory.Space);
+        VariableDeclaratorSyntax VariableDeclarator = SyntaxFactory.VariableDeclarator(ResultIdentifier, null, Initializer).WithLeadingTrivia(SyntaxFactory.Space);
         VariableDeclarationSyntax Declaration = SyntaxFactory.VariableDeclaration(VarIdentifier, SyntaxFactory.SeparatedList([VariableDeclarator]));
         LocalDeclarationStatementSyntax LocalDeclarationStatement = SyntaxFactory.LocalDeclarationStatement(Declaration).WithLeadingTrivia(leadingTrivia);
 
@@ -251,10 +251,10 @@ public partial class ContractGenerator
     private static AssignmentExpressionSyntax GeneratePropertyAssignment(string propertyName, string valueName)
     {
         string VerifiedSuffix = Settings.VerifiedSuffix;
-        ExpressionSyntax PropertyName = SyntaxFactory.IdentifierName(propertyName + VerifiedSuffix).WithLeadingTrivia(WhitespaceTrivia);
-        IdentifierNameSyntax ValueName = SyntaxFactory.IdentifierName(valueName).WithLeadingTrivia(WhitespaceTrivia);
+        ExpressionSyntax PropertyName = SyntaxFactory.IdentifierName(propertyName + VerifiedSuffix).WithLeadingTrivia(SyntaxFactory.Space);
+        IdentifierNameSyntax ValueName = SyntaxFactory.IdentifierName(valueName).WithLeadingTrivia(SyntaxFactory.Space);
         SyntaxToken EqualToken = SyntaxFactory.Token(SyntaxKind.EqualsToken);
-        EqualToken = EqualToken.WithLeadingTrivia(WhitespaceTrivia);
+        EqualToken = EqualToken.WithLeadingTrivia(SyntaxFactory.Space);
         AssignmentExpressionSyntax AssignmentExpression = SyntaxFactory.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, PropertyName, EqualToken, ValueName);
 
         return AssignmentExpression;

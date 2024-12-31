@@ -49,7 +49,7 @@ public partial class ContractGenerator
         if (isAsync && IsTaskType(MethodDeclaration.ReturnType))
             MethodDeclaration = MethodDeclaration.WithReturnType(SyntaxFactory.IdentifierName("Task").WithTrailingTrivia(SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "))));
         else if (SimplifyReturnTypeLeadingTrivia) // This case applies to methods with zero modifier that become public.
-            MethodDeclaration = MethodDeclaration.WithReturnType(MethodDeclaration.ReturnType.WithLeadingTrivia(WhitespaceTrivia));
+            MethodDeclaration = MethodDeclaration.WithReturnType(MethodDeclaration.ReturnType.WithLeadingTrivia(SyntaxFactory.Space));
 
         MethodDeclaration = MethodDeclaration.WithLeadingTrivia(LeadingTriviaWithoutLineEnd);
 
@@ -147,7 +147,7 @@ public partial class ContractGenerator
             }
         }
 
-        int LastItemIndex = memberDeclaration.Modifiers.Count - 1;
+        int LastItemIndex = ModifierTokens.Count - 1;
         ModifierTokens[LastItemIndex] = ModifierTokens[LastItemIndex].WithTrailingTrivia(trailingTrivia);
 
         return ModifierTokens;
@@ -203,7 +203,7 @@ public partial class ContractGenerator
             {
                 if (Type != string.Empty)
                 {
-                    TypeSyntax UpatedType = SyntaxFactory.IdentifierName(Type).WithTrailingTrivia(WhitespaceTrivia);
+                    TypeSyntax UpatedType = SyntaxFactory.IdentifierName(Type).WithTrailingTrivia(SyntaxFactory.Space);
                     updatedParameter = updatedParameter.WithType(UpatedType);
                 }
 
@@ -260,6 +260,4 @@ public partial class ContractGenerator
 
         return SyntaxFactory.Block(OpenBraceToken, SyntaxFactory.List(Statements), CloseBraceToken);
     }
-
-    private static SyntaxTriviaList WhitespaceTrivia { get; } = SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "));
 }

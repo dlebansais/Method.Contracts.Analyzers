@@ -39,7 +39,7 @@ internal static class TestHelper
             references: [ReferenceBinder, ReferenceContracts],
             Options);
 
-        // Create an instance of our EnumGenerator incremental source generator.
+        // Create an instance of our incremental source generator.
         ContractGenerator Generator = new();
 
         // The GeneratorDriver is used to run our generator against a compilation.
