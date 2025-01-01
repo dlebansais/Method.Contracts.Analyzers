@@ -180,7 +180,7 @@ public partial class ContractGenerator
             foreach (SyntaxTrivia Trivia in LeadingTrivia)
                 if (Trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia))
                 {
-                    Documentation = LeadingTrivia.ToString().Trim('\r').Trim('\n').TrimEnd(' ');
+                    Documentation = LeadingTrivia.ToFullString().Trim('\r').Trim('\n').TrimEnd(' ');
                     break;
                 }
         }
