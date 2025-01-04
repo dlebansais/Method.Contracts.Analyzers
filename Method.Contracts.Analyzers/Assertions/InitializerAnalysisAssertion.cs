@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -48,15 +47,12 @@ internal class InitializerAnalysisAssertion : IAnalysisAssertion
     {
         foreach (AttributeData Attribute in attributes)
         {
-            if (Attribute.AttributeClass is IErrorTypeSymbol)
-                continue;
-
             INamedTypeSymbol AttributeClass = Contract.AssertNotNull(Attribute.AttributeClass);
 
             if (AnalyzerTools.IsExpectedAttribute<InitializeWithAttribute>(context, AttributeClass))
                 if (TryGetInitializers(classSymbol, Attribute, out List<IMethodSymbol> Initializers))
                 {
-                    InitializerMethodSymbols.Clear();
+                    Contract.Assert(InitializerMethodSymbols.Count == 0);
                     InitializerMethodSymbols.AddRange(Initializers);
                     return true;
                 }
@@ -76,7 +72,7 @@ internal class InitializerAnalysisAssertion : IAnalysisAssertion
             return false;
         }
 
-        TypedConstant FirstArgument = Attribute.ConstructorArguments.First();
+        TypedConstant FirstArgument = Attribute.ConstructorArguments[0];
         string ArgumentValue = Contract.AssertNotNull(FirstArgument.Value as string);
 
         List<IMethodSymbol> InitializerOverloads = [];

@@ -68,10 +68,7 @@ public partial class ContractGenerator : IIncrementalGenerator
             string ParameterName = Parameter.Identifier.Text;
 
             if (ParameterName == argumentName)
-            {
                 ResultType = Parameter.Type;
-                break;
-            }
         }
 
         if (ResultType is not null)

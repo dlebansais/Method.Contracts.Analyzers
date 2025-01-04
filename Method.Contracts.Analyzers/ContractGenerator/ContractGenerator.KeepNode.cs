@@ -31,12 +31,7 @@ public partial class ContractGenerator
         Contract.Assert(VerifiedSuffix != string.Empty);
 
         // Only accept methods and properties with the 'Verified' suffix in their name.
-        string MemberName = string.Empty;
-        if (MethodDeclaration is not null)
-            MemberName = MethodDeclaration.Identifier.Text;
-        if (PropertyDeclaration is not null)
-            MemberName = PropertyDeclaration.Identifier.Text;
-
+        string MemberName = GetMemberName(MethodDeclaration, PropertyDeclaration);
         if (!GeneratorHelper.StringEndsWith(MemberName, VerifiedSuffix))
             return false;
 
@@ -66,6 +61,21 @@ public partial class ContractGenerator
         return FirstAttributeName is not null && FirstAttributeName == typeof(T).Name;
     }
 
+    private static string GetMemberName(MethodDeclarationSyntax? methodDeclaration, PropertyDeclarationSyntax? propertyDeclaration)
+    {
+        AssignTrackingString Result = new();
+
+        if (methodDeclaration is not null)
+            Result = (AssignTrackingString)methodDeclaration.Identifier.Text;
+
+        if (propertyDeclaration is not null)
+            Result = (AssignTrackingString)propertyDeclaration.Identifier.Text;
+
+        Contract.Assert(Result.IsSet);
+
+        return (string)Result;
+    }
+
     /// <summary>
     /// Checks whether a method or property contains at least one attribute we support and returns its name.
     /// All attributes we support must be valid.
@@ -86,7 +96,7 @@ public partial class ContractGenerator
             if (!IsValidAttribute(Attribute, MemberDeclaration, IsDebugGeneration, AttributeNames))
                 return null;
 
-        return AttributeNames.Count > 0 ? AttributeNames.First() : null;
+        return AttributeNames.Count > 0 ? AttributeNames[0] : null;
     }
 
     private static bool IsValidAttribute(AttributeSyntax attribute, MemberDeclarationSyntax memberDeclaration, bool isDebugGeneration, List<string> attributeNames)
@@ -94,7 +104,7 @@ public partial class ContractGenerator
         if (attribute.ArgumentList is AttributeArgumentListSyntax AttributeArgumentList)
         {
             string AttributeName = GeneratorHelper.ToAttributeName(attribute);
-            IReadOnlyList<AttributeArgumentSyntax> AttributeArguments = AttributeArgumentList.Arguments;
+            SeparatedSyntaxList<AttributeArgumentSyntax> AttributeArguments = AttributeArgumentList.Arguments;
 
             Dictionary<string, Func<MemberDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, AttributeValidityCheckResult>> ValidityVerifierTable = new()
             {
@@ -110,9 +120,17 @@ public partial class ContractGenerator
             AttributeGeneration AttributeGeneration = CheckResult.Result;
 
             if (AttributeGeneration == AttributeGeneration.Invalid)
+            {
+                Contract.Assert(CheckResult.PositionOfFirstInvalidArgument >= -1);
+                Contract.Assert(CheckResult.PositionOfFirstInvalidArgument < AttributeArguments.Count);
                 return false;
+            }
             else if (AttributeGeneration == AttributeGeneration.Valid || (AttributeGeneration == AttributeGeneration.DebugOnly && isDebugGeneration))
+            {
+                Contract.Assert(CheckResult.ArgumentValues.Count > 0);
+                Contract.Assert(CheckResult.PositionOfFirstInvalidArgument == -1);
                 attributeNames.Add(AttributeName);
+            }
         }
 
         return true;
@@ -161,7 +179,7 @@ public partial class ContractGenerator
     {
         Contract.RequireNotNull(attributeArguments, out IReadOnlyList<AttributeArgumentSyntax> AttributeArguments);
 
-        return AttributeArguments.Count > 0 && AttributeArguments.Any(argument => !IsParameterName(argument));
+        return AttributeArguments.Any(argument => !IsParameterName(argument));
     }
 
     /// <summary>
@@ -190,9 +208,9 @@ public partial class ContractGenerator
         if (!GetParameterType(ParameterName, methodDeclaration, out _))
             return AttributeValidityCheckResult.Invalid(0);
 
-        string Type = string.Empty;
-        string Name = string.Empty;
-        string AliasName = string.Empty;
+        AssignTrackingString Type = new();
+        AssignTrackingString Name = new();
+        AssignTrackingString AliasName = new();
 
         // The first argument has no name, there has to be a second argument because IsRequireNotNullAttributeWithAlias() returned true.
         Contract.Assert(attributeArguments.Count > 1);
@@ -202,12 +220,12 @@ public partial class ContractGenerator
                 return AttributeValidityCheckResult.Invalid(i);
 
         // At this step there is at least one valid argument that is either Type, Name or AliasName.
-        Contract.Assert(Type != string.Empty || Name != string.Empty || AliasName != string.Empty);
+        Contract.Assert(Type.IsSet || Name.IsSet || AliasName.IsSet);
 
         return new AttributeValidityCheckResult(AttributeGeneration.Valid, [ParameterName], -1);
     }
 
-    private static bool IsValidArgumentWithAliasTypeOrName(AttributeArgumentSyntax attributeArgument, ref string type, ref string name, ref string aliasName)
+    private static bool IsValidArgumentWithAliasTypeOrName(AttributeArgumentSyntax attributeArgument, ref AssignTrackingString type, ref AssignTrackingString name, ref AssignTrackingString aliasName)
     {
         if (attributeArgument.NameEquals is not NameEqualsSyntax NameEquals)
             return false;
@@ -222,21 +240,21 @@ public partial class ContractGenerator
 
         if (ArgumentName == nameof(RequireNotNullAttribute.Type))
         {
-            type = ArgumentValue;
+            type = (AssignTrackingString)ArgumentValue;
 
             if (!IsValidTypeName(ArgumentValue))
                 return false;
         }
         else if (ArgumentName == nameof(RequireNotNullAttribute.Name))
         {
-            name = ArgumentValue;
+            name = (AssignTrackingString)ArgumentValue;
 
             if (!SyntaxFacts.IsValidIdentifier(ArgumentValue))
                 return false;
         }
         else if (ArgumentName == nameof(RequireNotNullAttribute.AliasName))
         {
-            aliasName = ArgumentValue;
+            aliasName = (AssignTrackingString)ArgumentValue;
 
             if (!SyntaxFacts.IsValidIdentifier(ArgumentValue))
                 return false;
@@ -315,7 +333,7 @@ public partial class ContractGenerator
     {
         Contract.RequireNotNull(attributeArguments, out IReadOnlyList<AttributeArgumentSyntax> AttributeArguments);
 
-        return AttributeArguments.Count > 0 && AttributeArguments.Any(argument => !IsStringExpression(argument));
+        return AttributeArguments.Any(argument => !IsStringExpression(argument));
     }
 
     /// <summary>

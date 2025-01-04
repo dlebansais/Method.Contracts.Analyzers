@@ -326,9 +326,9 @@ public partial class ContractGenerator
         // This was verified in IsValidRequireNotNullAttributeWithAlias().
         Contract.Assert(IsValidParameterType);
 
-        string Type = string.Empty;
-        string Name = string.Empty;
-        string AliasName = string.Empty;
+        AssignTrackingString Type = new();
+        AssignTrackingString Name = new();
+        AssignTrackingString AliasName = new();
 
         for (int i = 1; i < attributeArguments.Count; i++)
         {
@@ -339,17 +339,17 @@ public partial class ContractGenerator
         }
 
         // This was verified in IsValidRequireNotNullAttributeWithAlias().
-        Contract.Assert(Type != string.Empty || Name != string.Empty || AliasName != string.Empty);
+        Contract.Assert(Type.IsSet || Name.IsSet || AliasName.IsSet);
 
         List<AttributeArgumentModel> Result = [new AttributeArgumentModel(Name: string.Empty, Value: ParameterName)];
 
-        if (Type != string.Empty)
+        if (Type.IsSet)
             Result.Add(new AttributeArgumentModel(Name: nameof(RequireNotNullAttribute.Type), Value: Type));
 
-        if (Name != string.Empty)
+        if (Name.IsSet)
             Result.Add(new AttributeArgumentModel(Name: nameof(RequireNotNullAttribute.Name), Value: Name));
 
-        if (AliasName != string.Empty)
+        if (AliasName.IsSet)
             Result.Add(new AttributeArgumentModel(Name: nameof(RequireNotNullAttribute.AliasName), Value: AliasName));
 
         Contract.Assert(Result.Count > 1);

@@ -26,7 +26,7 @@ public partial class ContractGenerator
         SyntaxTriviaList LeadingTrivia = GetLeadingTriviaWithLineEnd(Tab);
         SyntaxTriviaList LeadingTriviaWithoutLineEnd = GetLeadingTriviaWithoutLineEnd(Tab);
         SyntaxTriviaList? TrailingTrivia = GetModifiersTrailingTrivia(PropertyDeclaration);
-        bool SimplifyReturnTypeLeadingTrivia = PropertyDeclaration.Modifiers.Count == 0 && PropertyDeclaration.Type.HasLeadingTrivia;
+        bool SimplifyReturnTypeLeadingTrivia = PropertyDeclaration.Modifiers.Count == 0;
 
         SyntaxList<AttributeListSyntax> CodeAttributes = GenerateCodeAttributes();
         PropertyDeclaration = PropertyDeclaration.WithAttributeLists(CodeAttributes);
@@ -57,9 +57,12 @@ public partial class ContractGenerator
         Location ReturnLocation = propertyDeclaration.Type.GetLocation();
         int ReturnPosition = ReturnLocation.SourceSpan.Start;
         NullableContext NullableContext = context.SemanticModel.GetNullableContext(ReturnPosition);
+
         bool IsAnnotationUsed = false;
-        IsAnnotationUsed |= NullableContext.HasFlag(NullableContext.AnnotationsEnabled);
-        IsAnnotationUsed |= NullableContext.HasFlag(NullableContext.AnnotationsContextInherited);
+        if (NullableContext.HasFlag(NullableContext.AnnotationsEnabled))
+            IsAnnotationUsed = true;
+        if (NullableContext.HasFlag(NullableContext.AnnotationsContextInherited))
+            IsAnnotationUsed = true;
 
         // If nullable is not enabled, null is always a possible value.
         if (!IsAnnotationUsed)

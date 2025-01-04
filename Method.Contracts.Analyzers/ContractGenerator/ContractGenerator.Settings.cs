@@ -55,13 +55,18 @@ public partial class ContractGenerator
     /// </summary>
     public const string DisabledWarningsKey = "DisabledWarnings";
 
+    /// <summary>
+    /// The default value for the name of the value identifier in generated queries.
+    /// </summary>
+    public const string DefaultDisabledWarnings = "";
+
     // The settings values.
     private static readonly GeneratorSettingsEntry VerifiedSuffixSetting = new(BuildKey: VerifiedSuffixKey, DefaultValue: DefaultVerifiedSuffix);
     private static readonly GeneratorSettingsEntry TabLengthSetting = new(BuildKey: TabLengthKey, DefaultValue: $"{DefaultTabLength}");
     private static readonly GeneratorSettingsEntry ResultIdentifierSetting = new(BuildKey: ResultIdentifierKey, DefaultValue: DefaultResultIdentifier);
     private static readonly GeneratorSettingsEntry ValueIdentifierSetting = new(BuildKey: ValueIdentifierKey, DefaultValue: DefaultValueIdentifier);
-    private static readonly GeneratorSettingsEntry DisabledWarningsSetting = new(BuildKey: DisabledWarningsKey, DefaultValue: string.Empty);
-    private static GeneratorSettings Settings = new(VerifiedSuffix: DefaultVerifiedSuffix, TabLength: DefaultTabLength, ResultIdentifier: DefaultResultIdentifier, ValueIdentifier: DefaultValueIdentifier, DisabledWarnings: string.Empty);
+    private static readonly GeneratorSettingsEntry DisabledWarningsSetting = new(BuildKey: DisabledWarningsKey, DefaultValue: DefaultDisabledWarnings);
+    private static GeneratorSettings Settings = new(VerifiedSuffix: DefaultVerifiedSuffix, TabLength: DefaultTabLength, ResultIdentifier: DefaultResultIdentifier, ValueIdentifier: DefaultValueIdentifier, DisabledWarnings: DefaultDisabledWarnings);
 
     /// <summary>
     /// Reads settings.

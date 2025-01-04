@@ -29,7 +29,7 @@ public partial class ContractGenerator
         SyntaxTriviaList LeadingTrivia = GetLeadingTriviaWithLineEnd(Tab);
         SyntaxTriviaList LeadingTriviaWithoutLineEnd = GetLeadingTriviaWithoutLineEnd(Tab);
         SyntaxTriviaList? TrailingTrivia = GetModifiersTrailingTrivia(MethodDeclaration);
-        bool SimplifyReturnTypeLeadingTrivia = MethodDeclaration.Modifiers.Count == 0 && MethodDeclaration.ReturnType.HasLeadingTrivia;
+        bool SimplifyReturnTypeLeadingTrivia = MethodDeclaration.Modifiers.Count == 0;
 
         SyntaxList<AttributeListSyntax> CodeAttributes = GenerateCodeAttributes();
         MethodDeclaration = MethodDeclaration.WithAttributeLists(CodeAttributes);
