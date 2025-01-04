@@ -1075,4 +1075,72 @@ internal partial class Program
 
         Assert.That(Result.Files, Has.Exactly(1).Items);
     }
+
+    [Test]
+    public async Task TestPropertyProtected()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        string Text = Foo;
+        Console.WriteLine(Text);
+    }
+
+    [Access(""protected"", ""static"")]
+    [Ensure(""Result.Length > 0"")]
+    private static string FooVerified
+    {
+        { get; set; }
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifyEnsure.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(1).Items);
+    }
+
+    [Test]
+    public async Task TestPropertyInternal()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        string Text = Foo;
+        Console.WriteLine(Text);
+    }
+
+    [Access(""internal"", ""static"")]
+    [Ensure(""Result.Length > 0"")]
+    private static string FooVerified
+    {
+        { get; set; }
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifyEnsure.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(1).Items);
+    }
 }

@@ -36,7 +36,7 @@ internal partial class Program
 ";
 
         // Pass the source code to the helper and snapshot test the output.
-        Microsoft.CodeAnalysis.GeneratorDriver Driver = TestHelper.GetDriver(Source);
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
         VerifyResult Result = await VerifyRequireNotNull.Verify(Driver).ConfigureAwait(false);
 
         Assert.That(Result.Files, Has.Exactly(1).Items);

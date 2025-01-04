@@ -319,9 +319,9 @@ public partial class ContractGenerator
         return IsRequireOrEnsureAttributeWithDebugOnly(attributeArguments)
             ? IsValidRequireOrEnsureAttributeWithDebugOnly(attributeArguments)
             : attributeArguments.Count > 0
-                ? IsValidStringOnlyAttribute(attributeArguments, out Collection<string> ArgumentValues, out int PositionOfFirstInvalidArgument)
+                ? (IsValidStringOnlyAttribute(attributeArguments, out Collection<string> ArgumentValues, out int PositionOfFirstInvalidArgument)
                     ? new AttributeValidityCheckResult(AttributeGeneration.Valid, ArgumentValues, -1)
-                    : AttributeValidityCheckResult.Invalid(PositionOfFirstInvalidArgument)
+                    : AttributeValidityCheckResult.Invalid(PositionOfFirstInvalidArgument))
                 : AttributeValidityCheckResult.Invalid(-1);
     }
 
@@ -439,7 +439,7 @@ public partial class ContractGenerator
         if (IsNameofAttributeArgument(AttributeArgument, out argumentValue))
             return true;
 
-        argumentValue = string.Empty;
+        Contract.Unused(out argumentValue);
         return false;
     }
 
@@ -464,7 +464,7 @@ public partial class ContractGenerator
             }
         }
 
-        argumentValue = string.Empty;
+        Contract.Unused(out argumentValue);
         return false;
     }
 
@@ -485,7 +485,7 @@ public partial class ContractGenerator
             return true;
         }
 
-        argumentValue = string.Empty;
+        Contract.Unused(out argumentValue);
         return false;
     }
 
@@ -508,7 +508,7 @@ public partial class ContractGenerator
             }
         }
 
-        argumentValue = false;
+        Contract.Unused(out argumentValue);
         return false;
     }
 

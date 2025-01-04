@@ -459,7 +459,7 @@ public class SimpleTest
 {
     private const bool Arg = false;
 
-    [Ensure(""true"", ""true"", DebugOnly = true)]
+    [Ensure(""true"", ""true"", DebugOnly = false)]
     public void FooVerified()
     {
     }
@@ -1218,6 +1218,40 @@ internal partial class Program
 
     [Access(""public"", ""static"")]
     [RequireNotNull(""text"", Type = ""@@"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+";
+
+        // Pass the source code to the helper and snapshot test the output.
+        GeneratorDriver Driver = TestHelper.GetDriver(Source);
+        VerifyResult Result = await VerifyNoGeneration.Verify(Driver).ConfigureAwait(false);
+
+        Assert.That(Result.Files, Has.Exactly(0).Items);
+    }
+
+    [Test]
+    public async Task TestInvalidType7()
+    {
+        // The source code to test
+        const string Source = @"
+namespace Contracts.TestSuite;
+
+using System;
+using Contracts;
+
+internal partial class Program
+{
+    public static void Main(string[] args)
+    {
+        HelloFrom(""Hello, World"", out string Text);
+        Console.WriteLine(Text);
+    }
+
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"", Type = ""string<global::foo.bar?[0]>"")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";

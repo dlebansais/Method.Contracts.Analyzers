@@ -166,6 +166,8 @@ public partial class ContractGenerator
 
     private static List<StatementSyntax> GeneratePropertyStatements(ContractModel model, bool isDebugGeneration, bool isNotNullPropertyType, bool isGetter, SyntaxTriviaList tabStatementTrivia, SyntaxTriviaList tabStatementExtraLineEndTrivia)
     {
+        Contract.Assert(!isGetter || !isNotNullPropertyType);
+
         List<StatementSyntax> Statements = [];
 
         if (!isGetter && isNotNullPropertyType)

@@ -246,19 +246,19 @@ public partial class ContractGenerator
         SeparatedSyntaxList<ParameterSyntax> Parameters = ParameterList.Parameters;
 
         foreach (ParameterSyntax Parameter in Parameters)
-            if (IsParameterNameReplaced(model, Parameter, out string ParameterName, out string ReplacementName))
-                Result.Add(ParameterName, ReplacementName);
+            if (IsParameterNameReplaced(model, Parameter, out AssignTrackingString ParameterName, out AssignTrackingString ReplacementName))
+                Result.Add(ParameterName.Value, ReplacementName.Value);
 
         return Result;
     }
 
-    private static bool IsParameterNameReplaced(ContractModel model, ParameterSyntax parameter, out string parameterName, out string replacementName)
+    private static bool IsParameterNameReplaced(ContractModel model, ParameterSyntax parameter, out AssignTrackingString parameterName, out AssignTrackingString replacementName)
     {
-        parameterName = string.Empty;
-        replacementName = string.Empty;
+        parameterName = new AssignTrackingString();
+        replacementName = new AssignTrackingString();
 
         foreach (AttributeModel Attribute in model.Attributes)
-            if (AttributeHasTypeOrName(Attribute, out parameterName, out _, out replacementName) && parameterName == parameter.Identifier.Text && replacementName != string.Empty)
+            if (AttributeHasTypeOrName(Attribute, out parameterName, out _, out replacementName) && parameterName.Value == parameter.Identifier.Text && replacementName.IsSet)
                 return true;
 
         return false;
