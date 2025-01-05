@@ -1,7 +1,6 @@
 ﻿namespace Contracts.Analyzers;
 
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -64,7 +63,7 @@ public class MCA1016OnlyUseContractUnusedWithParameters : DiagnosticAnalyzer
     {
         // If we reached this step, there is an argument name.
         Contract.Assert(analysisAssertions.Length == 1);
-        ContractUnusedInvocationAssertion Assertion = Contract.AssertNotNull(analysisAssertions.First() as ContractUnusedInvocationAssertion);
+        ContractUnusedInvocationAssertion Assertion = Contract.AssertNotNull(analysisAssertions[0] as ContractUnusedInvocationAssertion);
         IdentifierNameSyntax ArgumentIdentifierName = Contract.AssertNotNull(Assertion.ArgumentIdentifierName);
         string ArgumentName = ArgumentIdentifierName.Identifier.Text;
 

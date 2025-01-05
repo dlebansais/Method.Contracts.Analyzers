@@ -13,11 +13,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 public partial class ContractGenerator
 {
-    private static string GetGeneratedPropertyDeclaration(ContractModel model, GeneratorAttributeSyntaxContext context)
+    private static void UpdateWithGeneratedPropertyDeclaration(GeneratorAttributeSyntaxContext context, ref ContractModel model)
     {
         SyntaxNode TargetNode = context.TargetNode;
         if (TargetNode is not PropertyDeclarationSyntax PropertyDeclaration)
-            return string.Empty;
+            return;
 
         bool IsDebugGeneration = PropertyDeclaration.SyntaxTree.Options.PreprocessorSymbolNames.Contains("DEBUG");
         bool IsNotNullPropertyType = CheckNotNullPropertyType(model, context, PropertyDeclaration);
@@ -34,7 +34,7 @@ public partial class ContractGenerator
         SyntaxToken ShortIdentifier = SyntaxFactory.Identifier(model.ShortName);
         PropertyDeclaration = PropertyDeclaration.WithIdentifier(ShortIdentifier);
 
-        SyntaxTokenList Modifiers = GenerateContractModifiers(model, PropertyDeclaration, LeadingTrivia, TrailingTrivia, out _);
+        SyntaxTokenList Modifiers = GenerateContractModifiers(ref model, PropertyDeclaration, LeadingTrivia, TrailingTrivia);
         PropertyDeclaration = PropertyDeclaration.WithModifiers(Modifiers);
 
         AccessorListSyntax PropertyAccessorList = GenerateAccessorList(model, IsDebugGeneration, IsNotNullPropertyType, LeadingTrivia, LeadingTriviaWithoutLineEnd, Tab);
@@ -45,7 +45,7 @@ public partial class ContractGenerator
 
         PropertyDeclaration = PropertyDeclaration.WithLeadingTrivia(LeadingTriviaWithoutLineEnd);
 
-        return PropertyDeclaration.ToFullString();
+        model = model with { GeneratedPropertyDeclaration = PropertyDeclaration.ToFullString() };
     }
 
     private static bool CheckNotNullPropertyType(ContractModel model, GeneratorAttributeSyntaxContext context, PropertyDeclarationSyntax propertyDeclaration)
@@ -199,10 +199,9 @@ public partial class ContractGenerator
                                     out StatementSyntax ReturnStatement,
                                     out StatementSyntax AssignStatement);
 
-        bool IsFirstAttributeStatement = true;
         foreach (AttributeModel AttributeModel in model.Attributes)
             if (AttributeModel.Name != nameof(AccessAttribute))
-                AddAttributeStatements(isDebugGeneration, isGetter, ref IsFirstAttributeStatement, tabStatementTrivia, tabStatementExtraLineEndTrivia, Statements, AttributeModel);
+                AddAttributeStatements(isDebugGeneration, isGetter, tabStatementTrivia, tabStatementExtraLineEndTrivia, Statements, AttributeModel);
 
         if (isGetter)
         {
@@ -267,7 +266,6 @@ public partial class ContractGenerator
 
     private static void AddAttributeStatements(bool isDebugGeneration,
                                                bool isGetter,
-                                               ref bool isFirstAttributeStatement,
                                                SyntaxTriviaList tabStatementTrivia,
                                                SyntaxTriviaList tabStatementExtraLineEndTrivia,
                                                List<StatementSyntax> statements,
@@ -281,8 +279,6 @@ public partial class ContractGenerator
                 statements.Add(Statement.WithLeadingTrivia(tabStatementExtraLineEndTrivia));
             else
                 statements.Add(Statement.WithLeadingTrivia(tabStatementTrivia));
-
-            isFirstAttributeStatement = false;
         }
     }
 

@@ -15,14 +15,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 public partial class ContractGenerator
 {
-    private static string GetGeneratedMethodDeclaration(ContractModel model, GeneratorAttributeSyntaxContext context, out bool isAsync)
+    private static void UpdateWithGeneratedMethodDeclaration(GeneratorAttributeSyntaxContext context, ref ContractModel model)
     {
         SyntaxNode TargetNode = context.TargetNode;
         if (TargetNode is not MethodDeclarationSyntax MethodDeclaration)
-        {
-            isAsync = false;
-            return string.Empty;
-        }
+            return;
 
         bool IsDebugGeneration = MethodDeclaration.SyntaxTree.Options.PreprocessorSymbolNames.Contains("DEBUG");
 
@@ -38,23 +35,23 @@ public partial class ContractGenerator
         SyntaxToken ShortIdentifier = SyntaxFactory.Identifier(model.ShortName);
         MethodDeclaration = MethodDeclaration.WithIdentifier(ShortIdentifier);
 
-        SyntaxTokenList Modifiers = GenerateContractModifiers(model, MethodDeclaration, LeadingTrivia, TrailingTrivia, out isAsync);
+        SyntaxTokenList Modifiers = GenerateContractModifiers(ref model, MethodDeclaration, LeadingTrivia, TrailingTrivia);
         MethodDeclaration = MethodDeclaration.WithModifiers(Modifiers);
 
-        BlockSyntax MethodBody = GenerateBody(model, MethodDeclaration, IsDebugGeneration, LeadingTrivia, LeadingTriviaWithoutLineEnd, isAsync, Tab);
+        BlockSyntax MethodBody = GenerateBody(model, MethodDeclaration, IsDebugGeneration, LeadingTrivia, LeadingTriviaWithoutLineEnd, Tab);
         MethodDeclaration = MethodDeclaration.WithExpressionBody(null).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.None)).WithBody(MethodBody);
 
         if (HasUpdatedParameterList(model, MethodDeclaration, out ParameterListSyntax ParameterList))
             MethodDeclaration = MethodDeclaration.WithParameterList(ParameterList);
 
-        if (isAsync && IsTaskType(MethodDeclaration.ReturnType))
+        if (model.IsAsync && IsTaskType(MethodDeclaration.ReturnType))
             MethodDeclaration = MethodDeclaration.WithReturnType(SyntaxFactory.IdentifierName("Task").WithTrailingTrivia(SyntaxFactory.TriviaList(SyntaxFactory.Whitespace(" "))));
         else if (SimplifyReturnTypeLeadingTrivia) // This case applies to methods with zero modifier that become public.
             MethodDeclaration = MethodDeclaration.WithReturnType(MethodDeclaration.ReturnType.WithLeadingTrivia(SyntaxFactory.Space));
 
         MethodDeclaration = MethodDeclaration.WithLeadingTrivia(LeadingTriviaWithoutLineEnd);
 
-        return MethodDeclaration.ToFullString();
+        model = model with { GeneratedMethodDeclaration = MethodDeclaration.ToFullString() };
     }
 
     private static SyntaxList<AttributeListSyntax> GenerateCodeAttributes()
@@ -87,21 +84,20 @@ public partial class ContractGenerator
 
     private static string GetToolVersion() => Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-    private static SyntaxTokenList GenerateContractModifiers(ContractModel model, MemberDeclarationSyntax memberDeclaration, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia, out bool isAsync)
+    private static SyntaxTokenList GenerateContractModifiers(ref ContractModel model, MemberDeclarationSyntax memberDeclaration, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia)
     {
         List<SyntaxToken> ModifierTokens = [];
 
         ModifierTokens = model.Attributes.Find(m => m.Name == nameof(AccessAttribute)) is AttributeModel AccessAttributeModel
-            ? GenerateContractExplicitModifiers(AccessAttributeModel, leadingTrivia, trailingTrivia, out isAsync)
-            : GenerateContractDefaultModifiers(memberDeclaration, leadingTrivia, trailingTrivia, out isAsync);
+            ? GenerateContractExplicitModifiers(ref model, AccessAttributeModel, leadingTrivia, trailingTrivia)
+            : GenerateContractDefaultModifiers(ref model, memberDeclaration, leadingTrivia, trailingTrivia);
 
         return SyntaxFactory.TokenList(ModifierTokens);
     }
 
-    private static List<SyntaxToken> GenerateContractExplicitModifiers(AttributeModel accessAttributeModel, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia, out bool isAsync)
+    private static List<SyntaxToken> GenerateContractExplicitModifiers(ref ContractModel model, AttributeModel accessAttributeModel, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia)
     {
         List<SyntaxToken> ModifierTokens = [];
-        isAsync = false;
 
         for (int i = 0; i < accessAttributeModel.Arguments.Count; i++)
         {
@@ -117,16 +113,15 @@ public partial class ContractGenerator
             ModifierTokens.Add(ModifierToken);
 
             if (ArgumentValue is "async")
-                isAsync = true;
+                model = model with { IsAsync = true };
         }
 
         return ModifierTokens;
     }
 
-    private static List<SyntaxToken> GenerateContractDefaultModifiers(MemberDeclarationSyntax memberDeclaration, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia, out bool isAsync)
+    private static List<SyntaxToken> GenerateContractDefaultModifiers(ref ContractModel model, MemberDeclarationSyntax memberDeclaration, SyntaxTriviaList leadingTrivia, SyntaxTriviaList? trailingTrivia)
     {
         List<SyntaxToken> ModifierTokens = [];
-        isAsync = false;
 
         SyntaxToken PublicModifierToken = SyntaxFactory.Identifier("public");
         PublicModifierToken = PublicModifierToken.WithLeadingTrivia(leadingTrivia);
@@ -144,7 +139,7 @@ public partial class ContractGenerator
                 ModifierTokens.Add(StaticModifierToken);
 
                 if (ModifierText is "async")
-                    isAsync = true;
+                    model = model with { IsAsync = true };
             }
         }
 
@@ -240,7 +235,7 @@ public partial class ContractGenerator
         return type.IsSet || name.IsSet;
     }
 
-    private static BlockSyntax GenerateBody(ContractModel model, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration, SyntaxTriviaList tabTrivia, SyntaxTriviaList tabTriviaWithoutLineEnd, bool isAsync, string tab)
+    private static BlockSyntax GenerateBody(ContractModel model, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration, SyntaxTriviaList tabTrivia, SyntaxTriviaList tabTriviaWithoutLineEnd, string tab)
     {
         bool IsExpressionBody = methodDeclaration.ExpressionBody is not null;
         SyntaxToken OpenBraceToken = SyntaxFactory.Token(SyntaxKind.OpenBraceToken);
@@ -257,7 +252,7 @@ public partial class ContractGenerator
         SyntaxToken CloseBraceToken = SyntaxFactory.Token(SyntaxKind.CloseBraceToken);
         CloseBraceToken = CloseBraceToken.WithLeadingTrivia(tabTrivia);
 
-        List<StatementSyntax> Statements = GenerateStatements(model, methodDeclaration, isDebugGeneration, TabStatementTrivia, TabStatementExtraLineEndTrivia, isAsync);
+        List<StatementSyntax> Statements = GenerateStatements(model, methodDeclaration, isDebugGeneration, TabStatementTrivia, TabStatementExtraLineEndTrivia);
 
         return SyntaxFactory.Block(OpenBraceToken, SyntaxFactory.List(Statements), CloseBraceToken);
     }

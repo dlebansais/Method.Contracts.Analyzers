@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading;
 using Contracts.Analyzers.Helper;
 using Microsoft.CodeAnalysis;
@@ -22,16 +21,10 @@ public partial class ContractGenerator
 
         ContractModel Model = GetModelWithoutContract(context, MemberDeclaration);
         Model = Model with { Attributes = GetModelContract(MemberDeclaration) };
-        Model = Model with { Documentation = GetMemberDocumentation(Model, MemberDeclaration) };
-        Model = Model with { GeneratedMethodDeclaration = GetGeneratedMethodDeclaration(Model, context, out bool IsAsync) };
-        Model = Model with { GeneratedPropertyDeclaration = GetGeneratedPropertyDeclaration(Model, context) };
-        (string UsingsBeforeNamespace, string UsingsAfterNamespace) = GetUsings(context, IsAsync);
-        Model = Model with
-        {
-            UsingsBeforeNamespace = UsingsBeforeNamespace,
-            UsingsAfterNamespace = UsingsAfterNamespace,
-            IsAsync = IsAsync,
-        };
+        UpdateWithDocumentation(MemberDeclaration, ref Model);
+        UpdateWithGeneratedMethodDeclaration(context, ref Model);
+        UpdateWithGeneratedPropertyDeclaration(context, ref Model);
+        UpdateUsings(context, ref Model);
 
         return Model;
     }
@@ -139,10 +132,8 @@ public partial class ContractGenerator
         return Result;
     }
 
-    private static string GetMemberDocumentation(ContractModel model, MemberDeclarationSyntax memberDeclaration)
+    private static void UpdateWithDocumentation(MemberDeclarationSyntax memberDeclaration, ref ContractModel model)
     {
-        string Documentation = string.Empty;
-
         if (memberDeclaration.HasLeadingTrivia)
         {
             SyntaxTriviaList LeadingTrivia = memberDeclaration.GetLeadingTrivia();
@@ -180,8 +171,9 @@ public partial class ContractGenerator
             foreach (SyntaxTrivia Trivia in LeadingTrivia)
                 if (Trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia))
                 {
-                    Documentation = LeadingTrivia.ToFullString().Trim('\r').Trim('\n').TrimEnd(' ');
-                    break;
+                    model = model with { Documentation = LeadingTrivia.ToFullString().Trim('\r').Trim('\n').TrimEnd(' ') };
+
+                    // break;
                 }
         }
 
@@ -193,14 +185,12 @@ public partial class ContractGenerator
         {
             string OldParameterName = $"<param name=\"{Entry.Key}\">";
             string NewParameterName = $"<param name=\"{Entry.Value}\">";
-            Documentation = AnalyzerTools.Replace(Documentation, OldParameterName, NewParameterName);
+            model = model with { Documentation = AnalyzerTools.Replace(model.Documentation, OldParameterName, NewParameterName) };
 
             string OldParameterRef = $"<paramref name=\"{Entry.Key}\"/>";
             string NewParameterRef = $"<paramref name=\"{Entry.Value}\"/>";
-            Documentation = AnalyzerTools.Replace(Documentation, OldParameterRef, NewParameterRef);
+            model = model with { Documentation = AnalyzerTools.Replace(model.Documentation, OldParameterRef, NewParameterRef) };
         }
-
-        return Documentation;
     }
 
     private static bool IsSupportedTrivia(SyntaxTrivia trivia)
@@ -216,7 +206,7 @@ public partial class ContractGenerator
         // If we reach this method there is at least one end of line, therefore at least one trivia.
         Contract.Assert(trivias.Count > 0);
 
-        SyntaxTrivia FirstTrivia = trivias.First();
+        SyntaxTrivia FirstTrivia = trivias[0];
 
         return FirstTrivia.IsKind(SyntaxKind.WhitespaceTrivia);
     }
@@ -436,40 +426,36 @@ public partial class ContractGenerator
         return Result;
     }
 
-    private static (string BeforeNamespaceDeclaration, string AfterNamespaceDeclaration) GetUsings(GeneratorAttributeSyntaxContext context, bool isAsync)
+    private static void UpdateUsings(GeneratorAttributeSyntaxContext context, ref ContractModel model)
     {
-        string RawBeforeNamespaceDeclaration = string.Empty;
-        string RawAfterNamespaceDeclaration = string.Empty;
-
         // We know it's not null from KeepNodeForPipeline().
         BaseNamespaceDeclarationSyntax BaseNamespaceDeclaration = Contract.AssertNotNull(context.TargetNode.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>());
 
-        RawAfterNamespaceDeclaration = BaseNamespaceDeclaration.Usings.ToFullString();
+        if (BaseNamespaceDeclaration.Usings.Count > 0)
+            model = model with { UsingsAfterNamespace = BaseNamespaceDeclaration.Usings.ToFullString() };
 
         if (BaseNamespaceDeclaration.Parent is CompilationUnitSyntax CompilationUnit)
-            RawBeforeNamespaceDeclaration = CompilationUnit.Usings.ToFullString();
+            model = model with { UsingsBeforeNamespace = CompilationUnit.Usings.ToFullString() };
 
-        return FixUsings(RawBeforeNamespaceDeclaration, RawAfterNamespaceDeclaration, isAsync);
+        AddMissingUsingsAndSort(ref model);
     }
 
-    private static (string BeforeNamespaceDeclaration, string AfterNamespaceDeclaration) FixUsings(string rawBeforeNamespaceDeclaration, string rawAfterNamespaceDeclaration, bool isAsync)
+    private static void AddMissingUsingsAndSort(ref ContractModel model)
     {
-        string BeforeNamespaceDeclaration = GeneratorHelper.SortUsings(rawBeforeNamespaceDeclaration);
-        string AfterNamespaceDeclaration = GeneratorHelper.SortUsings(rawAfterNamespaceDeclaration);
-        bool UseGlobal = GeneratorHelper.HasGlobalSystem(AfterNamespaceDeclaration);
+        model = model with { UsingsBeforeNamespace = GeneratorHelper.SortUsings(model.UsingsBeforeNamespace) };
+        model = model with { UsingsAfterNamespace = GeneratorHelper.SortUsings(model.UsingsAfterNamespace) };
+        bool UseGlobal = GeneratorHelper.HasGlobalSystem(model.UsingsAfterNamespace);
 
-        (BeforeNamespaceDeclaration, AfterNamespaceDeclaration) = AddMissingUsing(BeforeNamespaceDeclaration, AfterNamespaceDeclaration, "Contracts", isGlobal: false);
-        (BeforeNamespaceDeclaration, AfterNamespaceDeclaration) = AddMissingUsing(BeforeNamespaceDeclaration, AfterNamespaceDeclaration, "System.CodeDom.Compiler", isGlobal: UseGlobal);
+        AddMissingUsing(ref model, "Contracts", isGlobal: false);
+        AddMissingUsing(ref model, "System.CodeDom.Compiler", isGlobal: UseGlobal);
 
-        if (isAsync)
-            (BeforeNamespaceDeclaration, AfterNamespaceDeclaration) = AddMissingUsing(BeforeNamespaceDeclaration, AfterNamespaceDeclaration, "System.Threading.Tasks", isGlobal: UseGlobal);
+        if (model.IsAsync)
+            AddMissingUsing(ref model, "System.Threading.Tasks", isGlobal: UseGlobal);
 
-        AfterNamespaceDeclaration = GeneratorHelper.SortUsings(AfterNamespaceDeclaration);
-
-        return (BeforeNamespaceDeclaration, AfterNamespaceDeclaration);
+        model = model with { UsingsAfterNamespace = GeneratorHelper.SortUsings(model.UsingsAfterNamespace) };
     }
 
-    private static (string BeforeNamespaceDeclaration, string AfterNamespaceDeclaration) AddMissingUsing(string beforeNamespaceDeclaration, string afterNamespaceDeclaration, string usingDirective, bool isGlobal)
+    private static void AddMissingUsing(ref ContractModel model, string usingDirective, bool isGlobal)
     {
         string GlobalDirective = $"using global::{usingDirective};\n";
         string NonGlobalDirective = $"using {usingDirective};\n";
@@ -477,16 +463,14 @@ public partial class ContractGenerator
         bool IsDirectiveAfterNamespace;
 
 #if NETSTANDARD2_1_OR_GREATER
-        IsDirectiveBeforeNamespace = beforeNamespaceDeclaration.Contains(GlobalDirective, StringComparison.Ordinal) || beforeNamespaceDeclaration.Contains(NonGlobalDirective, StringComparison.Ordinal);
-        IsDirectiveAfterNamespace = afterNamespaceDeclaration.Contains(GlobalDirective, StringComparison.Ordinal) || afterNamespaceDeclaration.Contains(NonGlobalDirective, StringComparison.Ordinal);
+        IsDirectiveBeforeNamespace = model.UsingsBeforeNamespace.Contains(GlobalDirective, StringComparison.Ordinal) || model.UsingsBeforeNamespace.Contains(NonGlobalDirective, StringComparison.Ordinal);
+        IsDirectiveAfterNamespace = model.UsingsAfterNamespace.Contains(GlobalDirective, StringComparison.Ordinal) || model.UsingsAfterNamespace.Contains(NonGlobalDirective, StringComparison.Ordinal);
 #else
-        IsDirectiveBeforeNamespace = beforeNamespaceDeclaration.Contains(GlobalDirective) || beforeNamespaceDeclaration.Contains(NonGlobalDirective);
-        IsDirectiveAfterNamespace = afterNamespaceDeclaration.Contains(GlobalDirective) || afterNamespaceDeclaration.Contains(NonGlobalDirective);
+        IsDirectiveBeforeNamespace = model.UsingsBeforeNamespace.Contains(GlobalDirective) || model.UsingsBeforeNamespace.Contains(NonGlobalDirective);
+        IsDirectiveAfterNamespace = model.UsingsAfterNamespace.Contains(GlobalDirective) || model.UsingsAfterNamespace.Contains(NonGlobalDirective);
 #endif
 
         if (!IsDirectiveBeforeNamespace && !IsDirectiveAfterNamespace)
-            afterNamespaceDeclaration += isGlobal ? GlobalDirective : NonGlobalDirective;
-
-        return (beforeNamespaceDeclaration, afterNamespaceDeclaration);
+            model = model with { UsingsAfterNamespace = model.UsingsAfterNamespace + (isGlobal ? GlobalDirective : NonGlobalDirective) };
     }
 }

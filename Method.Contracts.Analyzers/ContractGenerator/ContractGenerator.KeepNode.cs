@@ -318,11 +318,9 @@ public partial class ContractGenerator
     {
         return IsRequireOrEnsureAttributeWithDebugOnly(attributeArguments)
             ? IsValidRequireOrEnsureAttributeWithDebugOnly(attributeArguments)
-            : attributeArguments.Count > 0
-                ? (IsValidStringOnlyAttribute(attributeArguments, out Collection<string> ArgumentValues, out int PositionOfFirstInvalidArgument)
-                    ? new AttributeValidityCheckResult(AttributeGeneration.Valid, ArgumentValues, -1)
-                    : AttributeValidityCheckResult.Invalid(PositionOfFirstInvalidArgument))
-                : AttributeValidityCheckResult.Invalid(-1);
+            : IsValidStringOnlyAttribute(attributeArguments, out Collection<string> ArgumentValues, out int PositionOfFirstInvalidArgument)
+                ? new AttributeValidityCheckResult(AttributeGeneration.Valid, ArgumentValues, -1)
+                : AttributeValidityCheckResult.Invalid(PositionOfFirstInvalidArgument);
     }
 
     /// <summary>
@@ -474,7 +472,7 @@ public partial class ContractGenerator
             InvocationExpression.Expression is IdentifierNameSyntax IdentifierName &&
             IdentifierName.Identifier.Text == "nameof" &&
             InvocationExpression.ArgumentList.Arguments.Count == 1 &&
-            InvocationExpression.ArgumentList.Arguments.First().Expression is IdentifierNameSyntax ExpressionIdentifierName)
+            InvocationExpression.ArgumentList.Arguments[0].Expression is IdentifierNameSyntax ExpressionIdentifierName)
         {
             string ArgumentText = ExpressionIdentifierName.Identifier.Text;
 
@@ -550,16 +548,13 @@ public partial class ContractGenerator
     {
         Contract.RequireNotNull(typeName, out string TypeName);
 
-        TypeName = AnalyzerTools.Replace(TypeName, "?", ";");
-        TypeName = AnalyzerTools.Replace(TypeName, "[]", ";");
-        TypeName = AnalyzerTools.Replace(TypeName, "<", ";");
-        TypeName = AnalyzerTools.Replace(TypeName, ">", ";");
-        TypeName = AnalyzerTools.Replace(TypeName, ".", ";");
-        TypeName = AnalyzerTools.Replace(TypeName, "::", ";");
-        TypeName = TypeName.Trim(';');
+        TypeName = AnalyzerTools.Replace(TypeName, "?", string.Empty);
+        TypeName = AnalyzerTools.Replace(TypeName, "[]", string.Empty);
+        TypeName = AnalyzerTools.Replace(TypeName, "<", string.Empty);
+        TypeName = AnalyzerTools.Replace(TypeName, ">", string.Empty);
+        TypeName = AnalyzerTools.Replace(TypeName, ".", string.Empty);
+        TypeName = AnalyzerTools.Replace(TypeName, "::", string.Empty);
 
-        string[] Identifiers = TypeName.Split(';');
-
-        return Identifiers.ToList().TrueForAll(SyntaxFacts.IsValidIdentifier);
+        return SyntaxFacts.IsValidIdentifier(TypeName);
     }
 }

@@ -1,7 +1,6 @@
 ﻿namespace Contracts.Analyzers;
 
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -64,7 +63,7 @@ public class MCA1010RequireNotNullAttributeUsesInvalidName : DiagnosticAnalyzer
     {
         // If we reached this step, there is an attribute.
         Contract.Assert(analysisAssertions.Length == 1);
-        WithinAttributeAnalysisAssertion<RequireNotNullAttribute> FirstAssertion = Contract.AssertNotNull(analysisAssertions.First() as WithinAttributeAnalysisAssertion<RequireNotNullAttribute>);
+        WithinAttributeAnalysisAssertion<RequireNotNullAttribute> FirstAssertion = Contract.AssertNotNull(analysisAssertions[0] as WithinAttributeAnalysisAssertion<RequireNotNullAttribute>);
         AttributeSyntax Attribute = Contract.AssertNotNull(FirstAssertion.AncestorAttribute);
 
         AttributeArgumentListSyntax ArgumentList = Contract.AssertNotNull(Attribute.ArgumentList);

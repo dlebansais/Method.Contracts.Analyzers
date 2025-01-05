@@ -1,7 +1,6 @@
 ﻿namespace Contracts.Analyzers;
 
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -64,7 +63,7 @@ public class MCA1021OnlyUseContractMapWithInSiteDictionary : DiagnosticAnalyzer
     {
         // If we reached this step, there is an argument name.
         Contract.Assert(analysisAssertions.Length == 1);
-        ContractMapInvocationAssertion Assertion = Contract.AssertNotNull(analysisAssertions.First() as ContractMapInvocationAssertion);
+        ContractMapInvocationAssertion Assertion = Contract.AssertNotNull(analysisAssertions[0] as ContractMapInvocationAssertion);
         ExpressionSyntax DictionaryExpression = Contract.AssertNotNull(Assertion.DictionaryExpression);
 
         if (DictionaryExpression is ObjectCreationExpressionSyntax)

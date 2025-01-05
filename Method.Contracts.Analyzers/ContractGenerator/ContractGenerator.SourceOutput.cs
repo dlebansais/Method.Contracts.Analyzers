@@ -12,6 +12,7 @@ public partial class ContractGenerator
 {
     private static void OutputContractMethod(SourceProductionContext context, (GeneratorSettings Settings, ImmutableArray<ContractModel> Models) modelAndSettings)
     {
+        // Stryker disable once String: this line is untestable.
         string DisableWarnings = GeneratorHelper.AddPrefixAndSuffixIfNotEmpty(Settings.DisabledWarnings, "#pragma warning disable ", "\n");
 
         foreach (ContractModel Model in modelAndSettings.Models)

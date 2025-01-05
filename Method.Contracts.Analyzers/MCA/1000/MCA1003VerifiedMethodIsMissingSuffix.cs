@@ -1,7 +1,6 @@
 ﻿namespace Contracts.Analyzers;
 
 using System.Collections.Immutable;
-using System.Linq;
 using Contracts.Analyzers.Helper;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -64,7 +63,7 @@ public class MCA1003VerifiedMethodIsMissingSuffix : DiagnosticAnalyzer
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, IAnalysisAssertion[] analysisAssertions)
     {
-        GeneratorSettings Settings = ContractGenerator.ReadSettings(context.Options.AnalyzerConfigOptionsProvider, context.CancellationToken).First();
+        GeneratorSettings Settings = ContractGenerator.ReadSettings(context.Options.AnalyzerConfigOptionsProvider, context.CancellationToken)[0];
 
         // The suffix can't be empty: if invalid in user settings, it's the default suffix.
         string VerifiedSuffix = Settings.VerifiedSuffix;

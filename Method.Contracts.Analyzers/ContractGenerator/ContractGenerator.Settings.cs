@@ -73,7 +73,7 @@ public partial class ContractGenerator
     /// </summary>
     /// <param name="options">Configuration options.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    internal static IEnumerable<GeneratorSettings> ReadSettings(AnalyzerConfigOptionsProvider options, CancellationToken cancellationToken)
+    internal static IList<GeneratorSettings> ReadSettings(AnalyzerConfigOptionsProvider options, CancellationToken cancellationToken)
     {
         string VerifiedSuffix = VerifiedSuffixSetting.ReadAsString(options, out _);
         int TabLength = TabLengthSetting.ReadAsInt(options, out _);

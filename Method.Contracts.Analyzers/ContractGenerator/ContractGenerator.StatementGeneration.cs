@@ -13,7 +13,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 /// </summary>
 public partial class ContractGenerator
 {
-    private static List<StatementSyntax> GenerateStatements(ContractModel model, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration, SyntaxTriviaList tabStatementTrivia, SyntaxTriviaList tabStatementExtraLineEndTrivia, bool isAsync)
+    private static List<StatementSyntax> GenerateStatements(ContractModel model, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration, SyntaxTriviaList tabStatementTrivia, SyntaxTriviaList tabStatementExtraLineEndTrivia)
     {
         List<StatementSyntax> Statements = [];
 
@@ -24,7 +24,6 @@ public partial class ContractGenerator
                                    tabStatementExtraLineEndTrivia,
                                    AliasNameReplacementTable,
                                    IsContainingRequire,
-                                   isAsync,
                                    out StatementSyntax CallStatement,
                                    out StatementSyntax? ReturnStatement);
 
@@ -60,8 +59,8 @@ public partial class ContractGenerator
 
                 if (Arguments.Any(argument => argument.Name != string.Empty))
                 {
-                    Contract.Assert(Arguments.First().Name == string.Empty);
-                    string ParameterName = Arguments.First().Value;
+                    Contract.Assert(Arguments[0].Name == string.Empty);
+                    string ParameterName = Arguments[0].Value;
                     string OriginalParameterName = ParameterName;
 
                     GetModifiedIdentifiers(Arguments, ref ParameterName, out string AliasName);
@@ -93,18 +92,17 @@ public partial class ContractGenerator
                                                    SyntaxTriviaList tabStatementExtraLineEndTrivia,
                                                    Dictionary<string, string> aliasNameReplacementTable,
                                                    bool isContainingRequire,
-                                                   bool isAsync,
                                                    out StatementSyntax callStatement,
                                                    out StatementSyntax? returnStatement)
     {
-        if (IsCommandMethod(methodDeclaration, isAsync))
+        if (IsCommandMethod(methodDeclaration, model.IsAsync))
         {
-            callStatement = GenerateCommandStatement(model.ShortName, methodDeclaration.ParameterList, aliasNameReplacementTable, isAsync);
+            callStatement = GenerateCommandStatement(model.ShortName, methodDeclaration.ParameterList, aliasNameReplacementTable, model.IsAsync);
             returnStatement = null;
         }
         else
         {
-            callStatement = GenerateMethodQueryStatement(model.ShortName, methodDeclaration.ParameterList, aliasNameReplacementTable, isAsync);
+            callStatement = GenerateMethodQueryStatement(model.ShortName, methodDeclaration.ParameterList, aliasNameReplacementTable, model.IsAsync);
             returnStatement = GenerateReturnStatement();
         }
 
@@ -302,7 +300,7 @@ public partial class ContractGenerator
 
     private static List<StatementSyntax> GenerateRequireNotNullStatement(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration)
     {
-        return attributeArguments.Count > 1 && attributeArguments.Any(argument => argument.Name != string.Empty)
+        return attributeArguments.Any(argument => argument.Name != string.Empty)
             ? GenerateRequireNotNullStatementWithAlias(attributeArguments, methodDeclaration)
             : GenerateMultipleRequireNotNullStatement(attributeArguments, methodDeclaration);
     }
@@ -310,8 +308,8 @@ public partial class ContractGenerator
     private static List<StatementSyntax> GenerateRequireNotNullStatementWithAlias(List<AttributeArgumentModel> attributeArguments, MethodDeclarationSyntax methodDeclaration)
     {
         Contract.Assert(attributeArguments.Count > 0);
-        Contract.Assert(attributeArguments.First().Name == string.Empty);
-        string ParameterName = attributeArguments.First().Value;
+        Contract.Assert(attributeArguments[0].Name == string.Empty);
+        string ParameterName = attributeArguments[0].Value;
 
         bool IsParameterTypeValid = GetParameterType(ParameterName, methodDeclaration, out TypeSyntax Type);
         Contract.Assert(IsParameterTypeValid);
@@ -389,7 +387,7 @@ public partial class ContractGenerator
 
     private static List<StatementSyntax> GenerateRequireOrEnsureStatement(List<AttributeArgumentModel> attributeArguments, bool isDebugGeneration, string contractMethodName)
     {
-        return attributeArguments.Count > 1 && attributeArguments.Any(argument => argument.Name != string.Empty)
+        return attributeArguments.Any(argument => argument.Name != string.Empty)
             ? GenerateRequireOrEnsureStatementWithDebugOnly(attributeArguments, isDebugGeneration, contractMethodName)
             : GenerateMultipleRequireOrEnsureStatement(attributeArguments, contractMethodName);
     }
@@ -401,7 +399,7 @@ public partial class ContractGenerator
 
         if (attributeArguments[1].Value == "false" || isDebugGeneration)
         {
-            List<AttributeArgumentModel> SingleAttributeArgument = [attributeArguments.First()];
+            List<AttributeArgumentModel> SingleAttributeArgument = [attributeArguments[0]];
             return GenerateMultipleRequireOrEnsureStatement(SingleAttributeArgument, contractMethodName);
         }
         else
@@ -443,7 +441,7 @@ public partial class ContractGenerator
     {
         Contract.Assert(text.Length > 0);
 
-        char FirstLetter = text.First();
+        char FirstLetter = text[0];
         string OtherLetters = text[1..];
 
         return char.IsLower(FirstLetter) ? $"{char.ToUpper(FirstLetter, CultureInfo.InvariantCulture)}{OtherLetters}" : $"_{text}";

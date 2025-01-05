@@ -69,7 +69,7 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
         List<IMethodSymbol> InitializerMethodSymbols = Contract.AssertNotNull(Assertion.InitializerMethodSymbols);
 
         Contract.Assert(InitializerMethodSymbols.Count > 0);
-        IMethodSymbol InitializerMethodSymbol = InitializerMethodSymbols.First();
+        IMethodSymbol InitializerMethodSymbol = InitializerMethodSymbols[0];
         string InitializerName = InitializerMethodSymbol.Name;
 
         // Diagnostic if there isn't exactly one initializer.

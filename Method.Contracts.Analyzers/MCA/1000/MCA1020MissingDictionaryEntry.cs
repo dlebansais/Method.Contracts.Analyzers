@@ -64,7 +64,7 @@ public class MCA1020MissingDictionaryEntry : DiagnosticAnalyzer
     {
         // If we reached this step, there is an argument name.
         Contract.Assert(analysisAssertions.Length == 1);
-        ContractMapInvocationAssertion Assertion = Contract.AssertNotNull(analysisAssertions.First() as ContractMapInvocationAssertion);
+        ContractMapInvocationAssertion Assertion = Contract.AssertNotNull(analysisAssertions[0] as ContractMapInvocationAssertion);
         ExpressionSyntax KeyExpression = Contract.AssertNotNull(Assertion.KeyExpression);
         ExpressionSyntax DictionaryExpression = Contract.AssertNotNull(Assertion.DictionaryExpression);
 
