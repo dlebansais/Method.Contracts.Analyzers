@@ -27,6 +27,8 @@ public partial class ContractGenerator
                 {{Model.Documentation}}{{Model.GeneratedMethodDeclaration}}{{Model.GeneratedPropertyDeclaration}}
                 }
                 """;
+
+            // Stryker disable once String: this line has no effect when the environment is not Windows, but in Windows we do need it.
             SourceText = AnalyzerTools.Replace(SourceText, "\r\n", "\n");
 
             context.AddSource($"{Model.ClassName}_{Model.ShortName}{Model.UniqueOverloadIdentifier}.g.cs", Microsoft.CodeAnalysis.Text.SourceText.From(SourceText, Encoding.UTF8));
