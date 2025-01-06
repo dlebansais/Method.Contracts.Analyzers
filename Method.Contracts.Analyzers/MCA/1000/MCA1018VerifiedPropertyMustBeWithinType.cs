@@ -56,7 +56,6 @@ public class MCA1018VerifiedPropertyMustBeWithinType : DiagnosticAnalyzer
             context,
             LanguageVersion.CSharp7,
             AnalyzeVerifiedNode,
-            new SimpleAnalysisAssertion(context => ((PropertyDeclarationSyntax)context.Node).Identifier.ValueText != string.Empty),
             new SimpleAnalysisAssertion(context => !IsPropertyWithinType((PropertyDeclarationSyntax)context.Node)),
             new SimpleAnalysisAssertion(context => ContractGenerator.GetFirstSupportedAttribute(context, (PropertyDeclarationSyntax)context.Node) is not null));
     }

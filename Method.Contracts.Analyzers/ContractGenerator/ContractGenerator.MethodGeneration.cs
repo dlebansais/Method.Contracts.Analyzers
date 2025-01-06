@@ -195,7 +195,10 @@ public partial class ContractGenerator
         updatedParameter = parameter;
 
         foreach (AttributeModel Attribute in model.Attributes)
-            if (AttributeHasTypeOrName(Attribute, out AssignTrackingString ParameterName, out AssignTrackingString Type, out AssignTrackingString Name) && ParameterName.Value == parameter.Identifier.Text)
+        {
+            GetAttributeHasTypeOrName(Attribute, out AssignTrackingString ParameterName, out AssignTrackingString Type, out AssignTrackingString Name);
+
+            if (ParameterName.Value == parameter.Identifier.Text)
             {
                 if (Type.IsSet)
                 {
@@ -209,15 +212,34 @@ public partial class ContractGenerator
                     updatedParameter = updatedParameter.WithIdentifier(UpdatedIdentifier);
                 }
             }
+        }
 
         return updatedParameter != parameter;
     }
 
-    private static bool AttributeHasTypeOrName(AttributeModel attribute, out AssignTrackingString parameterName, out AssignTrackingString type, out AssignTrackingString name)
+    private static void GetAttributeHasTypeOrName(AttributeModel attribute, out AssignTrackingString parameterName, out AssignTrackingString type, out AssignTrackingString name)
+    {
+        parameterName = new();
+        type = new();
+        name = new();
+
+        if (AttributeHasType(attribute, out AssignTrackingString TypeParameterName, out AssignTrackingString ParsedType))
+        {
+            parameterName = TypeParameterName;
+            type = ParsedType;
+        }
+
+        if (AttributeHasName(attribute, out AssignTrackingString NameParameterName, out AssignTrackingString ParseName))
+        {
+            parameterName = NameParameterName;
+            name = ParseName;
+        }
+    }
+
+    private static bool AttributeHasType(AttributeModel attribute, out AssignTrackingString parameterName, out AssignTrackingString type)
     {
         parameterName = new AssignTrackingString();
         type = new AssignTrackingString();
-        name = new AssignTrackingString();
 
         foreach (AttributeArgumentModel AttributeArgument in attribute.Arguments)
         {
@@ -225,6 +247,23 @@ public partial class ContractGenerator
                 parameterName = (AssignTrackingString)AttributeArgument.Value;
             if (AttributeArgument.Name == nameof(RequireNotNullAttribute.Type))
                 type = (AssignTrackingString)AttributeArgument.Value;
+        }
+
+        // Valid attribute for RequireNotNull always have a parameter name.
+        Contract.Assert(parameterName.IsSet);
+
+        return type.IsSet;
+    }
+
+    private static bool AttributeHasName(AttributeModel attribute, out AssignTrackingString parameterName, out AssignTrackingString name)
+    {
+        parameterName = new AssignTrackingString();
+        name = new AssignTrackingString();
+
+        foreach (AttributeArgumentModel AttributeArgument in attribute.Arguments)
+        {
+            if (AttributeArgument.Name == string.Empty)
+                parameterName = (AssignTrackingString)AttributeArgument.Value;
             if (AttributeArgument.Name == nameof(RequireNotNullAttribute.Name))
                 name = (AssignTrackingString)AttributeArgument.Value;
         }
@@ -232,7 +271,7 @@ public partial class ContractGenerator
         // Valid attribute for RequireNotNull always have a parameter name.
         Contract.Assert(parameterName.IsSet);
 
-        return type.IsSet || name.IsSet;
+        return name.IsSet;
     }
 
     private static BlockSyntax GenerateBody(ContractModel model, MethodDeclarationSyntax methodDeclaration, bool isDebugGeneration, SyntaxTriviaList tabTrivia, SyntaxTriviaList tabTriviaWithoutLineEnd, string tab)

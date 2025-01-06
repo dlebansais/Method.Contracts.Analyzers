@@ -121,13 +121,29 @@ internal partial class Program
     }
 
     [Test]
-    public async Task InvalidNameWithType_Diagnostic()
+    public async Task InvalidNameWithType1_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
 {
     [Access(""public"", ""static"")]
     [RequireNotNull(""text"", [|Name = ""@@""|], Type = ""string"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task InvalidNameWithType2_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"", [|Name = ""@@""|], Type = ""@@"")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";

@@ -61,18 +61,6 @@ public class MCA1009RequireNotNullAttributeUsesInvalidType : DiagnosticAnalyzer
 
     private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeArgumentSyntax attributeArgument, IAnalysisAssertion[] analysisAssertions)
     {
-        // If we reached this step, there is an attribute.
-        Contract.Assert(analysisAssertions.Length == 1);
-        WithinAttributeAnalysisAssertion<RequireNotNullAttribute> FirstAssertion = Contract.AssertNotNull(analysisAssertions[0] as WithinAttributeAnalysisAssertion<RequireNotNullAttribute>);
-        AttributeSyntax Attribute = Contract.AssertNotNull(FirstAssertion.AncestorAttribute);
-
-        AttributeArgumentListSyntax ArgumentList = Contract.AssertNotNull(Attribute.ArgumentList);
-        SeparatedSyntaxList<AttributeArgumentSyntax> AttributeArguments = ArgumentList.Arguments;
-
-        // No diagnostic if the attribute has no alias.
-        if (!ContractGenerator.IsRequireNotNullAttributeWithAliasTypeOrName(AttributeArguments))
-            return;
-
         // No diagnostic if the argument is a parameter name.
         if (attributeArgument.NameEquals is not NameEqualsSyntax NameEquals)
             return;

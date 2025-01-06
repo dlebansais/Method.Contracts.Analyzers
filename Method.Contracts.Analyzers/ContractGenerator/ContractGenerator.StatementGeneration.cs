@@ -397,7 +397,12 @@ public partial class ContractGenerator
         // This is the result of TransformRequireOrEnsureAttributeWithDebugOnly().
         Contract.Assert(attributeArguments.Count == 2);
 
-        if (attributeArguments[1].Value == "false" || isDebugGeneration)
+        bool IsDebugOnlyTrue = attributeArguments[1].Value == "true";
+        bool IsDebugOnlyFalse = attributeArguments[1].Value == "false";
+
+        Contract.Assert(IsDebugOnlyTrue || IsDebugOnlyFalse);
+
+        if (IsDebugOnlyFalse || isDebugGeneration)
         {
             List<AttributeArgumentModel> SingleAttributeArgument = [attributeArguments[0]];
             return GenerateMultipleRequireOrEnsureStatement(SingleAttributeArgument, contractMethodName);

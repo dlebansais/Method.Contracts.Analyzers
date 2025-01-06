@@ -79,7 +79,7 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
             if (GetCreatedObjectAndFollowUpStatements(context, objectCreationExpression, out ISymbol CreatedSymbol, out StatementSyntax nextStatement))
             {
                 // No diagnostic if the next statement is a call to the initializer.
-                if (IsFollowUpStatementInitialization(context, nextStatement, CreatedSymbol, InitializerMethodSymbol))
+                if (IsFollowUpStatementInitialization(context, CreatedSymbol, nextStatement, InitializerMethodSymbol))
                     return;
             }
         }
@@ -171,9 +171,12 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
         return false;
     }
 
-    private static bool IsFollowUpStatementInitialization(SyntaxNodeAnalysisContext context, StatementSyntax firstStatement, ISymbol createdSymbol, IMethodSymbol initializerMethodSymbol)
+    private static bool IsFollowUpStatementInitialization(SyntaxNodeAnalysisContext context, ISymbol createdSymbol, StatementSyntax firstStatement, IMethodSymbol initializerMethodSymbol)
     {
-        if (firstStatement is ExpressionStatementSyntax ExpressionStatement)
+        Contract.RequireNotNull(createdSymbol, out ISymbol CreatedSymbol);
+        Contract.RequireNotNull(firstStatement, out StatementSyntax FirstStatement);
+
+        if (FirstStatement is ExpressionStatementSyntax ExpressionStatement)
         {
             ExpressionSyntax Expression = ExpressionStatement.Expression;
 
@@ -201,7 +204,7 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
 
                 if (ExpressionSymbol is not null &&
                     MethodSymbol is not null &&
-                    SymbolEqualityComparer.Default.Equals(ExpressionSymbol, createdSymbol) &&
+                    SymbolEqualityComparer.Default.Equals(ExpressionSymbol, CreatedSymbol) &&
                     SymbolEqualityComparer.Default.Equals(MethodSymbol, initializerMethodSymbol))
                 {
                     return true;

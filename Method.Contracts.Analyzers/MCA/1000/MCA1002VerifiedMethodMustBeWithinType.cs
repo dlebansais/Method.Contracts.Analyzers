@@ -56,7 +56,6 @@ public class MCA1002VerifiedMethodMustBeWithinType : DiagnosticAnalyzer
             context,
             LanguageVersion.CSharp7,
             AnalyzeVerifiedNode,
-            new SimpleAnalysisAssertion(context => ((MethodDeclarationSyntax)context.Node).Identifier.ValueText != string.Empty),
             new SimpleAnalysisAssertion(context => !IsMethodWithinType((MethodDeclarationSyntax)context.Node)),
             new SimpleAnalysisAssertion(context => ContractGenerator.GetFirstSupportedAttribute(context, (MethodDeclarationSyntax)context.Node) is not null));
     }

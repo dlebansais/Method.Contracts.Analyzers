@@ -38,6 +38,31 @@ internal partial class Program
 {
     private static int Foo(int n, out string text)
     {
+        if (n <= 0)
+        {
+            Contract.Unused(out text);
+            return -1;
+        }
+        else
+        {
+            text = ""Foo"";
+            return 0;
+        }
+
+        n++;
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task InvocationWithReturnInElse_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    private static int Foo(int n, out string text)
+    {
         if (n > 0)
         {
             text = ""Foo"";
@@ -48,6 +73,8 @@ internal partial class Program
             Contract.Unused(out text);
             return -1;
         }
+
+        n++;
     }
 }
 ").ConfigureAwait(false);

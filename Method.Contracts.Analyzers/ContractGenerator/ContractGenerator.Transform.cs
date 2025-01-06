@@ -145,36 +145,53 @@ public partial class ContractGenerator
 
             // Trim consecutive end of lines until there is only at most one at the beginning.
             bool HadEndOfLine = false;
-            while (CountStartingEndOfLineTrivias(SupportedTrivias) > 1)
+            while (HasStartingEndOfLineTrivias(SupportedTrivias))
             {
+                int PreviousRemaining = SupportedTrivias.Count;
+
                 HadEndOfLine = true;
                 SupportedTrivias.RemoveAt(0);
+
+                // Ensures that this while loop is not infinite.
+                int Remaining = SupportedTrivias.Count;
+                Contract.Assert(Remaining + 1 == PreviousRemaining);
             }
 
             if (HadEndOfLine)
             {
                 // Trim whitespace trivias at start.
                 while (IsFirstTriviaWhitespace(SupportedTrivias))
+                {
+                    int PreviousRemaining = SupportedTrivias.Count;
+
                     SupportedTrivias.RemoveAt(0);
+
+                    // Ensures that this while loop is not infinite.
+                    int Remaining = SupportedTrivias.Count;
+                    Contract.Assert(Remaining + 1 == PreviousRemaining);
+                }
             }
 
             // Remove successive whitespace trivias.
             int i = 0;
             while (i + 1 < SupportedTrivias.Count)
+            {
+                int PreviousRemaining = SupportedTrivias.Count - i;
+
                 if (SupportedTrivias[i].IsKind(SyntaxKind.WhitespaceTrivia) && SupportedTrivias[i + 1].IsKind(SyntaxKind.WhitespaceTrivia))
                     SupportedTrivias.RemoveAt(i);
                 else
                     i++;
 
+                int Remaining = SupportedTrivias.Count - i;
+
+                // Ensures that this while loop is not infinite.
+                Contract.Assert(Remaining + 1 == PreviousRemaining);
+            }
+
             LeadingTrivia = SyntaxFactory.TriviaList(SupportedTrivias);
-
-            foreach (SyntaxTrivia Trivia in LeadingTrivia)
-                if (Trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia))
-                {
-                    model = model with { Documentation = LeadingTrivia.ToFullString().Trim('\r').Trim('\n').TrimEnd(' ') };
-
-                    // break;
-                }
+            if (LeadingTrivia.Any(SyntaxKind.SingleLineDocumentationCommentTrivia))
+                model = model with { Documentation = LeadingTrivia.ToFullString().Trim('\r').Trim('\n').TrimEnd(' ') };
         }
 
         Dictionary<string, string> ParameterNameReplacementTable = memberDeclaration is MethodDeclarationSyntax MethodDeclaration
@@ -211,7 +228,7 @@ public partial class ContractGenerator
         return FirstTrivia.IsKind(SyntaxKind.WhitespaceTrivia);
     }
 
-    private static int CountStartingEndOfLineTrivias(List<SyntaxTrivia> trivias)
+    private static bool HasStartingEndOfLineTrivias(List<SyntaxTrivia> trivias)
     {
         int Count = 0;
 
@@ -220,12 +237,19 @@ public partial class ContractGenerator
             SyntaxTrivia Trivia = trivias[i];
 
             if (Trivia.IsKind(SyntaxKind.EndOfLineTrivia))
+            {
                 Count++;
+
+                if (Count > 1)
+                    return true;
+            }
             else if (!Trivia.IsKind(SyntaxKind.WhitespaceTrivia))
-                break;
+            {
+                return false;
+            }
         }
 
-        return Count;
+        return false;
     }
 
     private static Dictionary<string, string> GetParameterNameReplacementTable(ContractModel model, MethodDeclarationSyntax methodDeclaration)
@@ -236,19 +260,18 @@ public partial class ContractGenerator
         SeparatedSyntaxList<ParameterSyntax> Parameters = ParameterList.Parameters;
 
         foreach (ParameterSyntax Parameter in Parameters)
-            if (IsParameterNameReplaced(model, Parameter, out AssignTrackingString ParameterName, out AssignTrackingString ReplacementName))
-                Result.Add(ParameterName.Value, ReplacementName.Value);
+            if (IsParameterNameReplaced(model, Parameter, out AssignTrackingString ReplacementName))
+                Result.Add(Parameter.Identifier.Text, ReplacementName.Value);
 
         return Result;
     }
 
-    private static bool IsParameterNameReplaced(ContractModel model, ParameterSyntax parameter, out AssignTrackingString parameterName, out AssignTrackingString replacementName)
+    private static bool IsParameterNameReplaced(ContractModel model, ParameterSyntax parameter, out AssignTrackingString replacementName)
     {
-        parameterName = new AssignTrackingString();
         replacementName = new AssignTrackingString();
 
         foreach (AttributeModel Attribute in model.Attributes)
-            if (AttributeHasTypeOrName(Attribute, out parameterName, out _, out replacementName) && parameterName.Value == parameter.Identifier.Text && replacementName.IsSet)
+            if (AttributeHasName(Attribute, out AssignTrackingString ParameterName, out replacementName) && ParameterName.Value == parameter.Identifier.Text && replacementName.IsSet)
                 return true;
 
         return false;
@@ -432,7 +455,12 @@ public partial class ContractGenerator
         BaseNamespaceDeclarationSyntax BaseNamespaceDeclaration = Contract.AssertNotNull(context.TargetNode.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>());
 
         if (BaseNamespaceDeclaration.Usings.Count > 0)
-            model = model with { UsingsAfterNamespace = BaseNamespaceDeclaration.Usings.ToFullString() };
+        {
+            string UsingString = BaseNamespaceDeclaration.Usings.ToFullString();
+            Contract.Assert(UsingString.Length > 0);
+
+            model = model with { UsingsAfterNamespace = UsingString };
+        }
 
         if (BaseNamespaceDeclaration.Parent is CompilationUnitSyntax CompilationUnit)
             model = model with { UsingsBeforeNamespace = CompilationUnit.Usings.ToFullString() };
@@ -471,6 +499,11 @@ public partial class ContractGenerator
 #endif
 
         if (!IsDirectiveBeforeNamespace && !IsDirectiveAfterNamespace)
-            model = model with { UsingsAfterNamespace = model.UsingsAfterNamespace + (isGlobal ? GlobalDirective : NonGlobalDirective) };
+        {
+            string LineToAdd = isGlobal ? GlobalDirective : NonGlobalDirective;
+            Contract.Assert(!model.UsingsAfterNamespace.Contains(LineToAdd));
+
+            model = model with { UsingsAfterNamespace = model.UsingsAfterNamespace + LineToAdd };
+        }
     }
 }

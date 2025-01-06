@@ -57,7 +57,6 @@ public class MCA1019VerifiedPropertyIsMissingSuffix : DiagnosticAnalyzer
             context,
             LanguageVersion.CSharp7,
             AnalyzeVerifiedNode,
-            new SimpleAnalysisAssertion(context => ((PropertyDeclarationSyntax)context.Node).Identifier.ValueText != string.Empty),
             new SimpleAnalysisAssertion(context => ContractGenerator.GetFirstSupportedAttribute(context, (PropertyDeclarationSyntax)context.Node) is not null));
     }
 

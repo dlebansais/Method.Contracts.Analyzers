@@ -57,7 +57,6 @@ public class MCA1003VerifiedMethodIsMissingSuffix : DiagnosticAnalyzer
             context,
             LanguageVersion.CSharp7,
             AnalyzeVerifiedNode,
-            new SimpleAnalysisAssertion(context => ((MethodDeclarationSyntax)context.Node).Identifier.ValueText != string.Empty),
             new SimpleAnalysisAssertion(context => ContractGenerator.GetFirstSupportedAttribute(context, (MethodDeclarationSyntax)context.Node) is not null));
     }
 

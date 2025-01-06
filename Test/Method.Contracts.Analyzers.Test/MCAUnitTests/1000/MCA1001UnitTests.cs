@@ -4,6 +4,7 @@ extern alias Analyzers;
 
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Testing;
 using NUnit.Framework;
 using VerifyCS = CSharpAnalyzerVerifier<Analyzers.Contracts.Analyzers.MCA1001VerifiedMethodMustBePrivate>;
@@ -14,7 +15,7 @@ internal partial class MCA1001UnitTests
     [Test]
     public async Task Protected_Diagnostic()
     {
-        await VerifyCS.VerifyAnalyzerAsync(@"
+        await VerifyCS.VerifyAnalyzerAsync(Prologs.Default, @"
 internal partial class Program
 {
     [|[Access(""public"", ""static"")]
@@ -23,7 +24,7 @@ internal partial class Program
         textPlus = text + ""!"";
     }|]
 }
-").ConfigureAwait(false);
+", LanguageVersion.CSharp7).ConfigureAwait(false);
     }
 
     [Test]

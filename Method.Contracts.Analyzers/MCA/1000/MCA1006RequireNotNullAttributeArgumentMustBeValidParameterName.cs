@@ -73,17 +73,9 @@ public class MCA1006RequireNotNullAttributeArgumentMustBeValidParameterName : Di
         SeparatedSyntaxList<AttributeArgumentSyntax> AttributeArguments = ArgumentList.Arguments;
         int ArgumentIndex = AttributeArguments.IndexOf(attributeArgument);
 
-        // No diagnostic if the attribute has an alias, type or name, and this is not the first argument.
-        if (ContractGenerator.IsRequireNotNullAttributeWithAliasTypeOrName(AttributeArguments) && ArgumentIndex > 0)
-            return;
-
         AttributeValidityCheckResult CheckResult = ContractGenerator.IsValidRequireNotNullAttribute(MethodDeclaration, AttributeArguments);
 
-        // No diagnostic if the argument is a valid parameter name.
-        if (CheckResult.Result == AttributeGeneration.Valid)
-            return;
-
-        // No diagnostic if the error is on another argument.
+        // No diagnostic if the argument is a valid parameter name, or if the error is on another argument.
         if (CheckResult.PositionOfFirstInvalidArgument != ArgumentIndex)
             return;
 

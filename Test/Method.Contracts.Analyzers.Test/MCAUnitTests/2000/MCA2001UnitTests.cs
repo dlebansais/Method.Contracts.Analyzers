@@ -308,6 +308,84 @@ internal partial class Program
     }
 
     [Test]
+    public async Task InitializerNotCalled10_Diagnostic()
+    {
+        DiagnosticDescriptor DescriptorCS1061 = new(
+            "CS1061",
+            "title",
+            "'Test' does not contain a definition for 'Foo' and no accessible extension method 'Foo' accepting a first argument of type 'Test' could be found (are you missing a using directive or an assembly reference?)",
+            "description",
+            DiagnosticSeverity.Error,
+            true
+            );
+
+        DiagnosticResult Expected = new(DescriptorCS1061);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 20, 14);
+
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal class Test
+{
+    [InitializeWith(nameof(Initialize))]
+    public Test()
+    {
+    }
+
+    public void Initialize()
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static void Main()
+    {
+        var test = [|new Test()|];
+        test.Foo();
+    }
+}
+", Expected).ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task InitializerNotCalled11_Diagnostic()
+    {
+        DiagnosticDescriptor DescriptorCS0103 = new(
+            "CS0103",
+            "title",
+            "The name 'foo' does not exist in the current context",
+            "description",
+            DiagnosticSeverity.Error,
+            true
+            );
+
+        DiagnosticResult Expected = new(DescriptorCS0103);
+        Expected = Expected.WithLocation("/0/Test0.cs", Prologs.DefaultLineCount + 20, 9);
+
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal class Test
+{
+    [InitializeWith(nameof(Initialize))]
+    public Test()
+    {
+    }
+
+    public void Initialize()
+    {
+    }
+}
+
+internal partial class Program
+{
+    private static void Main()
+    {
+        var test = [|new Test()|];
+        foo.GetType();
+    }
+}
+", Expected).ConfigureAwait(false);
+    }
+
+    [Test]
     public async Task InitializerCalled_NoDiagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"

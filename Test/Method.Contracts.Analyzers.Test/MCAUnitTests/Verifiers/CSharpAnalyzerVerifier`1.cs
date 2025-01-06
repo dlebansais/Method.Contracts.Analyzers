@@ -20,11 +20,10 @@ internal static partial class CSharpAnalyzerVerifier<TAnalyzer>
     /// <inheritdoc cref="AnalyzerVerifier{TAnalyzer, TTest, TVerifier}.VerifyAnalyzerAsync(string, DiagnosticResult[])"/>
     public static async Task VerifyAnalyzerAsync(string prolog, string source, LanguageVersion languageVersion = LanguageVersion.Default, params DiagnosticResult[] expected)
     {
-        Test test = new()
-        {
-            TestCode = prolog + source,
-            Version = languageVersion,
-        };
+        Test test = new();
+
+        if (test.IsDiagnosticEnabledd && test.HasHelpLink)
+            test = new() { TestCode = prolog + source, Version = languageVersion };
 
         test.ExpectedDiagnostics.AddRange(expected);
         await test.RunAsync(CancellationToken.None).ConfigureAwait(true);

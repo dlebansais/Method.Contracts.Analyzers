@@ -23,7 +23,7 @@ internal partial class Program
         textPlus = text + ""!"";
     }
 }
-").ConfigureAwait(false);
+", Microsoft.CodeAnalysis.CSharp.LanguageVersion.CSharp7).ConfigureAwait(false);
     }
 
     [Test]

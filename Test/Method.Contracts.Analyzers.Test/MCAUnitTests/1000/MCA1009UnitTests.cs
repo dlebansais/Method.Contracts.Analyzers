@@ -105,13 +105,29 @@ internal partial class Program
     }
 
     [Test]
-    public async Task InvalidAliasWithType_Diagnostic()
+    public async Task InvalidAliasWithType1_Diagnostic()
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
 internal partial class Program
 {
     [Access(""public"", ""static"")]
     [RequireNotNull(""text"", [|Type = ""@@""|], AliasName = ""Text"")]
+    private static void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task InvalidAliasWithType2_Diagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(@"
+internal partial class Program
+{
+    [Access(""public"", ""static"")]
+    [RequireNotNull(""text"", [|Type = ""@@""|], AliasName = ""@@"")]
     private static void HelloFromVerified(string text, out string textPlus)
     {
         textPlus = text + ""!"";

@@ -23,7 +23,7 @@ internal partial class Program
         get { return 0; }
     }
 }
-").ConfigureAwait(false);
+", Microsoft.CodeAnalysis.CSharp.LanguageVersion.CSharp7).ConfigureAwait(false);
     }
 
     [Test]

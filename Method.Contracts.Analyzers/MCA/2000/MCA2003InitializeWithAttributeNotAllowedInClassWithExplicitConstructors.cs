@@ -77,13 +77,13 @@ public class MCA2003InitializeWithAttributeNotAllowedInClassWithExplicitConstruc
         else
             return;
 
-        int ConstructorCount = 0;
+        bool HasContructor = false;
         foreach (MemberDeclarationSyntax Member in Members)
             if (Member is ConstructorDeclarationSyntax)
-                ConstructorCount++;
+                HasContructor = true;
 
         // No diagnostic if no explicit constructors.
-        if (ConstructorCount == 0)
+        if (!HasContructor)
             return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation()));

@@ -73,17 +73,9 @@ public class MCA1011RequireAttributeArgumentMustBeValid : DiagnosticAnalyzer
         SeparatedSyntaxList<AttributeArgumentSyntax> AttributeArguments = ArgumentList.Arguments;
         int ArgumentIndex = AttributeArguments.IndexOf(attributeArgument);
 
-        // No diagnostic if the attribute has DebugOnly, and this is not the first argument.
-        if (ContractGenerator.IsRequireOrEnsureAttributeWithDebugOnly(AttributeArguments) && ArgumentIndex > 0)
-            return;
-
         AttributeValidityCheckResult CheckResult = ContractGenerator.IsValidRequireAttribute(MethodDeclaration, AttributeArguments);
 
-        // No diagnostic if the argument is a valid expression.
-        if (CheckResult.Result == AttributeGeneration.Valid)
-            return;
-
-        // No diagnostic if the error is on another argument.
+        // No diagnostic if the argument is a valid expression or if the error is on another argument.
         if (CheckResult.PositionOfFirstInvalidArgument != ArgumentIndex)
             return;
 

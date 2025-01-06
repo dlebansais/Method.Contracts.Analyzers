@@ -14,7 +14,7 @@ internal partial class MCA1016UnitTests
     {
         await VerifyCS.VerifyAnalyzerAsync(@"
 #define COVERAGE_A25BDFABDDF8402785EB75AD812DA952
-" + Prologs.Nullable, @"
+" + Prologs.Default, @"
 internal partial class Program
 {
     private static void Foo()
@@ -23,7 +23,7 @@ internal partial class Program
         Contract.Unused(out Bar);
     }
 }
-").ConfigureAwait(false);
+", Microsoft.CodeAnalysis.CSharp.LanguageVersion.CSharp7).ConfigureAwait(false);
     }
 
     [Test]

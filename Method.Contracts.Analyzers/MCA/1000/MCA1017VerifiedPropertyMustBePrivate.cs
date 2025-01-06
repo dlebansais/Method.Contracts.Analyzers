@@ -57,7 +57,6 @@ public class MCA1017VerifiedPropertyMustBePrivate : DiagnosticAnalyzer
             context,
             LanguageVersion.CSharp7,
             AnalyzeVerifiedNode,
-            new SimpleAnalysisAssertion(context => ((PropertyDeclarationSyntax)context.Node).Identifier.ValueText != string.Empty),
             new SimpleAnalysisAssertion(context => !IsPropertyPrivate((PropertyDeclarationSyntax)context.Node)),
             new SimpleAnalysisAssertion(context => ContractGenerator.GetFirstSupportedAttribute(context, (PropertyDeclarationSyntax)context.Node) is not null));
     }
