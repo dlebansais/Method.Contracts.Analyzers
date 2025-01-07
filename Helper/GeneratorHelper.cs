@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -30,7 +31,7 @@ internal static class GeneratorHelper
     /// <returns><see langword="true"/> if using directives contain 'using global::System'; otherwise, <see langword="false"/>.</returns>
     public static bool HasGlobalSystem(string usings)
     {
-        if (usings == string.Empty)
+        if (usings.Length == 0)
             return false;
 
         string[] Lines = usings.Split('\n');
@@ -74,7 +75,7 @@ internal static class GeneratorHelper
     {
         string TrimmedLine = line.Trim(' ').Trim('\n').Trim('\r');
 
-        if (StringStartsWith(TrimmedLine, UsingDirectivePrefix) && StringEndsWith(TrimmedLine, ";"))
+        if (StringStartsWith(TrimmedLine, UsingDirectivePrefix))
         {
             string RawNamespace = TrimmedLine.Substring(UsingDirectivePrefix.Length, TrimmedLine.Length - UsingDirectivePrefix.Length - 1);
             string[] Names = RawNamespace.Split('.');
@@ -87,7 +88,7 @@ internal static class GeneratorHelper
             return true;
         }
 
-        directiveNamespace = string.Empty;
+        Contract.Unused(out directiveNamespace);
         return false;
     }
 
@@ -168,12 +169,13 @@ internal static class GeneratorHelper
                     SymbolInfo SymbolInfo = AvailableContext.SemanticModel.GetSymbolInfo(Attribute);
                     if (SymbolInfo.Symbol is ISymbol AttributeSymbol)
                     {
-                        ITypeSymbol AccessTypeSymbol = Contract.AssertNotNull(AvailableContext.Compilation.GetTypeByMetadataName(typeof(AccessAttribute).FullName));
+                        Type AccessType = typeof(AccessAttribute);
+                        ImmutableArray<INamedTypeSymbol> MatchingTypeSymbols = AvailableContext.Compilation.GetTypesByMetadataName(AccessType.FullName);
+                        ITypeSymbol AccessTypeSymbol = Contract.AssertNotNull(MatchingTypeSymbols.FirstOrDefault(symbol => symbol.ContainingAssembly.Identity.ToString() == AccessType.Assembly.FullName));
                         INamespaceSymbol ContainingNamespace = Contract.AssertNotNull(AccessTypeSymbol.ContainingNamespace);
-                        IAssemblySymbol ContainingAssembly = Contract.AssertNotNull(AccessTypeSymbol.ContainingAssembly);
 
-                        IsSameNamespaceAssembly &= SymbolEqualityComparer.Default.Equals(ContainingNamespace, AttributeSymbol.ContainingNamespace);
-                        IsSameNamespaceAssembly &= SymbolEqualityComparer.Default.Equals(ContainingAssembly, AttributeSymbol.ContainingAssembly);
+                        if (!SymbolEqualityComparer.Default.Equals(ContainingNamespace, AttributeSymbol.ContainingNamespace))
+                            IsSameNamespaceAssembly = false;
                     }
                     else
                     {

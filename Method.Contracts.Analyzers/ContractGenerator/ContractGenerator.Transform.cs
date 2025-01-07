@@ -268,12 +268,11 @@ public partial class ContractGenerator
 
     private static bool IsParameterNameReplaced(ContractModel model, ParameterSyntax parameter, out AssignTrackingString replacementName)
     {
-        replacementName = new AssignTrackingString();
-
         foreach (AttributeModel Attribute in model.Attributes)
             if (AttributeHasName(Attribute, out AssignTrackingString ParameterName, out replacementName) && ParameterName.Value == parameter.Identifier.Text && replacementName.IsSet)
                 return true;
 
+        Contract.Unused(out replacementName);
         return false;
     }
 

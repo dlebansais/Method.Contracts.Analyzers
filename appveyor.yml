@@ -75,6 +75,8 @@ before_test:
     printf "cd ./Test/%APPVEYOR_PROJECT_NAME%.Test\n" >> after-test.bat
     printf "dotnet stryker -p %APPVEYOR_PROJECT_NAME%.csproj --configuration:%CONFIGURATION% --output . --reporter ""markdown""\n" >> after-test.bat
     printf "powershell $stryker_summary = Get-Content ./reports/mutation-report.md -Raw ; Write-Output $stryker_summary ; $pattern = 'The final mutation score is 100' ; if ($stryker_summary -NotMatch $pattern) { exit -1 }\n" >> after-test.bat
+    printf "dotnet stryker -p Helper.csproj --configuration:%CONFIGURATION% --output . --reporter ""markdown""\n" >> after-test.bat
+    printf "powershell $stryker_summary = Get-Content ./reports/mutation-report.md -Raw ; Write-Output $stryker_summary ; $pattern = 'The final mutation score is 100' ; if ($stryker_summary -NotMatch $pattern) { exit -1 }\n" >> after-test.bat
 
 test_script:
   - if '%APPVEYOR_REPO_BRANCH%' == 'master' opencover.bat run-tests1.bat

@@ -111,6 +111,29 @@ internal partial class Program
     }
 
     [Test]
+    public async Task DifferentAttributeSameNamespace_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(Prologs.NoContract, @"
+namespace Contracts;
+
+internal class AccessAttribute : Attribute
+{
+    public AccessAttribute(string value) { Value = value; }
+    public string Value { get; set; }
+}
+
+internal partial class Program
+{
+    [Access(""public"")]
+    protected void HelloFromVerified(string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+").ConfigureAwait(false);
+    }
+
+    [Test]
     public async Task UndefinedAttribute_NoDiagnostic()
     {
         DiagnosticDescriptor DescriptorCS0116 = new(
