@@ -109,7 +109,7 @@ public partial class ContractGenerator
         List<SyntaxTrivia> TrivialList = [.. tabTrivia, SyntaxFactory.Whitespace(tab)];
         SyntaxTriviaList TabAccessorsTrivia = SyntaxFactory.TriviaList(TrivialList);
 
-        List<SyntaxTrivia> TrivialListExtraLineEnd = new(TrivialList);
+        List<SyntaxTrivia> TrivialListExtraLineEnd = [.. TrivialList];
         TrivialListExtraLineEnd.Insert(0, SyntaxFactory.EndOfLine("\n"));
         TrivialListExtraLineEnd.Add(SyntaxFactory.Whitespace(tab));
         SyntaxTriviaList TabStatementExtraLineEndTrivia = SyntaxFactory.TriviaList(TrivialListExtraLineEnd);

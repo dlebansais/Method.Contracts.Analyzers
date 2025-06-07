@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using Contracts;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -62,7 +61,7 @@ internal static partial class CSharpAnalyzerVerifier<TAnalyzer>
         {
             get
             {
-                DiagnosticAnalyzer[] Analyzers = GetDiagnosticAnalyzers().ToArray();
+                DiagnosticAnalyzer[] Analyzers = [.. GetDiagnosticAnalyzers()];
                 DiagnosticDescriptor? Diagnostics = GetDefaultDiagnostic(Analyzers);
                 return Diagnostics is not null && Diagnostics.IsEnabledByDefault;
             }
@@ -72,7 +71,7 @@ internal static partial class CSharpAnalyzerVerifier<TAnalyzer>
         {
             get
             {
-                DiagnosticAnalyzer[] Analyzers = GetDiagnosticAnalyzers().ToArray();
+                DiagnosticAnalyzer[] Analyzers = [.. GetDiagnosticAnalyzers()];
                 DiagnosticDescriptor? Diagnostics = GetDefaultDiagnostic(Analyzers);
                 return Diagnostics is not null && Diagnostics.HelpLinkUri is string Uri && Uri.StartsWith("https://github.com/dlebansais/Method.Contracts.Analyzers", StringComparison.Ordinal);
             }

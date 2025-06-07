@@ -207,7 +207,7 @@ internal static class AnalyzerTools
 
         if (statement.Parent is BlockSyntax Block)
         {
-            parentStatements = new List<StatementSyntax>(Block.Statements);
+            parentStatements = [.. Block.Statements];
 
             Parent = Block.Parent switch
             {
@@ -218,7 +218,7 @@ internal static class AnalyzerTools
         }
         else if (statement.Parent is SwitchSectionSyntax SwitchSection)
         {
-            parentStatements = new List<StatementSyntax>(SwitchSection.Statements);
+            parentStatements = [.. SwitchSection.Statements];
             Parent = SwitchSection.Parent as SwitchStatementSyntax;
         }
         else if (statement.Parent is ElseClauseSyntax ElseClause)

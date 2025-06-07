@@ -12,7 +12,7 @@
         <Company />
         <Product />
         <Description>A code generator companion for Method.Contracts</Description>
-        <Copyright>Copyright © 2024 David Le Bansais</Copyright>
+        <Copyright>Copyright © 2025 David Le Bansais</Copyright>
         <AssemblyVersion>2.0.1.36</AssemblyVersion>
         <FileVersion>2.0.1.36</FileVersion>
         <RepositoryUrl>https://github.com/dlebansais/Method.Contracts.Analyzers</RepositoryUrl>
@@ -47,15 +47,15 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Nullable.Extended.Analyzer" Version="1.15.6495">
+        <PackageReference Include="Nullable.Extended.Analyzer" Version="1.15.6581">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="IDisposableAnalyzers" Version="4.0.8">
+        <PackageReference Include="dlebansais.IDisposableAnalyzers" Version="4.0.8.9">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="dlebansais.CSharpLatest" Version="2.1.1">
+        <PackageReference Include="dlebansais.CSharpLatest" Version="2.1.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -70,7 +70,7 @@
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
         <PackageReference Include="Method.Contracts-Debug" Version="2.0.1" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
         <PackageReference Include="Method.Contracts" Version="2.0.1" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
     </ItemGroup>

@@ -61,7 +61,7 @@ internal static class GeneratorHelper
                 Namespaces.Add(Directive);
 
         Namespaces.Sort(SortWithSystemFirst);
-        Namespaces = Namespaces.Distinct().ToList();
+        Namespaces = [.. Namespaces.Distinct()];
 
         string Result = string.Empty;
 
