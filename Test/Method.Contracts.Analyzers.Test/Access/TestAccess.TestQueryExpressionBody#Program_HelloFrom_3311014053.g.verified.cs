@@ -9,7 +9,7 @@ using Contracts;
 
 partial class Program
 {
-    [GeneratedCodeAttribute("Method.Contracts.Analyzers","2.0.1.36")]
+    [GeneratedCodeAttribute("Method.Contracts.Analyzers","2.0.2.38")]
     public static string HelloFrom(string text) 
     {
         var Result = HelloFromVerified(text);
