@@ -7,14 +7,14 @@
         <Platforms>x64</Platforms>
 
         <RootNamespace>Contracts.Analyzers</RootNamespace>
-        <Version>2.0.1</Version>
+        <Version>2.0.2</Version>
         <Authors>David Le Bansais</Authors>
         <Company />
         <Product />
         <Description>A code generator companion for Method.Contracts</Description>
         <Copyright>Copyright © 2025 David Le Bansais</Copyright>
-        <AssemblyVersion>2.0.1.36</AssemblyVersion>
-        <FileVersion>2.0.1.36</FileVersion>
+        <AssemblyVersion>2.0.2.38</AssemblyVersion>
+        <FileVersion>2.0.2.38</FileVersion>
         <RepositoryUrl>https://github.com/dlebansais/Method.Contracts.Analyzers</RepositoryUrl>
         <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 
@@ -32,10 +32,17 @@
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <PackageLicenseExpression>0BSD</PackageLicenseExpression>
+        <PackageReadmeFile>README-short.md</PackageReadmeFile>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(APPVEYOR)' == 'True'">
         <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\signing.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -71,8 +78,8 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
-        <PackageReference Include="Method.Contracts-Debug" Version="2.0.1" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-        <PackageReference Include="Method.Contracts" Version="2.0.1" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
+        <PackageReference Include="Method.Contracts-Debug" Version="2.0.2" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+        <PackageReference Include="Method.Contracts" Version="2.0.2" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
     </ItemGroup>
 
     <ItemGroup>
@@ -101,6 +108,7 @@
             <None Include="$(TargetDir)Method.Contracts.dll" />
         </ItemGroup>
         <Copy SourceFiles="@(None)" DestinationFolder="$(SolutionDir)nuget-debug\analyzers\dotnet\cs\" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+        <Copy SourceFiles="README-short.md" DestinationFolder="$(SolutionDir)nuget-debug\" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
 
         <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
             <None Include="$(TargetDir)$(ProjectName).dll" />
@@ -109,6 +117,7 @@
             <None Include="$(TargetDir)Method.Contracts.dll" />
         </ItemGroup>
         <Copy SourceFiles="@(None)" DestinationFolder="$(SolutionDir)nuget\analyzers\dotnet\cs\" Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+        <Copy SourceFiles="README-short.md" DestinationFolder="$(SolutionDir)nuget\" Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     </Target>
 
 </Project>
