@@ -7,14 +7,14 @@
         <Platforms>x64</Platforms>
 
         <RootNamespace>Contracts.Analyzers.Helper</RootNamespace>
-        <Version>2.0.2</Version>
+        <Version>2.0.3</Version>
         <Authors>David Le Bansais</Authors>
         <Company />
         <Product />
         <Description>Code generation helper</Description>
         <Copyright>Copyright © 2025 David Le Bansais</Copyright>
-        <AssemblyVersion>2.0.2.38</AssemblyVersion>
-        <FileVersion>2.0.2.38</FileVersion>
+        <AssemblyVersion>2.0.3.39</AssemblyVersion>
+        <FileVersion>2.0.3.39</FileVersion>
         <RepositoryUrl>https://github.com/dlebansais/Method.Contracts.Analyzers</RepositoryUrl>
         <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 
