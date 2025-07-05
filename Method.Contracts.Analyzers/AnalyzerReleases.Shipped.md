@@ -28,3 +28,4 @@ MCA1021 |  Usage   |  Warning | MCA1021OnlyUseContractMapWithInSiteDictionary, [
 MCA2001 |  Usage   |  Warning | MCA2001ObjectMustBeInitialized, [Documentation](doc/MCA2001.md)
 MCA2002 |  Usage   |   Error  | MCA2002InitializeWithAttributeArgumentMustBeValidMethodName, [Documentation](doc/MCA2002.md)
 MCA2003 |  Usage   |   Error  | MCA2003InitializeWithAttributeNotAllowedInClassWithExplicitConstructors, [Documentation](doc/MCA2003.md)
+MCA2004 |  Usage   |   Error  | MCA2004InitializeWithAttributeNotAllowedInPublicClass, [Documentation](doc/MCA2004.md)

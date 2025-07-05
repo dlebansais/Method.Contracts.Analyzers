@@ -337,3 +337,4 @@ If a base class contains one or more constructors with the `InitializeWith` attr
 | [MCA2001](doc/MCA2001.md) | Object must be initialized.                                                 |
 | [MCA2002](doc/MCA2002.md) | `InitializeWith` attribute argument must be a valid method name.            |
 | [MCA2003](doc/MCA2003.md) | `InitializeWith` attribute not allowed in class with explicit constructors. |
+| [MCA2004](doc/MCA2004.md) | `InitializeWith` attribute not allowed in public class.                     |

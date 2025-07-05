@@ -405,4 +405,16 @@
     <value>Use in-site dictionary</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="MCA2004AnalyzerDescription" xml:space="preserve">
+    <value>InitializeWith attribute not allowed in public class.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA2004AnalyzerMessageFormat" xml:space="preserve">
+    <value>InitializeWith attribute not allowed in class '{0}' because it is public</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA2004AnalyzerTitle" xml:space="preserve">
+    <value>InitializeWith attribute not allowed in public class</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
 </root>

@@ -707,5 +707,32 @@ namespace Contracts.Analyzers {
                 return ResourceManager.GetString("MCA2003AnalyzerTitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to InitializeWith attribute not allowed in public class..
+        /// </summary>
+        internal static string MCA2004AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA2004AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to InitializeWith attribute not allowed in class &apos;{0}&apos; because it is public.
+        /// </summary>
+        internal static string MCA2004AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA2004AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to InitializeWith attribute not allowed in public class.
+        /// </summary>
+        internal static string MCA2004AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA2004AnalyzerTitle", resourceCulture);
+            }
+        }
     }
 }
