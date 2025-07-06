@@ -13,7 +13,7 @@
         <Product />
         <Description>A code generator companion for Method.Contracts</Description>
         <Copyright>Copyright © 2025 David Le Bansais</Copyright>
-        <AssemblyVersion>2.0.4.41</AssemblyVersion>
+        <AssemblyVersion>2.0.4.40</AssemblyVersion>
         <FileVersion>2.0.4.40</FileVersion>
         <RepositoryUrl>https://github.com/dlebansais/Method.Contracts.Analyzers</RepositoryUrl>
         <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
