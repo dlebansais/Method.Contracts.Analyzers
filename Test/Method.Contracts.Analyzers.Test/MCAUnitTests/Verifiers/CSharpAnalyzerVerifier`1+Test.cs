@@ -120,12 +120,12 @@ internal static partial class CSharpAnalyzerVerifier<TAnalyzer>
         private static string GetContractAssemblyPath()
         {
 #if DEBUG
-            string AssemblyPath = GetContractAssemblyPath("Method.Contracts-Debug");
+            string AssemblyPath = GetContractAssemblyPath("dlebansais.Method.Contracts-Debug");
             if (File.Exists(AssemblyPath))
                 return AssemblyPath;
 #endif
 
-            return GetContractAssemblyPath("Method.Contracts");
+            return GetContractAssemblyPath("dlebansais.Method.Contracts");
         }
 
         private static string GetContractAssemblyPath(string assemblyName)
