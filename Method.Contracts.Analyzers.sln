@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Method.Contracts.Analyzers.Demo", "Demo\Method.Contracts.Analyzers.Demo\Method.Contracts.Analyzers.Demo.csproj", "{1508B5BB-FC78-4D0B-B48C-BDF13607228E}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Method.Contracts.Analyzers", "Method.Contracts.Analyzers\Method.Contracts.Analyzers.csproj", "{390CD976-3B0B-4115-9D94-DD34B7F02CB1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Method.Contracts.Analyzers.Test", "Test\Method.Contracts.Analyzers.Test\Method.Contracts.Analyzers.Test.csproj", "{B57CEBD1-2D09-4D0A-A8C4-F296368FC586}"
@@ -22,10 +20,6 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1508B5BB-FC78-4D0B-B48C-BDF13607228E}.Debug|x64.ActiveCfg = Debug|x64
-		{1508B5BB-FC78-4D0B-B48C-BDF13607228E}.Debug|x64.Build.0 = Debug|x64
-		{1508B5BB-FC78-4D0B-B48C-BDF13607228E}.Release|x64.ActiveCfg = Release|x64
-		{1508B5BB-FC78-4D0B-B48C-BDF13607228E}.Release|x64.Build.0 = Release|x64
 		{390CD976-3B0B-4115-9D94-DD34B7F02CB1}.Debug|x64.ActiveCfg = Debug|x64
 		{390CD976-3B0B-4115-9D94-DD34B7F02CB1}.Debug|x64.Build.0 = Debug|x64
 		{390CD976-3B0B-4115-9D94-DD34B7F02CB1}.Release|x64.ActiveCfg = Release|x64
