@@ -6,8 +6,9 @@ updates:
     schedule:
       interval: daily
     ignore:
+      - dependency-name: "Microsoft.CodeAnalysis"
       - dependency-name: "Microsoft.CodeAnalysis.Analyzers"
-        update-types: ["version-update:semver-major"]
+      - dependency-name: "Microsoft.CodeAnalysis.CSharp"
     open-pull-requests-limit: 1
     groups:
         all-dependencies:
