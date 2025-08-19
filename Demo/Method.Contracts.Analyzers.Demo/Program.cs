@@ -1,6 +1,4 @@
-﻿#pragma warning disable IDE0060 // Remove unused parameter
-
-namespace Contracts.Analyzers.Demo;
+﻿namespace Contracts.Analyzers.Demo;
 
 using System;
 using Contracts;
@@ -13,8 +11,7 @@ internal partial class Program
     /// <summary>
     /// The main entry point.
     /// </summary>
-    /// <param name="args">Entry point arguments.</param>
-    public static void Main(string[] args)
+    public static void Main()
     {
         Console.WriteLine("Started...");
         string Text = HelloFrom("Hello, World");
