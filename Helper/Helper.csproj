@@ -32,9 +32,13 @@
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
-
+    
     <PropertyGroup Condition="'$(APPVEYOR)' == 'True'">
         <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(APPVEYOR_PULL_REQUEST_NUMBER)' != ''">
+        <DefineConstants>$(DefineConstants);FRIEND_ASSEMBLY_NOT_SIGNED</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(APPVEYOR_PULL_REQUEST_NUMBER)' == ''">
