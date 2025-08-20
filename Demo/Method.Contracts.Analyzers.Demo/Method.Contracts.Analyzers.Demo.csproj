@@ -12,6 +12,7 @@
 
         <NeutralLanguage>en-US</NeutralLanguage>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <ContractSourceGenerator_VerifiedSuffix>DemoVerified</ContractSourceGenerator_VerifiedSuffix>
         <ContractSourceGenerator_TabLength>8</ContractSourceGenerator_TabLength>
