@@ -79,9 +79,9 @@ before_test:
     printf "powershell $summary = Get-Content .\CoverageReports\Summary.txt -Raw ; Write-Output $summary ; $pattern = 'Branch coverage' + [char]0x003A + ' 100' + [char]0x0025 ; if ($summary -NotMatch $pattern) { exit -1 }\n" >> after-test.bat
     printf "if ""%STRYKER_OPTIONS%"" == ""skip"" goto end\n" >> after-test.bat
     printf "cd ./Test/%APPVEYOR_PROJECT_NAME%.Test\n" >> after-test.bat
-    printf "dotnet stryker -p %APPVEYOR_PROJECT_NAME%.csproj --configuration:%CONFIGURATION% --target-framework:net8.0 --output . --reporter ""markdown""\n" >> after-test.bat
+    printf "dotnet stryker -p %APPVEYOR_PROJECT_NAME%.csproj --configuration:%CONFIGURATION% --target-framework:net8.0 --output . --reporter ""markdown"" --mutation-level:%STRYKER_OPTIONS%\n" >> after-test.bat
     printf "powershell $stryker_summary = Get-Content ./reports/mutation-report.md -Raw ; Write-Output $stryker_summary ; $pattern = 'The final mutation score is 100' ; if ($stryker_summary -NotMatch $pattern) { exit -1 }\n" >> after-test.bat
-    printf "dotnet stryker -p Helper.csproj --configuration:%CONFIGURATION% --target-framework:net8.0 --output . --reporter ""markdown""\n" >> after-test.bat
+    printf "dotnet stryker -p Helper.csproj --configuration:%CONFIGURATION% --target-framework:net8.0 --output . --reporter ""markdown"" --mutation-level:%STRYKER_OPTIONS%\n" >> after-test.bat
     printf "powershell $stryker_summary = Get-Content ./reports/mutation-report.md -Raw ; Write-Output $stryker_summary ; $pattern = 'The final mutation score is 100' ; if ($stryker_summary -NotMatch $pattern) { exit -1 }\n" >> after-test.bat
     printf ":end\n" >> after-test.bat
 
