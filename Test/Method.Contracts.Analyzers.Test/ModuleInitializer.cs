@@ -1,4 +1,8 @@
-﻿namespace Contracts.Analyzers.Test;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+[assembly: Parallelize(Scope = ExecutionScope.MethodLevel)]
+
+namespace Contracts.Analyzers.Test;
 
 using System.Runtime.CompilerServices;
 using VerifyTests;
