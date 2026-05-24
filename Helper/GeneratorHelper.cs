@@ -171,7 +171,7 @@ internal static class GeneratorHelper
                     {
                         Type AccessType = typeof(AccessAttribute);
                         ImmutableArray<INamedTypeSymbol> MatchingTypeSymbols = AvailableContext.Compilation.GetTypesByMetadataName(AccessType.FullName);
-                        ITypeSymbol AccessTypeSymbol = Contract.AssertNotNull(MatchingTypeSymbols.FirstOrDefault(symbol => symbol.ContainingAssembly.Identity.ToString() == AccessType.Assembly.FullName));
+                        ITypeSymbol AccessTypeSymbol = Contract.AssertNotNull(MatchingTypeSymbols.FirstOrDefault(symbol => symbol.ContainingAssembly.Identity.Name == AccessType.Assembly.GetName().Name));
                         INamespaceSymbol ContainingNamespace = Contract.AssertNotNull(AccessTypeSymbol.ContainingNamespace);
 
                         if (!SymbolEqualityComparer.Default.Equals(ContainingNamespace, AttributeSymbol.ContainingNamespace))
