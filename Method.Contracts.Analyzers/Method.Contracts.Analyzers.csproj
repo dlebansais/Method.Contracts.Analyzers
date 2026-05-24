@@ -2,19 +2,20 @@
 
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0</TargetFrameworks>
+        <Configurations>Debug;Release-4-12-0;Release-4-14-0;Release-5-0-0;Release-5-3-0;Release</Configurations>
         <LangVersion>14</LangVersion>
         <Nullable>enable</Nullable>
         <Platforms>x64</Platforms>
 
         <RootNamespace>Contracts.Analyzers</RootNamespace>
-        <Version>2.0.8</Version>
+        <Version>2.0.9</Version>
         <Authors>David Le Bansais</Authors>
         <Company />
         <Product />
         <Description>A code generator companion for Method.Contracts</Description>
         <Copyright>Copyright © 2026 David Le Bansais</Copyright>
-        <AssemblyVersion>2.0.8.44</AssemblyVersion>
-        <FileVersion>2.0.8.44</FileVersion>
+        <AssemblyVersion>2.0.9.45</AssemblyVersion>
+        <FileVersion>2.0.9.45</FileVersion>
         <RepositoryUrl>https://github.com/dlebansais/Method.Contracts.Analyzers</RepositoryUrl>
         <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 
@@ -75,10 +76,24 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
 
-        <!-- Only use 5.0.0 until AppVeyor is upgraded -->
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
         <PackageReference Include="dlebansais.Method.Contracts-Debug" Version="2.0.7" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
         <PackageReference Include="dlebansais.Method.Contracts" Version="2.0.7" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(Configuration)' == 'Release-4-12-0'">
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(Configuration)' == 'Release-4-14-0'">
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(Configuration)' == 'Release-5-0-0'">
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(Configuration)' != 'Release-4-12-0' And '$(Configuration)' != 'Release-4-14-0' And '$(Configuration)' != 'Release-5-0-0'">
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.3.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -98,7 +113,7 @@
             <None Remove="@(None)" />
         </ItemGroup>
 
-        <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+        <ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
             <None Include="$(TargetDir)$(ProjectName).dll" />
             <None Include="$(TargetDir)$(ProjectName).pdb" />
             <None Include="$(TargetDir)$(ProjectName).xml" />
@@ -106,19 +121,22 @@
             <None Include="$(TargetDir)Helper.pdb" />
             <None Include="$(TargetDir)Method.Contracts.dll" />
         </ItemGroup>
-        <Copy SourceFiles="@(None)" DestinationFolder="$(SolutionDir)nuget-debug\analyzers\dotnet\cs\" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-        <Copy SourceFiles="package-icon.png" DestinationFolder="$(SolutionDir)nuget-debug\" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-        <Copy SourceFiles="README-short.md" DestinationFolder="$(SolutionDir)nuget-debug\" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+        <Copy SourceFiles="@(None)" DestinationFolder="$(SolutionDir)nuget-debug\analyzers\dotnet\cs\" Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
+        <Copy SourceFiles="package-icon.png" DestinationFolder="$(SolutionDir)nuget-debug\" Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
+        <Copy SourceFiles="README-short.md" DestinationFolder="$(SolutionDir)nuget-debug\" Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
 
-        <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+        <ItemGroup Condition="'$(Configuration)|$(Platform)' != 'Debug|x64'">
             <None Include="$(TargetDir)$(ProjectName).dll" />
             <None Include="$(TargetDir)$(ProjectName).xml" />
             <None Include="$(TargetDir)Helper.dll" />
             <None Include="$(TargetDir)Method.Contracts.dll" />
         </ItemGroup>
-        <Copy SourceFiles="@(None)" DestinationFolder="$(SolutionDir)nuget\analyzers\dotnet\cs\" Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
-        <Copy SourceFiles="package-icon.png" DestinationFolder="$(SolutionDir)nuget\" Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
-        <Copy SourceFiles="README-short.md" DestinationFolder="$(SolutionDir)nuget\" Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+        <Copy SourceFiles="@(None)" DestinationFolder="$(SolutionDir)nuget\analyzers\dotnet\cs\roslyn4.12" Condition="'$(Configuration)|$(Platform)' == 'Release-4-12-0|x64'" />
+        <Copy SourceFiles="@(None)" DestinationFolder="$(SolutionDir)nuget\analyzers\dotnet\cs\roslyn4.14" Condition="'$(Configuration)|$(Platform)' == 'Release-4-14-0|x64'" />
+        <Copy SourceFiles="@(None)" DestinationFolder="$(SolutionDir)nuget\analyzers\dotnet\cs\roslyn5.0" Condition="'$(Configuration)|$(Platform)' == 'Release-5-0-0|x64'" />
+        <Copy SourceFiles="@(None)" DestinationFolder="$(SolutionDir)nuget\analyzers\dotnet\cs\roslyn5.3" Condition="'$(Configuration)|$(Platform)' == 'Release-5-3-0|x64'" />
+        <Copy SourceFiles="package-icon.png" DestinationFolder="$(SolutionDir)nuget\" Condition="'$(Configuration)|$(Platform)' != 'Debug|x64'" />
+        <Copy SourceFiles="README-short.md" DestinationFolder="$(SolutionDir)nuget\" Condition="'$(Configuration)|$(Platform)' != 'Debug|x64'" />
     </Target>
 
 </Project>

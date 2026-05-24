@@ -1,12 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <Platforms>x64</Platforms>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <Platforms>x64</Platforms>
+        <Configurations>Debug;Release-4-12-0;Release-4-14-0;Release-5-0-0;Release-5-3-0;Release</Configurations>
+    </PropertyGroup>
 
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="call &quot;$(SolutionDir)updateversion.bat&quot; &quot;$(SolutionDir)&quot; &quot;$(SolutionPath)&quot;" />
-  </Target>
+    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+        <Exec Command="call &quot;$(SolutionDir)updateversion.bat&quot; &quot;$(SolutionDir)&quot; &quot;$(SolutionPath)&quot;" />
+    </Target>
 
 </Project>

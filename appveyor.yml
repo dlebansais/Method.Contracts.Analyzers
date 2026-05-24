@@ -28,6 +28,36 @@ environment:
   report_generator_version: 5.2.0
   PACKAGE_PREFIX: dlebansais
 
+  matrix:
+    - job_name: Debug
+      configuration: Debug
+
+    - job_name: Release-4-12-0
+      job_group: Specific-Release-Group
+      configuration: Release-4-12-0
+
+    - job_name: Release-4-14-0
+      job_group: Specific-Release-Group
+      configuration: Release-4-14-0
+
+    - job_name: Release-5-0-0
+      job_group: Specific-Release-Group
+      configuration: Release-5-0-0
+
+# 5.3.0 disabled until AppVeyor supports it.
+#    - job_name: Release-5-3-0
+#      job_group: Specific-Release-Group
+#      configuration: Release-5-3-0
+
+# A dummy job that only repeats the Debug job to give artifacts some time to settle on the server.
+    - job_name: Dummy
+      job_group: Dummy-Group
+      configuration: Debug
+
+    - job_name: Release
+      job_depends_on: Dummy-Group
+      configuration: Release
+
 matrix:
 # set this flag to immediately finish build once one of the jobs fails.
   fast_finish: true
@@ -39,10 +69,15 @@ before_build:
   - dotnet tool install -g dotnet-stryker
 # Extract signing.snk to the current directory. Do not extract for a PR because they don't have access to secrets, but we don't need to sign assemblies in that case.
   - if '%APPVEYOR_PULL_REQUEST_NUMBER%'=='' C:/PROGRA~1/7-Zip/7z.exe e -p%SnkPassword% .signing\key.zip > nul
-
-configuration:
-  - Debug
-  - Release
+# Get artifacts from previous release builds for different versions of the Microsoft.CodeAnalysis package.
+  - ps: |-
+        if ($env:CONFIGURATION -eq 'Release') { curl -OutFile Release-4-12-0.zip -Headers @{ Authorization = "Bearer $token" } -Uri "https://ci.appveyor.com/api/projects/dlebansais/Method.Contracts.Analyzers/artifacts/Method.Contracts.Analyzers/bin/x64/Release-4-12-0/Method.Contracts.Analyzers-Release-4-12-0.zip?job=Release%2D4%2D12%2D0" }
+        if ($env:CONFIGURATION -eq 'Release') { curl -OutFile Release-4-14-0.zip -Headers @{ Authorization = "Bearer $token" } -Uri "https://ci.appveyor.com/api/projects/dlebansais/Method.Contracts.Analyzers/artifacts/Method.Contracts.Analyzers/bin/x64/Release-4-14-0/Method.Contracts.Analyzers-Release-4-14-0.zip?job=Release%2D4%2D14%2D0" }
+        if ($env:CONFIGURATION -eq 'Release') { curl -OutFile Release-5-0-0.zip  -Headers @{ Authorization = "Bearer $token" } -Uri "https://ci.appveyor.com/api/projects/dlebansais/Method.Contracts.Analyzers/artifacts/Method.Contracts.Analyzers/bin/x64/Release-5-0-0/Method.Contracts.Analyzers-Release-5-0-0.zip?job=Release%2D5%2D0%2D0" }
+  - |-
+    if exist Release-4-12-0.zip C:/PROGRA~1/7-Zip/7z.exe -o%APPVEYOR_PROJECT_NAME%/bin/x64/Release-4-12-0\netstandard2.0 e Release-4-12-0.zip
+    if exist Release-4-14-0.zip C:/PROGRA~1/7-Zip/7z.exe -o%APPVEYOR_PROJECT_NAME%/bin/x64/Release-4-14-0\netstandard2.0 e Release-4-14-0.zip
+    if exist Release-5-0-0.zip C:/PROGRA~1/7-Zip/7z.exe -o%APPVEYOR_PROJECT_NAME%/bin/x64/Release-5-0-0\netstandard2.0  e Release-5-0-0.zip
 
 build:
   project: $(APPVEYOR_PROJECT_NAME).sln
@@ -94,12 +129,20 @@ before_test:
     printf ":end\n" >> after-test.bat
 
 test_script:
-  - if '%APPVEYOR_REPO_BRANCH%' == 'master' call opencover.bat run-tests1.bat
+  - if '%APPVEYOR_REPO_BRANCH%/%CONFIGURATION%' == 'master/Debug' call opencover.bat run-tests1.bat
+  - if '%APPVEYOR_REPO_BRANCH%/%CONFIGURATION%' == 'master/Release' call opencover.bat run-tests1.bat
 
 after_test:
-  - if '%APPVEYOR_REPO_BRANCH%' == 'master' call after-test.bat
+  - if '%APPVEYOR_REPO_BRANCH%/%CONFIGURATION%' == 'master/Debug' call after-test.bat
+  - if '%APPVEYOR_REPO_BRANCH%/%CONFIGURATION%' == 'master/Release' call after-test.bat
 
 artifacts:
+  - path: $(APPVEYOR_PROJECT_NAME)\bin\x64\Release-4-12-0\netstandard2.0
+    name: $(APPVEYOR_PROJECT_NAME)-Release-4-12-0
+  - path: $(APPVEYOR_PROJECT_NAME)\bin\x64\Release-4-14-0\netstandard2.0
+    name: $(APPVEYOR_PROJECT_NAME)-Release-4-14-0
+  - path: $(APPVEYOR_PROJECT_NAME)\bin\x64\Release-5-0-0\netstandard2.0
+    name: $(APPVEYOR_PROJECT_NAME)-Release-5-0-0
   - path: $(PACKAGE_PREFIX).$(APPVEYOR_PROJECT_NAME)-Debug.*.nupkg
     name: $(APPVEYOR_PROJECT_NAME)-Package-Debug
   - path: $(PACKAGE_PREFIX).$(APPVEYOR_PROJECT_NAME).*.nupkg
