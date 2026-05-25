@@ -45,7 +45,7 @@ environment:
 #      configuration: Release-5-0-0
 
     - job_name: Release
-      job_depends_on: Specific-Release-Group
+#      job_depends_on: Specific-Release-Group
       configuration: Release
 
 matrix:
