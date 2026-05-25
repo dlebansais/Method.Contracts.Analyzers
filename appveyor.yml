@@ -29,20 +29,24 @@ environment:
   PACKAGE_PREFIX: dlebansais
 
   matrix:
-#    - job_name: Debug
-#      configuration: Debug
+    - job_name: Debug
+      configuration: Debug
 
-#    - job_name: Release-4-12-0
-#      job_group: Specific-Release-Group
-#      configuration: Release-4-12-0
+    - job_name: Release-4-12-0
+      job_group: Specific-Release-Group
+      configuration: Release-4-12-0
 
-#    - job_name: Release-4-14-0
-#      job_group: Specific-Release-Group
-#      configuration: Release-4-14-0
+    - job_name: Release-4-14-0
+      job_group: Specific-Release-Group
+      configuration: Release-4-14-0
 
-#    - job_name: Release-5-0-0
-#      job_group: Specific-Release-Group
-#      configuration: Release-5-0-0
+    - job_name: Release-5-0-0
+      job_group: Specific-Release-Group
+      configuration: Release-5-0-0
+
+    - job_name: Release-5-3-0
+      job_group: Specific-Release-Group
+      configuration: Release-5-3-0
 
     - job_name: Release
       job_depends_on: Specific-Release-Group
@@ -67,9 +71,10 @@ before_build:
         if ($env:CONFIGURATION -eq 'Release') { curl -OutFile Release-4-14-0.zip -Headers @{ Authorization = "Bearer $token" } -Uri "https://ci.appveyor.com/api/projects/dlebansais/$env:APPVEYOR_PROJECT_SLUG/artifacts/nuget/analyzers/dotnet/cs/Release-4-14-0.zip?job=Release%2D4%2D14%2D0" }
         if ($env:CONFIGURATION -eq 'Release') { curl -OutFile Release-5-0-0.zip  -Headers @{ Authorization = "Bearer $token" } -Uri "https://ci.appveyor.com/api/projects/dlebansais/$env:APPVEYOR_PROJECT_SLUG/artifacts/nuget/analyzers/dotnet/cs/Release-5-0-0.zip?job=Release%2D5%2D0%2D0" }
   - |-
-    if exist Release-4-12-0.zip C:/PROGRA~1/7-Zip/7z.exe -onuget/analyzers/dotnet/cs/roslyn4.12 -y e Release-4-12-0.zip
-    if exist Release-4-14-0.zip C:/PROGRA~1/7-Zip/7z.exe -onuget/analyzers/dotnet/cs/roslyn4.14 -y e Release-4-14-0.zip
-    if exist Release-5-0-0.zip  C:/PROGRA~1/7-Zip/7z.exe -onuget/analyzers/dotnet/cs/roslyn5.0  -y e Release-5-0-0.zip
+    if exist Release-4-12-0.zip C:/PROGRA~1/7-Zip/7z.exe -onuget/analyzers/dotnet/cs/roslyn4.12 e Release-4-12-0.zip
+    if exist Release-4-14-0.zip C:/PROGRA~1/7-Zip/7z.exe -onuget/analyzers/dotnet/cs/roslyn4.14 e Release-4-14-0.zip
+    if exist Release-5-0-0.zip  C:/PROGRA~1/7-Zip/7z.exe -onuget/analyzers/dotnet/cs/roslyn5.0  e Release-5-0-0.zip
+    if exist Release-5-3-0.zip  C:/PROGRA~1/7-Zip/7z.exe -onuget/analyzers/dotnet/cs/roslyn5.3  e Release-5-3-0.zip
 
 build:
   project: $(APPVEYOR_PROJECT_NAME).sln
@@ -138,6 +143,8 @@ artifacts:
     name: Release-4-14-0
   - path: nuget/analyzers/dotnet/cs/roslyn5.0
     name: Release-5-0-0
+  - path: nuget/analyzers/dotnet/cs/roslyn5.3
+    name: Release-5-3-0
   - path: $(PACKAGE_PREFIX).$(APPVEYOR_PROJECT_NAME)-Debug.*.nupkg
     name: $(APPVEYOR_PROJECT_NAME)-Package-Debug
   - path: $(PACKAGE_PREFIX).$(APPVEYOR_PROJECT_NAME).*.nupkg
