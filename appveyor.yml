@@ -63,9 +63,9 @@ before_build:
 # This step reads artifacts from the PREVIOUS build. Fortunately, that means it works if deploying on a separate deployment branch since it's a second build.
 #https://ci.appveyor.com/api/buildjobs/72miq72af016o308/artifacts/nuget%2Fanalyzers%2Fdotnet%2Fcs%2FMethod.Contracts.Analyzers-Release-4-12-0.zip
   - ps: |-
-        if ($env:CONFIGURATION -eq 'Release') { curl -OutFile Release-4-12-0.zip -Headers @{ Authorization = "Bearer $token" } -Uri "https://ci.appveyor.com/api/projects/dlebansais/$env:APPVEYOR_PROJECT_SLUG/artifacts/nuget/analyzers/dotnet/cs/$env:APPVEYOR_PROJECT_NAME-Release-4-12-0.zip?job=Release%2D4%2D12%2D0" }
-        if ($env:CONFIGURATION -eq 'Release') { curl -OutFile Release-4-14-0.zip -Headers @{ Authorization = "Bearer $token" } -Uri "https://ci.appveyor.com/api/projects/dlebansais/$env:APPVEYOR_PROJECT_SLUG/artifacts/nuget/analyzers/dotnet/cs/$env:APPVEYOR_PROJECT_NAME-Release-4-14-0.zip?job=Release%2D4%2D14%2D0" }
-        if ($env:CONFIGURATION -eq 'Release') { curl -OutFile Release-5-0-0.zip  -Headers @{ Authorization = "Bearer $token" } -Uri "https://ci.appveyor.com/api/projects/dlebansais/$env:APPVEYOR_PROJECT_SLUG/artifacts/nuget/analyzers/dotnet/cs/$env:APPVEYOR_PROJECT_NAME-Release-5-0-0.zip?job=Release%2D5%2D0%2D0" }
+        if ($env:CONFIGURATION -eq 'Release') { curl -OutFile Release-4-12-0.zip -Headers @{ Authorization = "Bearer $token" } -Uri "https://ci.appveyor.com/api/projects/dlebansais/$env:APPVEYOR_PROJECT_SLUG/artifacts/nuget/analyzers/dotnet/cs/Method.Contracts.Analyzers-Release-4-12-0.zip?job=Release%2D4%2D12%2D0" }
+        if ($env:CONFIGURATION -eq 'Release') { curl -OutFile Release-4-14-0.zip -Headers @{ Authorization = "Bearer $token" } -Uri "https://ci.appveyor.com/api/projects/dlebansais/$env:APPVEYOR_PROJECT_SLUG/artifacts/nuget/analyzers/dotnet/cs/Method.Contracts.Analyzers-Release-4-14-0.zip?job=Release%2D4%2D14%2D0" }
+        if ($env:CONFIGURATION -eq 'Release') { curl -OutFile Release-5-0-0.zip  -Headers @{ Authorization = "Bearer $token" } -Uri "https://ci.appveyor.com/api/projects/dlebansais/$env:APPVEYOR_PROJECT_SLUG/artifacts/nuget/analyzers/dotnet/cs/Method.Contracts.Analyzers-Release-5-0-0.zip?job=Release%2D5%2D0%2D0" }
   - |-
     if exist Release-4-12-0.zip C:/PROGRA~1/7-Zip/7z.exe -onuget/analyzers/dotnet/cs/roslyn4.12 -y e Release-4-12-0.zip
     if exist Release-4-14-0.zip C:/PROGRA~1/7-Zip/7z.exe -onuget/analyzers/dotnet/cs/roslyn4.14 -y e Release-4-14-0.zip
