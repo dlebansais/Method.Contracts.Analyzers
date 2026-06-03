@@ -148,7 +148,6 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-#if NONE
     [Test]
     public async Task DictionaryWithoutInitializer_NoDiagnostic()
     {
@@ -169,5 +168,4 @@ internal partial class Program
 }
 ").ConfigureAwait(false);
     }
-#endif
 }
