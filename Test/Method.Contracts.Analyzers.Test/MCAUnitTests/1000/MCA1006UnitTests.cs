@@ -264,8 +264,6 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-    /**/
-
     [Test]
     public async Task BadArgumentWithAliasTypeAndName_Diagnostic()
     {
@@ -282,7 +280,6 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
-#if NONE
     [Test]
     public async Task OtherAttribute_NoDiagnostic()
     {
@@ -305,5 +302,4 @@ internal partial class Program
 }
 ").ConfigureAwait(false);
     }
-#endif
 }
