@@ -1,5 +1,6 @@
 ﻿namespace Contracts.Analyzers;
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -11,7 +12,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 /// Analyzer for rule MCA1017: Verified property must be private.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MCA1017VerifiedPropertyMustBePrivate : DiagnosticAnalyzer
+public class MCA1017VerifiedPropertyMustBePrivate : PropertyDiagnosticAnalyzer
 {
     /// <summary>
     /// Diagnostic ID for this rule.
@@ -37,29 +38,12 @@ public class MCA1017VerifiedPropertyMustBePrivate : DiagnosticAnalyzer
     /// </summary>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
-    /// <summary>
-    /// Initializes the rule analyzer.
-    /// </summary>
-    /// <param name="context">The analysis context.</param>
-    public override void Initialize(AnalysisContext context)
-    {
-        context = Contract.AssertNotNull(context);
-
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
-        context.EnableConcurrentExecution();
-
-        context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.PropertyDeclaration);
-    }
-
-    private void AnalyzeNode(SyntaxNodeAnalysisContext context)
-    {
-        AnalyzerTools.AssertSyntaxRequirements<PropertyDeclarationSyntax>(
-            context,
-            LanguageVersion.CSharp7,
-            AnalyzeVerifiedNode,
-            new SimpleAnalysisAssertion(context => !IsPropertyPrivate((PropertyDeclarationSyntax)context.Node)),
-            new SimpleAnalysisAssertion(context => ContractGenerator.GetFirstSupportedAttribute(context, (PropertyDeclarationSyntax)context.Node) is not null));
-    }
+    /// <inheritdoc />
+    private protected override IEnumerable<IAnalysisAssertion> Assertions { get; } =
+    [
+        new SimpleAnalysisAssertion(context => !IsPropertyPrivate((PropertyDeclarationSyntax)context.Node)),
+        new SimpleAnalysisAssertion(context => ContractGenerator.GetFirstSupportedAttribute(context, (PropertyDeclarationSyntax)context.Node) is not null),
+    ];
 
     private static bool IsPropertyPrivate(PropertyDeclarationSyntax propertyDeclaration)
     {
@@ -68,7 +52,8 @@ public class MCA1017VerifiedPropertyMustBePrivate : DiagnosticAnalyzer
                                                              !modifier.IsKind(SyntaxKind.InternalKeyword));
     }
 
-    private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, PropertyDeclarationSyntax propertyDeclaration, IAnalysisAssertion[] analysisAssertions)
+    /// <inheritdoc />
+    private protected override void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, PropertyDeclarationSyntax propertyDeclaration, IAnalysisAssertion[] analysisAssertions)
     {
         string Text = propertyDeclaration.Identifier.ValueText;
 

@@ -1,9 +1,9 @@
 ﻿namespace Contracts.Analyzers;
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Contracts.Analyzers.Helper;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 /// Analyzer for rule MCA1019: Verified property is missing suffix.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MCA1019VerifiedPropertyIsMissingSuffix : DiagnosticAnalyzer
+public class MCA1019VerifiedPropertyIsMissingSuffix : PropertyDiagnosticAnalyzer
 {
     /// <summary>
     /// Diagnostic ID for this rule.
@@ -37,30 +37,14 @@ public class MCA1019VerifiedPropertyIsMissingSuffix : DiagnosticAnalyzer
     /// </summary>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
-    /// <summary>
-    /// Initializes the rule analyzer.
-    /// </summary>
-    /// <param name="context">The analysis context.</param>
-    public override void Initialize(AnalysisContext context)
-    {
-        context = Contract.AssertNotNull(context);
+    /// <inheritdoc />
+    private protected override IEnumerable<IAnalysisAssertion> Assertions { get; } =
+    [
+        new SimpleAnalysisAssertion(context => ContractGenerator.GetFirstSupportedAttribute(context, (PropertyDeclarationSyntax)context.Node) is not null),
+    ];
 
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
-        context.EnableConcurrentExecution();
-
-        context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.PropertyDeclaration);
-    }
-
-    private void AnalyzeNode(SyntaxNodeAnalysisContext context)
-    {
-        AnalyzerTools.AssertSyntaxRequirements<PropertyDeclarationSyntax>(
-            context,
-            LanguageVersion.CSharp7,
-            AnalyzeVerifiedNode,
-            new SimpleAnalysisAssertion(context => ContractGenerator.GetFirstSupportedAttribute(context, (PropertyDeclarationSyntax)context.Node) is not null));
-    }
-
-    private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, PropertyDeclarationSyntax propertyDeclaration, IAnalysisAssertion[] analysisAssertions)
+    /// <inheritdoc />
+    private protected override void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, PropertyDeclarationSyntax propertyDeclaration, IAnalysisAssertion[] analysisAssertions)
     {
         GeneratorSettings Settings = ContractGenerator.ReadSettings(context.Options.AnalyzerConfigOptionsProvider, context.CancellationToken)[0];
 

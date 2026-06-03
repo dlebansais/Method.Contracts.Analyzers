@@ -1,8 +1,8 @@
 ﻿namespace Contracts.Analyzers;
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 /// Analyzer for rule MCA1002: Verified method must be within type.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MCA1002VerifiedMethodMustBeWithinType : DiagnosticAnalyzer
+public class MCA1002VerifiedMethodMustBeWithinType : MethodDiagnosticAnalyzer
 {
     /// <summary>
     /// Diagnostic ID for this rule.
@@ -36,29 +36,12 @@ public class MCA1002VerifiedMethodMustBeWithinType : DiagnosticAnalyzer
     /// </summary>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
-    /// <summary>
-    /// Initializes the rule analyzer.
-    /// </summary>
-    /// <param name="context">The analysis context.</param>
-    public override void Initialize(AnalysisContext context)
-    {
-        context = Contract.AssertNotNull(context);
-
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
-        context.EnableConcurrentExecution();
-
-        context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.MethodDeclaration);
-    }
-
-    private void AnalyzeNode(SyntaxNodeAnalysisContext context)
-    {
-        AnalyzerTools.AssertSyntaxRequirements<MethodDeclarationSyntax>(
-            context,
-            LanguageVersion.CSharp7,
-            AnalyzeVerifiedNode,
-            new SimpleAnalysisAssertion(context => !IsMethodWithinType((MethodDeclarationSyntax)context.Node)),
-            new SimpleAnalysisAssertion(context => ContractGenerator.GetFirstSupportedAttribute(context, (MethodDeclarationSyntax)context.Node) is not null));
-    }
+    /// <inheritdoc />
+    private protected override IEnumerable<IAnalysisAssertion> Assertions { get; } =
+    [
+        new SimpleAnalysisAssertion(context => !IsMethodWithinType((MethodDeclarationSyntax)context.Node)),
+        new SimpleAnalysisAssertion(context => ContractGenerator.GetFirstSupportedAttribute(context, (MethodDeclarationSyntax)context.Node) is not null),
+    ];
 
     private static bool IsMethodWithinType(MethodDeclarationSyntax methodDeclaration)
     {
@@ -68,7 +51,8 @@ public class MCA1002VerifiedMethodMustBeWithinType : DiagnosticAnalyzer
                methodDeclaration.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>() is not null;
     }
 
-    private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, IAnalysisAssertion[] analysisAssertions)
+    /// <inheritdoc />
+    private protected override void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax methodDeclaration, IAnalysisAssertion[] analysisAssertions)
     {
         string Text = methodDeclaration.Identifier.ValueText;
 

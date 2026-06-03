@@ -1,8 +1,8 @@
 ﻿namespace Contracts.Analyzers;
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 /// Analyzer for rule MCA1018: Verified property must be within type.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MCA1018VerifiedPropertyMustBeWithinType : DiagnosticAnalyzer
+public class MCA1018VerifiedPropertyMustBeWithinType : PropertyDiagnosticAnalyzer
 {
     /// <summary>
     /// Diagnostic ID for this rule.
@@ -36,29 +36,12 @@ public class MCA1018VerifiedPropertyMustBeWithinType : DiagnosticAnalyzer
     /// </summary>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
-    /// <summary>
-    /// Initializes the rule analyzer.
-    /// </summary>
-    /// <param name="context">The analysis context.</param>
-    public override void Initialize(AnalysisContext context)
-    {
-        context = Contract.AssertNotNull(context);
-
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
-        context.EnableConcurrentExecution();
-
-        context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.PropertyDeclaration);
-    }
-
-    private void AnalyzeNode(SyntaxNodeAnalysisContext context)
-    {
-        AnalyzerTools.AssertSyntaxRequirements<PropertyDeclarationSyntax>(
-            context,
-            LanguageVersion.CSharp7,
-            AnalyzeVerifiedNode,
-            new SimpleAnalysisAssertion(context => !IsPropertyWithinType((PropertyDeclarationSyntax)context.Node)),
-            new SimpleAnalysisAssertion(context => ContractGenerator.GetFirstSupportedAttribute(context, (PropertyDeclarationSyntax)context.Node) is not null));
-    }
+    /// <inheritdoc />
+    private protected override IEnumerable<IAnalysisAssertion> Assertions { get; } =
+    [
+        new SimpleAnalysisAssertion(context => !IsPropertyWithinType((PropertyDeclarationSyntax)context.Node)),
+        new SimpleAnalysisAssertion(context => ContractGenerator.GetFirstSupportedAttribute(context, (PropertyDeclarationSyntax)context.Node) is not null),
+    ];
 
     private static bool IsPropertyWithinType(PropertyDeclarationSyntax propertyDeclaration)
     {
@@ -68,7 +51,8 @@ public class MCA1018VerifiedPropertyMustBeWithinType : DiagnosticAnalyzer
                propertyDeclaration.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>() is not null;
     }
 
-    private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, PropertyDeclarationSyntax propertyDeclaration, IAnalysisAssertion[] analysisAssertions)
+    /// <inheritdoc />
+    private protected override void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, PropertyDeclarationSyntax propertyDeclaration, IAnalysisAssertion[] analysisAssertions)
     {
         string Text = propertyDeclaration.Identifier.ValueText;
 
