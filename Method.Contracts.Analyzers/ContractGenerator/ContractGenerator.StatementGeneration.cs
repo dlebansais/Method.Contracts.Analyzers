@@ -173,6 +173,36 @@ public partial class ContractGenerator
                                                                       Dictionary<string, string> aliasNameReplacementTable,
                                                                       bool isAsync)
     {
+        ExpressionSyntax CallExpression = GenerateCallExpression(methodName, parameterList, aliasNameReplacementTable, isAsync, withTrivia: false);
+
+        ExpressionStatementSyntax ExpressionStatement = SyntaxFactory.ExpressionStatement(CallExpression);
+
+        return ExpressionStatement;
+    }
+
+    private static LocalDeclarationStatementSyntax GenerateMethodQueryStatement(string methodName,
+                                                                                ParameterListSyntax parameterList,
+                                                                                Dictionary<string, string> aliasNameReplacementTable,
+                                                                                bool isAsync)
+    {
+        ExpressionSyntax CallExpression = GenerateCallExpression(methodName, parameterList, aliasNameReplacementTable, isAsync, withTrivia: true);
+
+        IdentifierNameSyntax VarIdentifier = SyntaxFactory.IdentifierName("var");
+        SyntaxToken ResultIdentifier = SyntaxFactory.Identifier(Settings.ResultIdentifier);
+        EqualsValueClauseSyntax Initializer = SyntaxFactory.EqualsValueClause(CallExpression).WithLeadingTrivia(SyntaxFactory.Space);
+        VariableDeclaratorSyntax VariableDeclarator = SyntaxFactory.VariableDeclarator(ResultIdentifier, null, Initializer).WithLeadingTrivia(SyntaxFactory.Space);
+        VariableDeclarationSyntax Declaration = SyntaxFactory.VariableDeclaration(VarIdentifier, SyntaxFactory.SeparatedList([VariableDeclarator]));
+        LocalDeclarationStatementSyntax LocalDeclarationStatement = SyntaxFactory.LocalDeclarationStatement(Declaration);
+
+        return LocalDeclarationStatement;
+    }
+
+    private static ExpressionSyntax GenerateCallExpression(string methodName,
+                                                           ParameterListSyntax parameterList,
+                                                           Dictionary<string, string> aliasNameReplacementTable,
+                                                           bool isAsync,
+                                                           bool withTrivia)
+    {
         string VerifiedSuffix = Settings.VerifiedSuffix;
         ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(methodName + VerifiedSuffix);
 
@@ -212,69 +242,17 @@ public partial class ContractGenerator
         ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(Arguments));
         ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(Invocation, ArgumentList);
 
+        if (withTrivia)
+            CallExpression = CallExpression.WithLeadingTrivia(SyntaxFactory.Space);
+
         if (isAsync)
-            CallExpression = SyntaxFactory.AwaitExpression(CallExpression.WithLeadingTrivia(SyntaxFactory.Space));
-
-        ExpressionStatementSyntax ExpressionStatement = SyntaxFactory.ExpressionStatement(CallExpression);
-
-        return ExpressionStatement;
-    }
-
-    private static LocalDeclarationStatementSyntax GenerateMethodQueryStatement(string methodName,
-                                                                                ParameterListSyntax parameterList,
-                                                                                Dictionary<string, string> aliasNameReplacementTable,
-                                                                                bool isAsync)
-    {
-        string VerifiedSuffix = Settings.VerifiedSuffix;
-        ExpressionSyntax Invocation = SyntaxFactory.IdentifierName(methodName + VerifiedSuffix);
-
-        List<ArgumentSyntax> Arguments = [];
-        foreach (ParameterSyntax Parameter in parameterList.Parameters)
         {
-            bool IsRef = false;
-            bool IsOut = false;
-
-            foreach (SyntaxToken Modifier in Parameter.Modifiers)
-            {
-                if (Modifier.IsKind(SyntaxKind.RefKeyword))
-                    IsRef = true;
-                if (Modifier.IsKind(SyntaxKind.OutKeyword))
-                    IsOut = true;
-            }
-
-            string ParameterName = Parameter.Identifier.Text;
-            if (aliasNameReplacementTable.TryGetValue(ParameterName, out string ReplacedParameterName))
-                ParameterName = ReplacedParameterName;
-
-            IdentifierNameSyntax ParameterIdentifier = SyntaxFactory.IdentifierName(ParameterName);
-
-            ArgumentSyntax Argument =
-                IsRef
-                ? SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.RefKeyword), ParameterIdentifier.WithLeadingTrivia(SyntaxFactory.Space))
-                : IsOut
-                  ? SyntaxFactory.Argument(null, SyntaxFactory.Token(SyntaxKind.OutKeyword), ParameterIdentifier.WithLeadingTrivia(SyntaxFactory.Space))
-                  : SyntaxFactory.Argument(ParameterIdentifier);
-
-            if (Arguments.Count > 0)
-                Argument = Argument.WithLeadingTrivia(SyntaxFactory.Space);
-
-            Arguments.Add(Argument);
+            CallExpression = withTrivia
+                ? SyntaxFactory.AwaitExpression(CallExpression).WithLeadingTrivia(SyntaxFactory.Space)
+                : SyntaxFactory.AwaitExpression(CallExpression.WithLeadingTrivia(SyntaxFactory.Space));
         }
 
-        ArgumentListSyntax ArgumentList = SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(Arguments));
-        ExpressionSyntax CallExpression = SyntaxFactory.InvocationExpression(Invocation, ArgumentList).WithLeadingTrivia(SyntaxFactory.Space);
-
-        if (isAsync)
-            CallExpression = SyntaxFactory.AwaitExpression(CallExpression).WithLeadingTrivia(SyntaxFactory.Space);
-
-        IdentifierNameSyntax VarIdentifier = SyntaxFactory.IdentifierName("var");
-        SyntaxToken ResultIdentifier = SyntaxFactory.Identifier(Settings.ResultIdentifier);
-        EqualsValueClauseSyntax Initializer = SyntaxFactory.EqualsValueClause(CallExpression).WithLeadingTrivia(SyntaxFactory.Space);
-        VariableDeclaratorSyntax VariableDeclarator = SyntaxFactory.VariableDeclarator(ResultIdentifier, null, Initializer).WithLeadingTrivia(SyntaxFactory.Space);
-        VariableDeclarationSyntax Declaration = SyntaxFactory.VariableDeclaration(VarIdentifier, SyntaxFactory.SeparatedList([VariableDeclarator]));
-        LocalDeclarationStatementSyntax LocalDeclarationStatement = SyntaxFactory.LocalDeclarationStatement(Declaration);
-
-        return LocalDeclarationStatement;
+        return CallExpression;
     }
 
     private static ReturnStatementSyntax GenerateReturnStatement()
