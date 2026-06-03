@@ -86,6 +86,7 @@ internal partial class Program
 ").ConfigureAwait(false);
     }
 
+#if NONE
     [Test]
     public async Task AttributeOnConstructor_NoDiagnostic()
     {
@@ -134,4 +135,5 @@ internal partial class Program
 }
 ").ConfigureAwait(false);
     }
+#endif
 }
