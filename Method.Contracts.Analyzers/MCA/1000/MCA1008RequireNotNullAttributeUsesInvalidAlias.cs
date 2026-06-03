@@ -62,18 +62,7 @@ public class MCA1008RequireNotNullAttributeUsesInvalidAlias : InvalidUseOfAttrib
     /// <inheritdoc />
     private protected override void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeArgumentSyntax attributeArgument, IAnalysisAssertion[] analysisAssertions)
     {
-        // No diagnostic if the argument is a parameter name.
-        if (attributeArgument.NameEquals is not NameEqualsSyntax NameEquals)
-            return;
-
-        string ArgumentName = NameEquals.Name.Identifier.Text;
-
-        // No diagnostic if the argument is not the alias.
-        if (ArgumentName != nameof(RequireNotNullAttribute.AliasName))
-            return;
-
-        // No diagnostic if the argument is not a valid string or nameof.
-        if (!ContractGenerator.IsStringOrNameofAttributeArgument(attributeArgument, out string ArgumentValue))
+        if (!IsAttributeValidForRule(attributeArgument, nameof(RequireNotNullAttribute.AliasName), out string ArgumentValue))
             return;
 
         string AliasName = ArgumentValue;

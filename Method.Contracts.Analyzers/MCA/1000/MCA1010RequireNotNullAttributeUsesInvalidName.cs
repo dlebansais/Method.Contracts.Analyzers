@@ -39,18 +39,7 @@ public class MCA1010RequireNotNullAttributeUsesInvalidName : InvalidUseOfAttribu
     /// <inheritdoc />
     private protected override void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeArgumentSyntax attributeArgument, IAnalysisAssertion[] analysisAssertions)
     {
-        // No diagnostic if the argument is a parameter name.
-        if (attributeArgument.NameEquals is not NameEqualsSyntax NameEquals)
-            return;
-
-        string ArgumentName = NameEquals.Name.Identifier.Text;
-
-        // No diagnostic if the argument is not the type.
-        if (ArgumentName != nameof(RequireNotNullAttribute.Name))
-            return;
-
-        // No diagnostic if the argument is not a valid string or nameof.
-        if (!ContractGenerator.IsStringOrNameofAttributeArgument(attributeArgument, out string ArgumentValue))
+        if (!IsAttributeValidForRule(attributeArgument, nameof(RequireNotNullAttribute.Name), out string ArgumentValue))
             return;
 
         string AliasName = ArgumentValue;
