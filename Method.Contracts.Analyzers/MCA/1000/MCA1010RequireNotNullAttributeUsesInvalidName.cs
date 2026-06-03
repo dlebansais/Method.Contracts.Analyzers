@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 /// Analyzer for rule MCA1010: RequireNotNull attribute uses invalid name.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MCA1010RequireNotNullAttributeUsesInvalidName : DiagnosticAnalyzer
+public class MCA1010RequireNotNullAttributeUsesInvalidName : InvalidUseOfAttributeDiagnosticAnalyzer
 {
     /// <summary>
     /// Diagnostic ID for this rule.
@@ -36,30 +36,8 @@ public class MCA1010RequireNotNullAttributeUsesInvalidName : DiagnosticAnalyzer
     /// </summary>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
-    /// <summary>
-    /// Initializes the rule analyzer.
-    /// </summary>
-    /// <param name="context">The analysis context.</param>
-    public override void Initialize(AnalysisContext context)
-    {
-        context = Contract.AssertNotNull(context);
-
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
-        context.EnableConcurrentExecution();
-
-        context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.AttributeArgument);
-    }
-
-    private void AnalyzeNode(SyntaxNodeAnalysisContext context)
-    {
-        AnalyzerTools.AssertSyntaxRequirements<AttributeArgumentSyntax>(
-            context,
-            LanguageVersion.CSharp7,
-            AnalyzeVerifiedNode,
-            new WithinAttributeAnalysisAssertion<RequireNotNullAttribute>());
-    }
-
-    private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeArgumentSyntax attributeArgument, IAnalysisAssertion[] analysisAssertions)
+    /// <inheritdoc />
+    private protected override void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeArgumentSyntax attributeArgument, IAnalysisAssertion[] analysisAssertions)
     {
         // No diagnostic if the argument is a parameter name.
         if (attributeArgument.NameEquals is not NameEqualsSyntax NameEquals)

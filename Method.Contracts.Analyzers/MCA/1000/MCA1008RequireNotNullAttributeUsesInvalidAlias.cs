@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 /// Analyzer for rule MCA1008: RequireNotNull attribute uses invalid alias.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MCA1008RequireNotNullAttributeUsesInvalidAlias : DiagnosticAnalyzer
+public class MCA1008RequireNotNullAttributeUsesInvalidAlias : InvalidUseOfAttributeDiagnosticAnalyzer
 {
     /// <summary>
     /// Diagnostic ID for this rule.
@@ -59,7 +59,8 @@ public class MCA1008RequireNotNullAttributeUsesInvalidAlias : DiagnosticAnalyzer
             new WithinAttributeAnalysisAssertion<RequireNotNullAttribute>());
     }
 
-    private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeArgumentSyntax attributeArgument, IAnalysisAssertion[] analysisAssertions)
+    /// <inheritdoc />
+    private protected override void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeArgumentSyntax attributeArgument, IAnalysisAssertion[] analysisAssertions)
     {
         // No diagnostic if the argument is a parameter name.
         if (attributeArgument.NameEquals is not NameEqualsSyntax NameEquals)
