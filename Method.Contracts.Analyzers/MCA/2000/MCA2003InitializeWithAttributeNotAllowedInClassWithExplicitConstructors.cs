@@ -2,7 +2,6 @@
 
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -10,7 +9,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 /// Analyzer for rule MCA2003: InitializeWith attribute not allowed in class with explicit constructors.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MCA2003InitializeWithAttributeNotAllowedInClassWithExplicitConstructors : DiagnosticAnalyzer
+public class MCA2003InitializeWithAttributeNotAllowedInClassWithExplicitConstructors : AttributeNotAllowedDiagnosticAnalyzer
 {
     /// <summary>
     /// Diagnostic ID for this rule.
@@ -36,36 +35,8 @@ public class MCA2003InitializeWithAttributeNotAllowedInClassWithExplicitConstruc
     /// </summary>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
-    /// <summary>
-    /// Initializes the rule analyzer.
-    /// </summary>
-    /// <param name="context">The analysis context.</param>
-    public override void Initialize(AnalysisContext context)
-    {
-        context = Contract.AssertNotNull(context);
-
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
-        context.EnableConcurrentExecution();
-
-        context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.Attribute);
-    }
-
-    private void AnalyzeNode(SyntaxNodeAnalysisContext context)
-    {
-        AnalyzerTools.AssertSyntaxRequirements<AttributeSyntax>(
-            context,
-            LanguageVersion.CSharp7,
-            AnalyzeVerifiedNode,
-            new SimpleAnalysisAssertion(context => IsClassAttribute(context, (AttributeSyntax)context.Node)));
-    }
-
-    private static bool IsClassAttribute(SyntaxNodeAnalysisContext context, AttributeSyntax attribute)
-    {
-        return AnalyzerTools.IsExpectedAttribute<InitializeWithAttribute>(context, attribute) &&
-               attribute.FirstAncestorOrSelf<ConstructorDeclarationSyntax>() is null;
-    }
-
-    private void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeSyntax attribute, IAnalysisAssertion[] analysisAssertions)
+    /// <inheritdoc />
+    private protected override void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeSyntax attribute, IAnalysisAssertion[] analysisAssertions)
     {
         SyntaxList<MemberDeclarationSyntax> Members;
         string ClassOrRecordName;
