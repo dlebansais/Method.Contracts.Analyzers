@@ -94,7 +94,7 @@ after_build:
         if ($LastExitCode -lt 0) { exit 1 }
         nuget pack "nuget\$env:PACKAGE_PREFIX.$env:APPVEYOR_PROJECT_NAME.nuspec"
       } else {
-        & $fullpath $($env:CUSTOM_PACKAGER_OPTIONS.Trim('"')) --prefix=$env:PACKAGE_PREFIX --debug    # Execute the packager: the output is nuget-debug\%PACKAGE_PREFIX%.%APPVEYOR_PROJECT_NAME%-Debug.nuspec
+        & $fullpath $($env:CUSTOM_PACKAGER_OPTIONS.Split(' ')) --prefix=$env:PACKAGE_PREFIX --debug    # Execute the packager: the output is nuget-debug\%PACKAGE_PREFIX%.%APPVEYOR_PROJECT_NAME%-Debug.nuspec
         if ($LastExitCode -lt 0) { exit 1 }
         nuget pack "nuget-debug\$env:PACKAGE_PREFIX.$env:APPVEYOR_PROJECT_NAME-Debug.nuspec"
       }
