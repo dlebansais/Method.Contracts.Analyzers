@@ -90,11 +90,11 @@ after_build:
       $firstline = ($folder -split '\r\n')[0]                                            # Get rid of carriage-return
       $fullpath = ".\packages\$firstline\tools\net10.0-windows7.0\Packager.exe"          # Build full path
       if ($env:CONFIGURATION -eq 'Release') {
-        & $fullpath $env:CUSTOM_PACKAGER_OPTIONS --prefix=$env:PACKAGE_PREFIX            # Execute the packager: the output is nuget\%PACKAGE_PREFIX%.%APPVEYOR_PROJECT_NAME%.nuspec
+        & $fullpath $env:CUSTOM_PACKAGER_OPTIONS.Trim('"') --prefix=$env:PACKAGE_PREFIX            # Execute the packager: the output is nuget\%PACKAGE_PREFIX%.%APPVEYOR_PROJECT_NAME%.nuspec
         if ($LastExitCode -lt 0) { exit 1 }
         nuget pack "nuget\$env:PACKAGE_PREFIX.$env:APPVEYOR_PROJECT_NAME.nuspec"
       } else {
-        & $fullpath $env:CUSTOM_PACKAGER_OPTIONS --prefix=$env:PACKAGE_PREFIX --debug    # Execute the packager: the output is nuget-debug\%PACKAGE_PREFIX%.%APPVEYOR_PROJECT_NAME%-Debug.nuspec
+        & $fullpath $($env:CUSTOM_PACKAGER_OPTIONS.Trim('"')) --prefix=$env:PACKAGE_PREFIX --debug    # Execute the packager: the output is nuget-debug\%PACKAGE_PREFIX%.%APPVEYOR_PROJECT_NAME%-Debug.nuspec
         if ($LastExitCode -lt 0) { exit 1 }
         nuget pack "nuget-debug\$env:PACKAGE_PREFIX.$env:APPVEYOR_PROJECT_NAME-Debug.nuspec"
       }
