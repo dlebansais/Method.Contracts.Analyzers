@@ -1,5 +1,5 @@
 # version format
-version: v{build}-temp
+version: v{build}
 
 branches:
   only:
