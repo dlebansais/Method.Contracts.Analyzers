@@ -15,9 +15,9 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <ContractSourceGenerator_VerifiedSuffix>DemoVerified</ContractSourceGenerator_VerifiedSuffix>
+        <ContractSourceGenerator_VerifiedSuffix>Verified</ContractSourceGenerator_VerifiedSuffix>
         <ContractSourceGenerator_TabLength>8</ContractSourceGenerator_TabLength>
-        <ContractSourceGenerator_ResultIdentifier>DemoResult</ContractSourceGenerator_ResultIdentifier>
+        <ContractSourceGenerator_ResultIdentifier>Result</ContractSourceGenerator_ResultIdentifier>
 
         <IsPackable>false</IsPackable>
     </PropertyGroup>
@@ -47,18 +47,16 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <!--
-        <PackageReference Include="dlebansais.Method.Contracts.Analyzers-Debug" Version="2.0.7" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+        <PackageReference Include="dlebansais.Method.Contracts.Analyzers-Debug" Version="2.0.10" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="dlebansais.Method.Contracts.Analyzers" Version="2.0.7" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'">
+        <PackageReference Include="dlebansais.Method.Contracts.Analyzers" Version="2.0.10" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-         -->
-        <PackageReference Include="dlebansais.Method.Contracts-Debug" Version="2.0.7" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-        <PackageReference Include="dlebansais.Method.Contracts" Version="2.0.7" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
+        <PackageReference Include="dlebansais.Method.Contracts-Debug" Version="3.0.0" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+        <PackageReference Include="dlebansais.Method.Contracts" Version="3.0.0" Condition="'$(Configuration)|$(Platform)'!='Debug|x64'" />
     </ItemGroup>
     
 </Project>

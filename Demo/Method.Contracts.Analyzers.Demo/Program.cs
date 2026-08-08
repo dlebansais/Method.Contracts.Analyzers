@@ -14,8 +14,8 @@ internal partial class Program
     public static void Main()
     {
         Console.WriteLine("Started...");
-        /*string Text = HelloFromDemo("Hello, World");*/
-        string Text = HelloFromDemoVerified("Hello, World");
+        string Text = HelloFromDemo("Hello, World");
+        /*string Text = HelloFromDemoVerified("Hello, World");*/
         Console.WriteLine(Text);
     }
 
@@ -26,6 +26,6 @@ internal partial class Program
     /// <returns>Test value.</returns>
     [RequireNotNull("text")]
     [Require("text.Length > 0")]
-    [Ensure("DemoResult.Length == text.Length + 1")]
+    [Ensure("Result.Length == text.Length + 1")]
     private static string HelloFromDemoVerified(string text) => text + "!";
 }
