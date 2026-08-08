@@ -19,7 +19,7 @@ namespace Contracts.Analyzers {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class AnalyzerResources {
@@ -624,6 +624,33 @@ namespace Contracts.Analyzers {
         internal static string MCA1021AnalyzerTitle {
             get {
                 return ResourceManager.GetString("MCA1021AnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unverified method is using the &apos;verified&apos; suffix..
+        /// </summary>
+        internal static string MCA1022AnalyzerDescription {
+            get {
+                return ResourceManager.GetString("MCA1022AnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; is incorrectly using the &apos;{1}&apos; suffix.
+        /// </summary>
+        internal static string MCA1022AnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("MCA1022AnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unverified method is using verified suffix.
+        /// </summary>
+        internal static string MCA1022AnalyzerTitle {
+            get {
+                return ResourceManager.GetString("MCA1022AnalyzerTitle", resourceCulture);
             }
         }
         

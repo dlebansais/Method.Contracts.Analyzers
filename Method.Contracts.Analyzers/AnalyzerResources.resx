@@ -417,4 +417,16 @@
     <value>InitializeWith attribute not allowed in public class</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="MCA1022AnalyzerDescription" xml:space="preserve">
+    <value>Unverified method is using the 'verified' suffix.</value>
+    <comment>An optional longer localizable description of the diagnostic.</comment>
+  </data>
+  <data name="MCA1022AnalyzerMessageFormat" xml:space="preserve">
+    <value>'{0}' is incorrectly using the '{1}' suffix</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="MCA1022AnalyzerTitle" xml:space="preserve">
+    <value>Unverified method is using verified suffix</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
 </root>

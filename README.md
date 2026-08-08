@@ -11,7 +11,7 @@ This assembly applies to projects using **C# 8 or higher** and with **Nullable**
 
 ## TODO
 
-- [ ] Analyze method names to forbid other methods ending with the suffix.
+- [x] Analyze method names to forbid other methods ending with the suffix.
 - [ ] Create an extension that interprets the method name with suffix to point to callers of the method with the same name but without the suffix. This puts reference to callers with Codelens at the right spot.
 - [ ] Display the suffix with separate color or style to make it clear.
 
@@ -338,6 +338,7 @@ If a base class contains one or more constructors with the `InitializeWith` attr
 | [MCA1019](doc/MCA1019.md) | Verified property is missing suffix.                                        |
 | [MCA1020](doc/MCA1020.md) | Missing Dictionary Entry.                                                   |
 | [MCA1021](doc/MCA1021.md) | Only use Contract.Map with in-site dictionary.                              |
+| [MCA1022](doc/MCA1022.md) | Unverified method is using suffix.                                          |
 
 ### Initialization
 
