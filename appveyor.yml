@@ -90,7 +90,7 @@ after_build:
       $folder = Get-ChildItem -Path packages/dlebansais.Packager.* -Name | Out-String    # Get the installation folder (we don't know the actual version)
       $firstline = ($folder -split '\r\n')[0]                                            # Get rid of carriage-return
       $fullpath = ".\packages\$firstline\tools\net10.0-windows7.0\Packager.exe"          # Build full path
-      $options = $env:CUSTOM_PACKAGER_OPTIONS | ConvertFrom-Json                         # Get options
+      $options = $env:CUSTOM_PACKAGER_OPTIONS | ConvertFrom-Json                         # Get options as JSON array
       if ($env:CONFIGURATION -eq 'Release') {
         & $fullpath $options --prefix=$env:PACKAGE_PREFIX                                # Execute the packager: the output is nuget\%PACKAGE_PREFIX%.%APPVEYOR_PROJECT_NAME%.nuspec
         if ($LastExitCode -lt 0) { exit 1 }
