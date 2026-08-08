@@ -27,7 +27,7 @@ environment:
   codecov_uploader_version: 0.8.0
   report_generator_version: 5.5.10
   DOTNET_CLI_TELEMETRY_OPTOUT: true
-  CUSTOM_PACKAGER_OPTIONS: []           # Override in settings -> Environment -> Environment variables
+  CUSTOM_PACKAGER_OPTIONS: "[]"           # Override in settings -> Environment -> Environment variables
   PACKAGE_PREFIX: dlebansais
 
   matrix:
