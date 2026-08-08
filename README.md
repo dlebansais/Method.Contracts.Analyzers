@@ -9,11 +9,11 @@ A code generator companion for [Method.Contracts](https://github.com/dlebansais/
 
 This assembly applies to projects using **C# 8 or higher** and with **Nullable** enabled.
 
-## To-do
+## TODO
 
-- [ ] Analyze method names to prevent other methods ending with the suffix to exist.
-- [ ] Create an extension that interpret the method name with suffix to point to callers of the method with the same name but without the suffix. This puts reference to callers with Codelens at the right spot.
-- [ ] Display the suffix in separate color or style to make it clear.
+- [ ] Analyze method names to forbid other methods ending with the suffix.
+- [ ] Create an extension that interprets the method name with suffix to point to callers of the method with the same name but without the suffix. This puts reference to callers with Codelens at the right spot.
+- [ ] Display the suffix with separate color or style to make it clear.
 
 ## Usage
 
