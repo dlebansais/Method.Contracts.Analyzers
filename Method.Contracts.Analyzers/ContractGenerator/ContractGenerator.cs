@@ -58,17 +58,21 @@ public partial class ContractGenerator : IIncrementalGenerator
 
     private static string GetFullyQualifiedMetadataName<T>() => $"{ContractsNamespace}.{typeof(T).Name}";
 
-    private static bool GetParameterType(string argumentName, MethodDeclarationSyntax methodDeclaration, out TypeSyntax parameterType)
+    private static bool GetParameterType(string argumentName, MethodDeclarationSyntax methodDeclaration, out bool isNullType, out TypeSyntax parameterType)
     {
         TypeSyntax? ResultType = null;
         ParameterListSyntax ParameterList = methodDeclaration.ParameterList;
+        isNullType = false;
 
         foreach (ParameterSyntax Parameter in ParameterList.Parameters)
         {
             string ParameterName = Parameter.Identifier.Text;
 
             if (ParameterName == argumentName)
+            {
+                isNullType = Parameter.Type is null;
                 ResultType = Parameter.Type;
+            }
         }
 
         if (ResultType is not null)

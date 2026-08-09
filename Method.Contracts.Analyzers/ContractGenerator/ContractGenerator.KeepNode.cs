@@ -205,7 +205,7 @@ public partial class ContractGenerator
         if (!IsStringOrNameofAttributeArgument(FirstAttributeArgument, out string ParameterName))
             return AttributeValidityCheckResult.Invalid(0);
 
-        if (!GetParameterType(ParameterName, methodDeclaration, out _))
+        if (!GetParameterType(ParameterName, methodDeclaration, out bool isNullType, out _) && !isNullType)
             return AttributeValidityCheckResult.Invalid(0);
 
         AssignTrackingString Type = new();
@@ -281,7 +281,7 @@ public partial class ContractGenerator
             if (!IsStringOrNameofAttributeArgument(AttributeArgument, out string ArgumentValue))
                 return AttributeValidityCheckResult.Invalid(i);
 
-            if (!GetParameterType(ArgumentValue, methodDeclaration, out _))
+            if (!GetParameterType(ArgumentValue, methodDeclaration, out bool isNullType, out _) && !isNullType)
                 return AttributeValidityCheckResult.Invalid(i);
 
             ArgumentValues.Add(ArgumentValue);

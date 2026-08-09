@@ -310,7 +310,7 @@ internal partial class Program
 internal static partial class Program
 {
     [RequireNotNull(nameof(text))]
-    private static void HelloFromVerified(this string text, out string textPlus)
+    private static void HelloFromVerified(this IDisposable text, out string textPlus)
     {
         textPlus = text + ""!"";
     }

@@ -333,10 +333,10 @@ public partial class ContractGenerator
         // This was verified in IsValidRequireNotNullAttributeWithAlias().
         Contract.Assert(IsValidParameterName);
 
-        bool IsValidParameterType = GetParameterType(ParameterName, methodDeclaration, out _);
+        bool IsValidParameterType = GetParameterType(ParameterName, methodDeclaration, out bool isNullType, out _);
 
         // This was verified in IsValidRequireNotNullAttributeWithAlias().
-        Contract.Assert(IsValidParameterType);
+        Contract.Assert(IsValidParameterType || isNullType);
 
         AssignTrackingString Type = new();
         AssignTrackingString Name = new();
