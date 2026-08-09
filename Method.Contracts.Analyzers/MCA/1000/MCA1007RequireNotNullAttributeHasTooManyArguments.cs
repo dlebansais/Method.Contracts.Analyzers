@@ -48,7 +48,7 @@ public class MCA1007RequireNotNullAttributeHasTooManyArguments : AttributeDiagno
         // If we reached this step, there is an attribute.
         Contract.Assert(analysisAssertions.Length == 1);
         WithinAttributeAnalysisAssertion<RequireNotNullAttribute> FirstAssertion = Contract.AssertNotNull(analysisAssertions[0] as WithinAttributeAnalysisAssertion<RequireNotNullAttribute>);
-        AttributeSyntax Attribute = Contract.AssertNotNull(FirstAssertion.AncestorAttribute);
+        AttributeSyntax Attribute = Contract.AssertNotNull(attributeArgument.FirstAncestorOrSelf<AttributeSyntax>());
 
         AttributeArgumentListSyntax ArgumentList = Contract.AssertNotNull(Attribute.ArgumentList);
         SeparatedSyntaxList<AttributeArgumentSyntax> AttributeArguments = ArgumentList.Arguments;

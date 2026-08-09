@@ -9,7 +9,7 @@ namespace Contracts.TestSuite;
 
 partial class Program
 {
-    [GeneratedCodeAttribute("Method.Contracts.Analyzers","3.0.0.48")]
+    [GeneratedCodeAttribute("Method.Contracts.Analyzers","3.0.1.49")]
     public static void HelloFrom(string text, out string textPlus)
     {
         HelloFromVerified(text, out textPlus);

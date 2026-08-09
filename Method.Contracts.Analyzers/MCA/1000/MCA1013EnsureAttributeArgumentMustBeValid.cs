@@ -49,7 +49,7 @@ public class MCA1013EnsureAttributeArgumentMustBeValid : AttributeDiagnosticAnal
         // If we reached this step, there is a method declaration and an attribute.
         Contract.Assert(analysisAssertions.Length == 2);
         WithinAttributeAnalysisAssertion<EnsureAttribute> FirstAssertion = Contract.AssertNotNull(analysisAssertions[0] as WithinAttributeAnalysisAssertion<EnsureAttribute>);
-        AttributeSyntax Attribute = Contract.AssertNotNull(FirstAssertion.AncestorAttribute);
+        AttributeSyntax Attribute = Contract.AssertNotNull(attributeArgument.FirstAncestorOrSelf<AttributeSyntax>());
         WithinMethodAnalysisAssertion SecondAssertion = Contract.AssertNotNull(analysisAssertions[1] as WithinMethodAnalysisAssertion);
         MethodDeclarationSyntax MethodDeclaration = Contract.AssertNotNull(SecondAssertion.AncestorMethodDeclaration);
 

@@ -302,4 +302,19 @@ internal partial class Program
 }
 ").ConfigureAwait(false);
     }
+
+    [Test]
+    public async Task ExtensionArgument_NoDiagnostic()
+    {
+        await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
+internal static partial class Program
+{
+    [RequireNotNull(nameof(text))]
+    private static void HelloFromVerified(this string text, out string textPlus)
+    {
+        textPlus = text + ""!"";
+    }
+}
+").ConfigureAwait(false);
+    }
 }

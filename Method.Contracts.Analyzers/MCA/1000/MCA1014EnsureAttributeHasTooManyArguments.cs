@@ -48,7 +48,7 @@ public class MCA1014EnsureAttributeHasTooManyArguments : AttributeDiagnosticAnal
         // If we reached this step, there is an attribute.
         Contract.Assert(analysisAssertions.Length == 1);
         WithinAttributeAnalysisAssertion<EnsureAttribute> FirstAssertion = Contract.AssertNotNull(analysisAssertions[0] as WithinAttributeAnalysisAssertion<EnsureAttribute>);
-        AttributeSyntax Attribute = Contract.AssertNotNull(FirstAssertion.AncestorAttribute);
+        AttributeSyntax Attribute = Contract.AssertNotNull(attributeArgument.FirstAncestorOrSelf<AttributeSyntax>());
 
         AttributeArgumentListSyntax ArgumentList = Contract.AssertNotNull(Attribute.ArgumentList);
         SeparatedSyntaxList<AttributeArgumentSyntax> AttributeArguments = ArgumentList.Arguments;
