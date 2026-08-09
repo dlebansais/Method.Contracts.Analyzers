@@ -9,7 +9,7 @@ using Contracts;
 
 partial record Program
 {
-    [GeneratedCodeAttribute("Method.Contracts.Analyzers","3.0.1.49")]
+    [GeneratedCodeAttribute("Method.Contracts.Analyzers","3.0.2.50")]
     public static string HelloFrom(string text)
     {
         var Result = HelloFromVerified(text);
