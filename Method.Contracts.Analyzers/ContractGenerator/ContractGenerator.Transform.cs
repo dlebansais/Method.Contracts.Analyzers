@@ -313,9 +313,8 @@ public partial class ContractGenerator
     {
         Contract.Assert(memberDeclaration is MethodDeclarationSyntax);
         MethodDeclarationSyntax MethodDeclarationSyntax = (MethodDeclarationSyntax)memberDeclaration;
-        string ReasonText = "0";
 
-        return IsRequireNotNullAttributeWithAliasTypeOrName(attributeArguments, ref ReasonText)
+        return IsRequireNotNullAttributeWithAliasTypeOrName(attributeArguments)
             ? TransformRequireNotNullAttributeWithAlias(MethodDeclarationSyntax, attributeArguments)
             : TransformRequireNotNullAttributeNoAlias(attributeArguments);
     }
@@ -334,10 +333,10 @@ public partial class ContractGenerator
         // This was verified in IsValidRequireNotNullAttributeWithAlias().
         Contract.Assert(IsValidParameterName);
 
-        bool IsValidParameterType = GetParameterType(ParameterName, methodDeclaration, out bool isNullType, out _, out _);
+        bool IsValidParameterType = GetParameterType(ParameterName, methodDeclaration, out _);
 
         // This was verified in IsValidRequireNotNullAttributeWithAlias().
-        Contract.Assert(IsValidParameterType || isNullType);
+        Contract.Assert(IsValidParameterType);
 
         AssignTrackingString Type = new();
         AssignTrackingString Name = new();

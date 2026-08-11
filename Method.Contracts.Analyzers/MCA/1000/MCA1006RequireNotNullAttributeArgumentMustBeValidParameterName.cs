@@ -56,14 +56,13 @@ public class MCA1006RequireNotNullAttributeArgumentMustBeValidParameterName : At
         AttributeArgumentListSyntax ArgumentList = Contract.AssertNotNull(Attribute.ArgumentList);
         SeparatedSyntaxList<AttributeArgumentSyntax> AttributeArguments = ArgumentList.Arguments;
         int ArgumentIndex = AttributeArguments.IndexOf(attributeArgument);
-        string ReasonText = "0";
 
-        AttributeValidityCheckResult CheckResult = ContractGenerator.IsValidRequireNotNullAttribute(MethodDeclaration, AttributeArguments, ref ReasonText);
+        AttributeValidityCheckResult CheckResult = ContractGenerator.IsValidRequireNotNullAttribute(MethodDeclaration, AttributeArguments);
 
         // No diagnostic if the argument is a valid parameter name, or if the error is on another argument.
         if (CheckResult.PositionOfFirstInvalidArgument != ArgumentIndex)
             return;
 
-        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), ArgumentIndex, ReasonText));
+        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), ArgumentIndex));
     }
 }

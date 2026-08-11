@@ -182,7 +182,7 @@
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="MCA1006AnalyzerMessageFormat" xml:space="preserve">
-    <value>Argument at position {0} in RequireNotNull attribute must be a valid parameter name (reason: {1})</value>
+    <value>Argument at position {0} in RequireNotNull attribute must be a valid parameter name</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
   <data name="MCA1006AnalyzerTitle" xml:space="preserve">

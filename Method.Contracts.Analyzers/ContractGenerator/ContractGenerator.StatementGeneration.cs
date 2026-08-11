@@ -289,7 +289,7 @@ public partial class ContractGenerator
         Contract.Assert(attributeArguments[0].Name == string.Empty);
         string ParameterName = attributeArguments[0].Value;
 
-        bool IsParameterTypeValid = GetParameterType(ParameterName, methodDeclaration, out _, out _, out TypeSyntax Type);
+        bool IsParameterTypeValid = GetParameterType(ParameterName, methodDeclaration, out TypeSyntax Type);
         Contract.Assert(IsParameterTypeValid);
 
         GetModifiedIdentifiers(attributeArguments, ref ParameterName, out string AliasName);
@@ -321,7 +321,7 @@ public partial class ContractGenerator
             string ParameterName = argument.Value;
             string AliasName = ToIdentifierLocalName(ParameterName);
 
-            bool IsParameterTypeValid = GetParameterType(ParameterName, methodDeclaration, out _, out _, out TypeSyntax Type);
+            bool IsParameterTypeValid = GetParameterType(ParameterName, methodDeclaration, out TypeSyntax Type);
             Contract.Assert(IsParameterTypeValid);
 
             ExpressionStatementSyntax ExpressionStatement = GenerateOneRequireNotNullStatement(ParameterName, Type, AliasName);
