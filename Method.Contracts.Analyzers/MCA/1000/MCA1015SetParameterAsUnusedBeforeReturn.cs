@@ -43,8 +43,8 @@ public class MCA1015SetParameterAsUnusedBeforeReturn : UnusedParameterDiagnostic
         // If we reached this step, there is an argument name.
         Contract.Assert(analysisAssertions.Length == 1);
         ContractUnusedInvocationAssertion Assertion = Contract.AssertNotNull(analysisAssertions[0] as ContractUnusedInvocationAssertion);
-        IdentifierNameSyntax ArgumentIdentifierName = Contract.AssertNotNull(Assertion.ArgumentIdentifierName);
-        StatementSyntax InvocationStatement = Contract.AssertNotNull(Assertion.InvocationStatement);
+        IdentifierNameSyntax ArgumentIdentifierName = Assertion.ArgumentIdentifierName.Get(context);
+        StatementSyntax InvocationStatement = Assertion.InvocationStatement.Get(context);
         string ArgumentName = ArgumentIdentifierName.Identifier.Text;
 
         List<StatementSyntax> RemainingStatements = AnalyzerTools.FindSubsequentStatements(InvocationStatement);

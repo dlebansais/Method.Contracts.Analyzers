@@ -12,12 +12,12 @@ internal class ContractMapInvocationAssertion : IAnalysisAssertion
     /// <summary>
     /// Gets the key argument in the call to Contract.Map.
     /// </summary>
-    public ExpressionSyntax? KeyExpression { get; private set; }
+    public AssertionResults<ExpressionSyntax> KeyExpression { get; } = new();
 
     /// <summary>
     /// Gets the dictionary argument in the call to Contract.Map.
     /// </summary>
-    public ExpressionSyntax? DictionaryExpression { get; private set; }
+    public AssertionResults<ExpressionSyntax> DictionaryExpression { get; } = new();
 
     /// <inheritdoc cref="IAnalysisAssertion.IsTrue(SyntaxNodeAnalysisContext)" />
     public bool IsTrue(SyntaxNodeAnalysisContext context)
@@ -35,8 +35,8 @@ internal class ContractMapInvocationAssertion : IAnalysisAssertion
         ArgumentSyntax FirstArgument = Arguments[0];
         ArgumentSyntax SecondArgument = Arguments[1];
 
-        KeyExpression = FirstArgument.Expression;
-        DictionaryExpression = SecondArgument.Expression;
+        KeyExpression.Add(context, FirstArgument.Expression);
+        DictionaryExpression.Add(context, SecondArgument.Expression);
 
         return true;
     }

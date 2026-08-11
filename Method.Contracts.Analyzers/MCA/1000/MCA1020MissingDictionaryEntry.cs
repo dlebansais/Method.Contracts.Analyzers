@@ -43,8 +43,8 @@ public class MCA1020MissingDictionaryEntry : DictionaryDiagnosticAnalyzer
         // If we reached this step, there is an argument name.
         Contract.Assert(analysisAssertions.Length == 1);
         ContractMapInvocationAssertion Assertion = Contract.AssertNotNull(analysisAssertions[0] as ContractMapInvocationAssertion);
-        ExpressionSyntax KeyExpression = Contract.AssertNotNull(Assertion.KeyExpression);
-        ExpressionSyntax DictionaryExpression = Contract.AssertNotNull(Assertion.DictionaryExpression);
+        ExpressionSyntax KeyExpression = Assertion.KeyExpression.Get(context);
+        ExpressionSyntax DictionaryExpression = Assertion.DictionaryExpression.Get(context);
 
         SymbolInfo KeySymbolInfo = context.SemanticModel.GetSymbolInfo(KeyExpression);
         ISymbol KeySymbol = Contract.AssertNotNull(KeySymbolInfo.Symbol);

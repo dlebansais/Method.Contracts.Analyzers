@@ -11,7 +11,7 @@ internal class WithinMethodAnalysisAssertion : IAnalysisAssertion
     /// <summary>
     /// Gets the ancestor method if the assertion is true.
     /// </summary>
-    public MethodDeclarationSyntax? AncestorMethodDeclaration { get; private set; }
+    public AssertionResults<MethodDeclarationSyntax> AncestorMethodDeclaration { get; } = new();
 
     /// <inheritdoc cref="IAnalysisAssertion.IsTrue(SyntaxNodeAnalysisContext)" />
     public bool IsTrue(SyntaxNodeAnalysisContext context)
@@ -21,7 +21,7 @@ internal class WithinMethodAnalysisAssertion : IAnalysisAssertion
         if (AttributeArgument.FirstAncestorOrSelf<MethodDeclarationSyntax>() is not MethodDeclarationSyntax MethodDeclaration)
             return false;
 
-        AncestorMethodDeclaration = MethodDeclaration;
+        AncestorMethodDeclaration.Add(context, MethodDeclaration);
         return true;
     }
 }

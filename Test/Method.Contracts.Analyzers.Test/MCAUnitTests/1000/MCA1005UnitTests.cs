@@ -74,6 +74,9 @@ internal partial class Program
     [Test]
     public async Task AllValidModifiers_NoDiagnostic()
     {
+        // Simulate a persistent analyzer.
+        await Task.Delay(2000).ConfigureAwait(false);
+
         await VerifyCS.VerifyAnalyzerAsync(Prologs.Nullable, @"
 internal partial class Program
 {
@@ -89,6 +92,9 @@ internal partial class Program
     [Test]
     public async Task AttributeOnConstructor_NoDiagnostic()
     {
+        // Simulate a persistent analyzer.
+        await Task.Delay(2000).ConfigureAwait(false);
+
         DiagnosticDescriptor DescriptorCS0592 = new(
             "CS0592",
             "title",

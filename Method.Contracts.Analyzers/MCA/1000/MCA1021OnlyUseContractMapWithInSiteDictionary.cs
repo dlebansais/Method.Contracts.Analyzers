@@ -41,7 +41,7 @@ public class MCA1021OnlyUseContractMapWithInSiteDictionary : DictionaryDiagnosti
         // If we reached this step, there is an argument name.
         Contract.Assert(analysisAssertions.Length == 1);
         ContractMapInvocationAssertion Assertion = Contract.AssertNotNull(analysisAssertions[0] as ContractMapInvocationAssertion);
-        ExpressionSyntax DictionaryExpression = Contract.AssertNotNull(Assertion.DictionaryExpression);
+        ExpressionSyntax DictionaryExpression = Assertion.DictionaryExpression.Get(context);
 
         if (DictionaryExpression is ObjectCreationExpressionSyntax)
             return;
