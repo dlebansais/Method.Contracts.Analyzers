@@ -10,7 +10,7 @@ using System.CodeDom.Compiler;
 
 partial class Program
 {
-    [GeneratedCodeAttribute("Method.Contracts.Analyzers","3.0.3.51")]
+    [GeneratedCodeAttribute("Method.Contracts.Analyzers","3.0.4.52")]
     public static void HelloFrom(string text, out string textPlus)
     {
         HelloFromVerified(text, out textPlus);

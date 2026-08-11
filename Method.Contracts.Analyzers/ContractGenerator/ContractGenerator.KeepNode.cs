@@ -105,12 +105,12 @@ public partial class ContractGenerator
         {
             string AttributeName = GeneratorHelper.ToAttributeName(attribute);
             SeparatedSyntaxList<AttributeArgumentSyntax> AttributeArguments = AttributeArgumentList.Arguments;
-            int Reason = 0;
+            string ReasonText = "0";
 
             Dictionary<string, Func<MemberDeclarationSyntax, IReadOnlyList<AttributeArgumentSyntax>, AttributeValidityCheckResult>> ValidityVerifierTable = new()
             {
                 { nameof(AccessAttribute), IsValidAccessAttribute },
-                { nameof(RequireNotNullAttribute), (md, args) => IsValidRequireNotNullAttribute(md, args, ref Reason) },
+                { nameof(RequireNotNullAttribute), (md, args) => IsValidRequireNotNullAttribute(md, args, ref ReasonText) },
                 { nameof(RequireAttribute), IsValidRequireAttribute },
                 { nameof(EnsureAttribute), IsValidEnsureAttribute },
             };
@@ -159,18 +159,18 @@ public partial class ContractGenerator
     /// </summary>
     /// <param name="memberDeclaration">The method or property with the attribute.</param>
     /// <param name="attributeArguments">The list of arguments.</param>
-    /// <param name="reason">The reason for invalidity.</param>
-    public static AttributeValidityCheckResult IsValidRequireNotNullAttribute(MemberDeclarationSyntax memberDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments, ref int reason)
+    /// <param name="reasonText">The reason for invalidity.</param>
+    public static AttributeValidityCheckResult IsValidRequireNotNullAttribute(MemberDeclarationSyntax memberDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments, ref string reasonText)
     {
         Contract.RequireNotNull(attributeArguments, out IReadOnlyList<AttributeArgumentSyntax> AttributeArguments);
-        reason = 4;
+        reasonText = "4";
 
         return memberDeclaration is not MethodDeclarationSyntax MethodDeclaration
             ? AttributeValidityCheckResult.Invalid(-1)
-            : IsRequireNotNullAttributeWithAliasTypeOrName(AttributeArguments, ref reason)
-                ? IsValidRequireNotNullAttributeWithAliasTypeOrName(MethodDeclaration, AttributeArguments, ref reason)
+            : IsRequireNotNullAttributeWithAliasTypeOrName(AttributeArguments, ref reasonText)
+                ? IsValidRequireNotNullAttributeWithAliasTypeOrName(MethodDeclaration, AttributeArguments, ref reasonText)
                 : AttributeArguments.Count > 0
-                    ? IsValidRequireNotNullAttributeNoAlias(MethodDeclaration, AttributeArguments, ref reason)
+                    ? IsValidRequireNotNullAttributeNoAlias(MethodDeclaration, AttributeArguments, ref reasonText)
                     : AttributeValidityCheckResult.Invalid(-1);
     }
 
@@ -178,12 +178,12 @@ public partial class ContractGenerator
     /// Checks whether arguments of an attribute include an alias, type or name.
     /// </summary>
     /// <param name="attributeArguments">The attribute arguments.</param>
-    /// <param name="reason">The reason for invalidity.</param>
-    public static bool IsRequireNotNullAttributeWithAliasTypeOrName(IReadOnlyList<AttributeArgumentSyntax> attributeArguments, ref int reason)
+    /// <param name="reasonText">The reason for invalidity.</param>
+    public static bool IsRequireNotNullAttributeWithAliasTypeOrName(IReadOnlyList<AttributeArgumentSyntax> attributeArguments, ref string reasonText)
     {
         Contract.RequireNotNull(attributeArguments, out IReadOnlyList<AttributeArgumentSyntax> AttributeArguments);
 
-        reason = 5;
+        reasonText = "5";
         return AttributeArguments.Any(argument => !IsParameterName(argument));
     }
 
@@ -198,7 +198,7 @@ public partial class ContractGenerator
         return AttributeArguments.NameEquals is null;
     }
 
-    private static AttributeValidityCheckResult IsValidRequireNotNullAttributeWithAliasTypeOrName(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments, ref int reason)
+    private static AttributeValidityCheckResult IsValidRequireNotNullAttributeWithAliasTypeOrName(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments, ref string reasonText)
     {
         // We reach this step only if IsRequireNotNullAttributeWithAlias() returned true.
         Contract.Assert(attributeArguments.Count > 0);
@@ -206,19 +206,19 @@ public partial class ContractGenerator
 
         if (FirstAttributeArgument.NameEquals is not null)
         {
-            reason = 6;
+            reasonText = "6";
             return AttributeValidityCheckResult.Invalid(0);
         }
 
         if (!IsStringOrNameofAttributeArgument(FirstAttributeArgument, out string ParameterName))
         {
-            reason = 7;
+            reasonText = "7";
             return AttributeValidityCheckResult.Invalid(0);
         }
 
-        if (!GetParameterType(ParameterName, methodDeclaration, out bool isNullType, out _) && !isNullType)
+        if (!GetParameterType(ParameterName, methodDeclaration, out bool isNullType, out reasonText, out _) && !isNullType)
         {
-            reason = 8;
+            reasonText += " [8]";
             return AttributeValidityCheckResult.Invalid(0);
         }
 
@@ -232,14 +232,14 @@ public partial class ContractGenerator
         for (int i = 1; i < attributeArguments.Count; i++)
             if (!IsValidArgumentWithAliasTypeOrName(attributeArguments[i], ref Type, ref Name, ref AliasName))
             {
-                reason = 9;
+                reasonText = "9";
                 return AttributeValidityCheckResult.Invalid(i);
             }
 
         // At this step there is at least one valid argument that is either Type, Name or AliasName.
         Contract.Assert(Type.IsSet || Name.IsSet || AliasName.IsSet);
 
-        reason = 10;
+        reasonText = "10";
         return new AttributeValidityCheckResult(AttributeGeneration.Valid, [ParameterName], -1);
     }
 
@@ -285,7 +285,7 @@ public partial class ContractGenerator
         return true;
     }
 
-    private static AttributeValidityCheckResult IsValidRequireNotNullAttributeNoAlias(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments, ref int reason)
+    private static AttributeValidityCheckResult IsValidRequireNotNullAttributeNoAlias(MethodDeclarationSyntax methodDeclaration, IReadOnlyList<AttributeArgumentSyntax> attributeArguments, ref string reasonText)
     {
         Collection<string> ArgumentValues = [];
 
@@ -298,20 +298,20 @@ public partial class ContractGenerator
 
             if (!IsStringOrNameofAttributeArgument(AttributeArgument, out string ArgumentValue))
             {
-                reason = 1;
+                reasonText = "1";
                 return AttributeValidityCheckResult.Invalid(i);
             }
 
-            if (!GetParameterType(ArgumentValue, methodDeclaration, out bool isNullType, out _) && !isNullType)
+            if (!GetParameterType(ArgumentValue, methodDeclaration, out bool isNullType, out reasonText, out _) && !isNullType)
             {
-                reason = 2;
+                reasonText += " [2]";
                 return AttributeValidityCheckResult.Invalid(i);
             }
 
             ArgumentValues.Add(ArgumentValue);
         }
 
-        reason = 3;
+        reasonText = "3";
         return new AttributeValidityCheckResult(AttributeGeneration.Valid, ArgumentValues, -1);
     }
 

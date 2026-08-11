@@ -9,7 +9,7 @@ using Contracts;
 
 partial class Program
 {
-    [GeneratedCodeAttribute("Method.Contracts.Analyzers","3.0.3.51")]
+    [GeneratedCodeAttribute("Method.Contracts.Analyzers","3.0.4.52")]
     public static void HelloFrom<T>(string text, out string textPlus)
         where T : class, Exception
     {

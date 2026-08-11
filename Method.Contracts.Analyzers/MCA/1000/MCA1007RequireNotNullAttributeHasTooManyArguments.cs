@@ -53,10 +53,10 @@ public class MCA1007RequireNotNullAttributeHasTooManyArguments : AttributeDiagno
         AttributeArgumentListSyntax ArgumentList = Contract.AssertNotNull(Attribute.ArgumentList);
         SeparatedSyntaxList<AttributeArgumentSyntax> AttributeArguments = ArgumentList.Arguments;
         int ArgumentIndex = AttributeArguments.IndexOf(attributeArgument);
-        int Reason = 0;
+        string ReasonText = "0";
 
         // No diagnostic if the attribute has no alias, type or name, or if this is the first argument.
-        if (!ContractGenerator.IsRequireNotNullAttributeWithAliasTypeOrName(AttributeArguments, ref Reason) || ArgumentIndex == 0)
+        if (!ContractGenerator.IsRequireNotNullAttributeWithAliasTypeOrName(AttributeArguments, ref ReasonText) || ArgumentIndex == 0)
             return;
 
         // No diagnostic if the argument is not a parameter name.
