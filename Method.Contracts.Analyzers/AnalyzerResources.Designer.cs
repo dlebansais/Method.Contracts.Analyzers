@@ -205,7 +205,7 @@ namespace Contracts.Analyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Argument at position {0} in RequireNotNull attribute must be a valid parameter name.
+        ///   Looks up a localized string similar to Argument at position {0} in RequireNotNull attribute must be a valid parameter name (reason: {1}).
         /// </summary>
         internal static string MCA1006AnalyzerMessageFormat {
             get {

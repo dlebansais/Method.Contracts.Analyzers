@@ -313,8 +313,9 @@ public partial class ContractGenerator
     {
         Contract.Assert(memberDeclaration is MethodDeclarationSyntax);
         MethodDeclarationSyntax MethodDeclarationSyntax = (MethodDeclarationSyntax)memberDeclaration;
+        int Reason = 0;
 
-        return IsRequireNotNullAttributeWithAliasTypeOrName(attributeArguments)
+        return IsRequireNotNullAttributeWithAliasTypeOrName(attributeArguments, ref Reason)
             ? TransformRequireNotNullAttributeWithAlias(MethodDeclarationSyntax, attributeArguments)
             : TransformRequireNotNullAttributeNoAlias(attributeArguments);
     }
