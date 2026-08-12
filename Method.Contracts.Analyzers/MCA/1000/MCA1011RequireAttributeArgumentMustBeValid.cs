@@ -40,7 +40,6 @@ public class MCA1011RequireAttributeArgumentMustBeValid : AttributeDiagnosticAna
     private protected override IEnumerable<IAnalysisAssertion> Assertions { get; } =
     [
         new WithinAttributeAnalysisAssertion<RequireAttribute>(),
-        new DummyAnalysisAssertion(),
         new WithinMethodAnalysisAssertion(),
     ];
 
@@ -48,12 +47,11 @@ public class MCA1011RequireAttributeArgumentMustBeValid : AttributeDiagnosticAna
     private protected override void AnalyzeVerifiedNode(SyntaxNodeAnalysisContext context, AttributeArgumentSyntax attributeArgument, IAnalysisAssertion[] analysisAssertions)
     {
         // If we reached this step, there is a method declaration and an attribute.
-        Contract.Assert(analysisAssertions.Length == 3);
+        Contract.Assert(analysisAssertions.Length == 2);
         WithinAttributeAnalysisAssertion<RequireAttribute> FirstAssertion = Contract.AssertNotNull(analysisAssertions[0] as WithinAttributeAnalysisAssertion<RequireAttribute>);
         AttributeSyntax Attribute = Contract.AssertNotNull(attributeArgument.FirstAncestorOrSelf<AttributeSyntax>());
-        _ = DummyAnalysisAssertion.Dummy.Get(context);
-        WithinMethodAnalysisAssertion ThirdAssertion = Contract.AssertNotNull(analysisAssertions[2] as WithinMethodAnalysisAssertion);
-        MethodDeclarationSyntax MethodDeclaration = ThirdAssertion.AncestorMethodDeclaration.Get(context);
+        WithinMethodAnalysisAssertion SecondAssertion = Contract.AssertNotNull(analysisAssertions[1] as WithinMethodAnalysisAssertion);
+        MethodDeclarationSyntax MethodDeclaration = SecondAssertion.AncestorMethodDeclaration.Get(context);
 
         AttributeArgumentListSyntax ArgumentList = Contract.AssertNotNull(Attribute.ArgumentList);
         SeparatedSyntaxList<AttributeArgumentSyntax> AttributeArguments = ArgumentList.Arguments;

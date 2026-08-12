@@ -1,8 +1,6 @@
 ﻿namespace Contracts.Analyzers;
 
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 /// <summary>
@@ -11,8 +9,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 /// <typeparam name="TResult">The result type.</typeparam>
 internal class AssertionResults<TResult>
 {
-    private readonly Dictionary<SyntaxNodeAnalysisContext, (TimeSpan, TResult)> Results = [];
-    private static readonly Stopwatch RecordingWatch = Stopwatch.StartNew();
+    private readonly Dictionary<SyntaxNodeAnalysisContext, TResult> Results = [];
 
     /// <summary>
     /// Adds a result.
@@ -20,7 +17,7 @@ internal class AssertionResults<TResult>
     /// <param name="context">The assertion context.</param>
     /// <param name="result">The result.</param>
     public void Add(SyntaxNodeAnalysisContext context, TResult result)
-        => Results.Add(context, (RecordingWatch.Elapsed, result));
+        => Results.Add(context, result);
 
     /// <summary>
     /// Gets a result.
@@ -28,25 +25,9 @@ internal class AssertionResults<TResult>
     /// <param name="context">The assertion context.</param>
     public TResult Get(SyntaxNodeAnalysisContext context)
     {
-        Contract.Assert(Results.ContainsKey(context));
-        (_, TResult result) = Results[context];
-
-        CleanupResults();
+        TResult result = Results[context];
+        _ = Results.Remove(context);
 
         return result;
-    }
-
-    private void CleanupResults()
-    {
-        List<SyntaxNodeAnalysisContext> LostContexts = [];
-        foreach (KeyValuePair<SyntaxNodeAnalysisContext, (TimeSpan, TResult)> Entry in Results)
-        {
-            (TimeSpan addedTime, _) = Entry.Value;
-            if (RecordingWatch.Elapsed - addedTime >= TimeSpan.FromSeconds(1))
-                LostContexts.Add(Entry.Key);
-        }
-
-        foreach (SyntaxNodeAnalysisContext context in LostContexts)
-            _ = Results.Remove(context);
     }
 }
