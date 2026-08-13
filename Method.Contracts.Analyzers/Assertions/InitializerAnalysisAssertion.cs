@@ -12,10 +12,7 @@ using Microsoft.CodeAnalysis.Operations;
 /// </summary>
 internal class InitializerAnalysisAssertion : IAnalysisAssertion
 {
-    /// <summary>
-    /// Gets the list of initializers if the assertion is true.
-    /// </summary>
-    public List<IMethodSymbol> InitializerMethodSymbols { get; } = [];
+    private readonly Dictionary<BaseObjectCreationExpressionSyntax, List<IMethodSymbol>> InitializerMethodSymbolsTable = [];
 
     /// <inheritdoc cref="IAnalysisAssertion.IsTrue(SyntaxNodeAnalysisContext)" />
     public bool IsTrue(SyntaxNodeAnalysisContext context)
@@ -32,18 +29,38 @@ internal class InitializerAnalysisAssertion : IAnalysisAssertion
         IMethodSymbol ConstructorSymbol = Contract.AssertNotNull(ObjectCreationOperation.Constructor);
 
         ITypeSymbol TypeSymbol = Contract.AssertNotNull(TypeInfo.Type);
-        return TypeSymbol.TypeKind == TypeKind.Class && HasInitializeWithAttribute(context, ConstructorSymbol);
+        if (TypeSymbol.TypeKind != TypeKind.Class)
+            return false;
+
+        List<IMethodSymbol> InitializerMethodSymbols = [];
+        if (!HasInitializeWithAttribute(context, ConstructorSymbol, InitializerMethodSymbols))
+            return false;
+
+        InitializerMethodSymbolsTable.Add(ObjectCreationExpression, InitializerMethodSymbols);
+        return true;
     }
 
-    private bool HasInitializeWithAttribute(SyntaxNodeAnalysisContext context, IMethodSymbol constructorSymbol)
+    /// <summary>
+    /// Gets the list of initializers for an object creation expression that successfuly passed the analysis.
+    /// </summary>
+    /// <param name="objectCreationExpression">The object creation expression.</param>
+    public List<IMethodSymbol> GetInitializerMethodSymbols(BaseObjectCreationExpressionSyntax objectCreationExpression)
+    {
+        List<IMethodSymbol> Result = InitializerMethodSymbolsTable[objectCreationExpression];
+        _ = InitializerMethodSymbolsTable.Remove(objectCreationExpression);
+
+        return Result;
+    }
+
+    private static bool HasInitializeWithAttribute(SyntaxNodeAnalysisContext context, IMethodSymbol constructorSymbol, List<IMethodSymbol> initializerMethodSymbols)
     {
         ITypeSymbol ClassSymbol = constructorSymbol.ContainingType;
 
-        return HasInitializeWithAttribute(context, constructorSymbol.GetAttributes(), ClassSymbol) ||
-               HasInitializeWithAttribute(context, ClassSymbol.GetAttributes(), ClassSymbol);
+        return HasInitializeWithAttribute(context, constructorSymbol.GetAttributes(), ClassSymbol, initializerMethodSymbols) ||
+               HasInitializeWithAttribute(context, ClassSymbol.GetAttributes(), ClassSymbol, initializerMethodSymbols);
     }
 
-    private bool HasInitializeWithAttribute(SyntaxNodeAnalysisContext context, IEnumerable<AttributeData> attributes, ITypeSymbol classSymbol)
+    private static bool HasInitializeWithAttribute(SyntaxNodeAnalysisContext context, IEnumerable<AttributeData> attributes, ITypeSymbol classSymbol, List<IMethodSymbol> initializerMethodSymbols)
     {
         foreach (AttributeData Attribute in attributes)
         {
@@ -52,8 +69,8 @@ internal class InitializerAnalysisAssertion : IAnalysisAssertion
             if (AnalyzerTools.IsExpectedAttribute<InitializeWithAttribute>(context, AttributeClass))
                 if (TryGetInitializers(classSymbol, Attribute, out List<IMethodSymbol> Initializers))
                 {
-                    Contract.Assert(InitializerMethodSymbols.Count == 0);
-                    InitializerMethodSymbols.AddRange(Initializers);
+                    Contract.Assert(initializerMethodSymbols.Count == 0);
+                    initializerMethodSymbols.AddRange(Initializers);
                     return true;
                 }
         }

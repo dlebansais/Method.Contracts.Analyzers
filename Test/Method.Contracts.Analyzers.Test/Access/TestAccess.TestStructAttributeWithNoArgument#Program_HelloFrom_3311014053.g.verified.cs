@@ -9,7 +9,7 @@ using Contracts;
 
 partial struct Program
 {
-    [GeneratedCodeAttribute("Method.Contracts.Analyzers","3.0.6.54")]
+    [GeneratedCodeAttribute("Method.Contracts.Analyzers","3.0.7.55")]
     public static string HelloFrom(string text)
     {
         var Result = HelloFromVerified(text);

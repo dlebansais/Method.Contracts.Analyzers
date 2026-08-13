@@ -66,7 +66,7 @@ public class MCA2001ObjectMustBeInitialized : DiagnosticAnalyzer
         // If we reached this step, there is an initializer method.
         Contract.Assert(analysisAssertions.Length == 1);
         InitializerAnalysisAssertion Assertion = Contract.AssertNotNull(analysisAssertions.First() as InitializerAnalysisAssertion);
-        List<IMethodSymbol> InitializerMethodSymbols = Contract.AssertNotNull(Assertion.InitializerMethodSymbols);
+        List<IMethodSymbol> InitializerMethodSymbols = Assertion.GetInitializerMethodSymbols(objectCreationExpression);
 
         Contract.Assert(InitializerMethodSymbols.Count > 0);
         IMethodSymbol InitializerMethodSymbol = InitializerMethodSymbols[0];

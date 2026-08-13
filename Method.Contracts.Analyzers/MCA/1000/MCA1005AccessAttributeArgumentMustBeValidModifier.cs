@@ -49,7 +49,7 @@ public class MCA1005AccessAttributeArgumentMustBeValidModifier : AttributeDiagno
         // If we reached this step, there is a method declaration.
         Contract.Assert(analysisAssertions.Length == 2);
         WithinMethodAnalysisAssertion SecondAssertion = Contract.AssertNotNull(analysisAssertions[1] as WithinMethodAnalysisAssertion);
-        MethodDeclarationSyntax MethodDeclaration = SecondAssertion.AncestorMethodDeclaration.Get(context);
+        MethodDeclarationSyntax MethodDeclaration = Contract.AssertNotNull(attributeArgument.FirstAncestorOrSelf<MethodDeclarationSyntax>());
 
         // No diagnostic if the argument is a valid modifier.
         AttributeValidityCheckResult CheckResult = ContractGenerator.IsValidAccessAttribute(MethodDeclaration, [attributeArgument]);

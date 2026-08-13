@@ -8,20 +8,11 @@ using Microsoft.CodeAnalysis.Diagnostics;
 /// </summary>
 internal class WithinMethodAnalysisAssertion : IAnalysisAssertion
 {
-    /// <summary>
-    /// Gets the ancestor method if the assertion is true.
-    /// </summary>
-    public AssertionResults<MethodDeclarationSyntax> AncestorMethodDeclaration { get; } = new();
-
     /// <inheritdoc cref="IAnalysisAssertion.IsTrue(SyntaxNodeAnalysisContext)" />
     public bool IsTrue(SyntaxNodeAnalysisContext context)
     {
         AttributeArgumentSyntax AttributeArgument = (AttributeArgumentSyntax)context.Node;
 
-        if (AttributeArgument.FirstAncestorOrSelf<MethodDeclarationSyntax>() is not MethodDeclarationSyntax MethodDeclaration)
-            return false;
-
-        AncestorMethodDeclaration.Add(context, MethodDeclaration);
-        return true;
+        return AttributeArgument.FirstAncestorOrSelf<MethodDeclarationSyntax>() is not null;
     }
 }

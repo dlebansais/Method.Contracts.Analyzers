@@ -11,15 +11,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 /// </summary>
 internal class ContractUnusedInvocationAssertion : IAnalysisAssertion
 {
-    /// <summary>
-    /// Gets the statement containing the invocation.
-    /// </summary>
-    public AssertionResults<StatementSyntax> InvocationStatement { get; } = new();
-
-    /// <summary>
-    /// Gets the argument in the call to Contract.Unused.
-    /// </summary>
-    public AssertionResults<IdentifierNameSyntax> ArgumentIdentifierName { get; } = new();
+    private readonly Dictionary<InvocationExpressionSyntax, (StatementSyntax, IdentifierNameSyntax)> InvocationTable = [];
 
     /// <inheritdoc cref="IAnalysisAssertion.IsTrue(SyntaxNodeAnalysisContext)" />
     public bool IsTrue(SyntaxNodeAnalysisContext context)
@@ -40,9 +32,19 @@ internal class ContractUnusedInvocationAssertion : IAnalysisAssertion
         if (Argument.Expression is not IdentifierNameSyntax IdentifierName)
             return false;
 
-        InvocationStatement.Add(context, ExpressionStatement);
-        ArgumentIdentifierName.Add(context, IdentifierName);
-
+        InvocationTable.Add(InvocationExpression, (ExpressionStatement, IdentifierName));
         return true;
+    }
+
+    /// <summary>
+    /// Gets the statement and identifier name associated with a successful invocation expression analysis.
+    /// </summary>
+    /// <param name="invocationExpression">The invocation expression.</param>
+    public (StatementSyntax ExpressionStatement, IdentifierNameSyntax IdentifierName) GetStatement(InvocationExpressionSyntax invocationExpression)
+    {
+        (StatementSyntax, IdentifierNameSyntax) Result = InvocationTable[invocationExpression];
+        _ = InvocationTable.Remove(invocationExpression);
+
+        return Result;
     }
 }

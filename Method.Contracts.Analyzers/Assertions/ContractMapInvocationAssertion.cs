@@ -9,15 +9,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 /// </summary>
 internal class ContractMapInvocationAssertion : IAnalysisAssertion
 {
-    /// <summary>
-    /// Gets the key argument in the call to Contract.Map.
-    /// </summary>
-    public AssertionResults<ExpressionSyntax> KeyExpression { get; } = new();
-
-    /// <summary>
-    /// Gets the dictionary argument in the call to Contract.Map.
-    /// </summary>
-    public AssertionResults<ExpressionSyntax> DictionaryExpression { get; } = new();
+    private readonly Dictionary<InvocationExpressionSyntax, (ExpressionSyntax, ExpressionSyntax)> ExpressionsTable = [];
 
     /// <inheritdoc cref="IAnalysisAssertion.IsTrue(SyntaxNodeAnalysisContext)" />
     public bool IsTrue(SyntaxNodeAnalysisContext context)
@@ -35,9 +27,19 @@ internal class ContractMapInvocationAssertion : IAnalysisAssertion
         ArgumentSyntax FirstArgument = Arguments[0];
         ArgumentSyntax SecondArgument = Arguments[1];
 
-        KeyExpression.Add(context, FirstArgument.Expression);
-        DictionaryExpression.Add(context, SecondArgument.Expression);
-
+        ExpressionsTable.Add(InvocationExpression, (FirstArgument.Expression, SecondArgument.Expression));
         return true;
+    }
+
+    /// <summary>
+    /// Gets the two argument expressions for an object creation expression that successfuly passed the analysis.
+    /// </summary>
+    /// <param name="invocationExpression">The invocation expression.</param>
+    public (ExpressionSyntax FirstArgument, ExpressionSyntax SecondArgument) GetInvocationArgumentExpressions(InvocationExpressionSyntax invocationExpression)
+    {
+        (ExpressionSyntax, ExpressionSyntax) Result = ExpressionsTable[invocationExpression];
+        _ = ExpressionsTable.Remove(invocationExpression);
+
+        return Result;
     }
 }
